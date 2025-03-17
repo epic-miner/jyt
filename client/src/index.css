@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,47 +10,50 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+  }
 
-/* Glass effect styles */
-.glass-effect {
-  @apply backdrop-blur-md bg-black/30 border border-white/10;
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-black/20;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/30 rounded-full hover:bg-primary/50 transition-colors;
+  }
 }
 
-.glass-card {
-  @apply glass-effect hover:bg-black/40 transition-all duration-300;
+@layer components {
+  /* Glass effect styles */
+  .glass-effect {
+    @apply backdrop-blur-md bg-black/30 border border-white/10;
+  }
+
+  .glass-card {
+    @apply glass-effect hover:bg-black/40 transition-all duration-300;
+  }
+
+  .glass-container {
+    @apply glass-effect p-6 rounded-lg shadow-lg;
+  }
 }
 
-.glass-container {
-  @apply glass-effect p-6 rounded-lg shadow-lg;
-}
+@layer utilities {
+  /* Gradient backgrounds */
+  .gradient-dark {
+    @apply bg-gradient-to-b from-black via-dark-950 to-dark-900;
+  }
 
-/* Custom scrollbar for dark theme */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+  .gradient-glow {
+    @apply relative;
+  }
 
-::-webkit-scrollbar-track {
-  @apply bg-black/20;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-primary/30 rounded-full hover:bg-primary/50 transition-colors;
-}
-
-/* Gradient backgrounds */
-.gradient-dark {
-  @apply bg-gradient-to-b from-black via-dark-950 to-dark-900;
-}
-
-.gradient-glow {
-  @apply relative;
-}
-
-.gradient-glow::after {
-  content: '';
-  @apply absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none;
-}
-
+  .gradient-glow::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none;
   }
 }
