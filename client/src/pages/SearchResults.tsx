@@ -8,7 +8,7 @@ import { searchAnime } from '../lib/api';
 const SearchResults = () => {
   const [location] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   useEffect(() => {
     // Extract search query from URL
     const searchParams = new URLSearchParams(window.location.search);
@@ -17,46 +17,51 @@ const SearchResults = () => {
       setSearchQuery(query);
     }
   }, [location]);
-  
+
   // Search for anime
   const { data: searchResults, isLoading, isError } = useQuery({
     queryKey: ['/api/search', searchQuery],
     queryFn: () => searchAnime(searchQuery),
     enabled: searchQuery.length > 0,
   });
-  
+
   return (
     <div className="container mx-auto px-4 py-6">
       <h2 className="text-xl font-bold mb-4 flex items-center">
         <i className="fas fa-search mr-2 text-primary"></i> Search Results
         {searchQuery && <span className="ml-2 text-sm font-normal text-slate-400">for "{searchQuery}"</span>}
       </h2>
-      
+
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {Array(6).fill(0).map((_, i) => (
-            <div key={i} className="rounded-lg overflow-hidden">
-              <Skeleton className="h-48 w-full" />
-              <div className="p-2">
-                <Skeleton className="h-4 w-3/4 mb-2" />
-                <Skeleton className="h-3 w-1/2" />
+            <div key={i} className="rounded-lg overflow-hidden glass-effect loading-shimmer">
+              <Skeleton className="aspect-[2/3] w-full" />
+              <div className="p-3">
+                <Skeleton className="h-4 w-3/4 mb-2 rounded-md" />
+                <Skeleton className="h-3 w-1/2 rounded-md" />
               </div>
             </div>
           ))}
         </div>
       ) : isError ? (
-        <div className="text-center py-10">
+        <div className="text-center py-10 glass-effect rounded-lg">
           <i className="fas fa-exclamation-circle text-slate-600 text-4xl mb-3"></i>
           <p className="text-slate-400">Error searching for anime. Please try again.</p>
         </div>
       ) : searchResults && searchResults.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {searchResults.map((anime) => (
-            <AnimeCard key={anime.id} anime={anime} />
+            <AnimeCard 
+              key={anime.id} 
+              anime={anime}
+              rating={4.5} //this line is added
+              episodeCount={anime.episode_count} //this line is added
+            />
           ))}
         </div>
       ) : (
-        <div className="text-center py-10">
+        <div className="text-center py-10 glass-effect rounded-lg">
           <i className="fas fa-search text-slate-600 text-4xl mb-3"></i>
           <p className="text-slate-400">No results found for "{searchQuery}"</p>
           <p className="text-sm text-slate-500 mt-1">Try a different search term</p>
