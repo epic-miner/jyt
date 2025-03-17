@@ -509,7 +509,7 @@ const VideoPlayer = ({
   const videoUrl = getVideoUrl();
 
   return (
-    <div className="w-full flex flex-col bg-black">
+    <div className="w-full flex flex-col bg-black video-player-container">
       {/* Main video container with 16:9 aspect ratio */}
       <div 
         ref={playerContainerRef}
