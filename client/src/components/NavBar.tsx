@@ -15,13 +15,13 @@ const NavBar = () => {
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location]);
-  
+
   // Add shadow on scroll
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -40,12 +40,12 @@ const NavBar = () => {
             </div>
           </Link>
         </div>
-        
+
         {/* Search bar (desktop) */}
         <div className="hidden md:block flex-grow max-w-xl mx-6">
           <SearchBar />
         </div>
-        
+
         {/* Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           <Link href="/">
@@ -67,7 +67,7 @@ const NavBar = () => {
             </div>
           </Link>
         </nav>
-        
+
         {/* Mobile menu button */}
         <button 
           className="md:hidden text-white focus:outline-none p-2" 
@@ -77,12 +77,12 @@ const NavBar = () => {
           <i className={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'} text-xl`}></i>
         </button>
       </div>
-      
+
       {/* Mobile search bar */}
       <div className="md:hidden px-4 pb-3">
         <SearchBar />
       </div>
-      
+
       {/* Mobile menu with smooth transition */}
       <div 
         className={`md:hidden bg-dark-800 border-t border-dark-700 overflow-hidden transition-all duration-300 ease-in-out ${
