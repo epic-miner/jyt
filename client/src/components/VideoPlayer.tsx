@@ -41,7 +41,7 @@ const VideoPlayer = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
-  
+
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -151,17 +151,30 @@ const VideoPlayer = ({
 
   // Handle fullscreen changes
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullScreen(!!document.fullscreenElement);
+    const handleFullScreenChange = () => {
+      const isFullscreen = !!document.fullscreenElement;
+      setIsFullScreen(isFullscreen);
+
+      // Toggle header and footer visibility
+      const header = document.querySelector('header');
+      const footer = document.querySelector('footer');
+
+      if (header) header.style.display = isFullscreen ? 'none' : 'block';
+      if (footer) footer.style.display = isFullscreen ? 'none' : 'block';
     };
 
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
 
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('fullscreenchange', handleFullScreenChange);
+      // Reset header and footer visibility on cleanup
+      const header = document.querySelector('header');
+      const footer = document.querySelector('footer');
+      if (header) header.style.display = 'block';
+      if (footer) footer.style.display = 'block';
     };
   }, []);
-  
+
   // Handle mobile rotation
   useEffect(() => {
     const handleOrientationChange = () => {
@@ -176,7 +189,7 @@ const VideoPlayer = ({
     };
 
     window.screen.orientation?.addEventListener('change', handleOrientationChange);
-    
+
     return () => {
       window.screen.orientation?.removeEventListener('change', handleOrientationChange);
     };
@@ -193,31 +206,31 @@ const VideoPlayer = ({
       ) {
         return;
       }
-      
+
       switch (e.key) {
         case ' ': // Spacebar - Play/Pause
         case 'k': // YouTube's play/pause shortcut
           e.preventDefault();
           togglePlay();
           break;
-          
+
         case 'f': // Full screen
           e.preventDefault();
           toggleFullScreen();
           break;
-          
+
         case 'm': // Mute/unmute
           e.preventDefault();
           toggleMute();
           break;
-          
+
         case 'ArrowLeft': // Rewind 5 seconds
           e.preventDefault();
           if (videoRef.current) {
             videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 5);
           }
           break;
-          
+
         case 'ArrowRight': // Fast forward 5 seconds
           e.preventDefault();
           if (videoRef.current) {
@@ -227,7 +240,7 @@ const VideoPlayer = ({
             );
           }
           break;
-          
+
         case 'ArrowUp': // Volume up
           e.preventDefault();
           if (videoRef.current) {
@@ -237,7 +250,7 @@ const VideoPlayer = ({
             setIsMuted(false);
           }
           break;
-          
+
         case 'ArrowDown': // Volume down
           e.preventDefault();
           if (videoRef.current) {
@@ -247,7 +260,7 @@ const VideoPlayer = ({
             if (newVolume === 0) setIsMuted(true);
           }
           break;
-          
+
         case '0':
         case '1':
         case '2':
@@ -266,9 +279,9 @@ const VideoPlayer = ({
           break;
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
-    
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
@@ -292,13 +305,13 @@ const VideoPlayer = ({
       }
     };
   }, [selectedQuality]);
-  
+
   // Hide title after a few seconds
   useEffect(() => {
     const timeout = setTimeout(() => {
       setShowTitle(false);
     }, 5000);
-    
+
     return () => clearTimeout(timeout);
   }, []);
 
@@ -361,7 +374,7 @@ const VideoPlayer = ({
   // Additional player functions
   const togglePlay = () => {
     if (!videoRef.current) return;
-    
+
     if (videoRef.current.paused) {
       videoRef.current.play();
       setIsPlaying(true);
@@ -370,60 +383,60 @@ const VideoPlayer = ({
       setIsPlaying(false);
     }
   };
-  
+
   const toggleMute = () => {
     if (!videoRef.current) return;
-    
+
     const newMutedState = !isMuted;
     videoRef.current.muted = newMutedState;
     setIsMuted(newMutedState);
   };
-  
+
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!videoRef.current) return;
-    
+
     const newVolume = parseFloat(e.target.value);
     videoRef.current.volume = newVolume;
     setVolume(newVolume);
-    
+
     if (newVolume === 0) {
       setIsMuted(true);
     } else if (isMuted) {
       setIsMuted(false);
     }
   };
-  
+
   const formatTime = (timeInSeconds: number) => {
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = Math.floor(timeInSeconds % 60);
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
-  
+
   const seekToPosition = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!videoRef.current || !progressBarRef.current) return;
-    
+
     const progressBar = progressBarRef.current;
     const bounds = progressBar.getBoundingClientRect();
     const x = e.clientX - bounds.left;
     const width = bounds.width;
     const percentage = x / width;
-    
+
     const videoDuration = videoRef.current.duration;
     if (!isNaN(videoDuration)) {
       videoRef.current.currentTime = percentage * videoDuration;
     }
   };
-  
+
   // Effect to update duration and playing state
   useEffect(() => {
     if (!videoRef.current) return;
-    
+
     const handleDurationChange = () => {
       if (videoRef.current) {
         setDuration(videoRef.current.duration);
       }
     };
-    
+
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
     const handleVolumeChange = () => {
@@ -432,36 +445,36 @@ const VideoPlayer = ({
         setIsMuted(videoRef.current.muted);
       }
     };
-    
+
     const videoElement = videoRef.current;
     videoElement.addEventListener('durationchange', handleDurationChange);
     videoElement.addEventListener('play', handlePlay);
     videoElement.addEventListener('pause', handlePause);
     videoElement.addEventListener('volumechange', handleVolumeChange);
-    
+
     // Auto-hide controls after inactivity
     let timeout: ReturnType<typeof setTimeout> | null = null;
-    
+
     const handleMouseMove = () => {
       setShowControls(true);
-      
+
       if (timeout) {
         clearTimeout(timeout);
       }
-      
+
       timeout = setTimeout(() => {
         if (isPlaying) {
           setShowControls(false);
         }
       }, 3000);
     };
-    
+
     const playerContainer = playerContainerRef.current;
     if (playerContainer) {
       playerContainer.addEventListener('mousemove', handleMouseMove);
       playerContainer.addEventListener('mouseenter', () => setShowControls(true));
     }
-    
+
     return () => {
       if (videoElement) {
         videoElement.removeEventListener('durationchange', handleDurationChange);
@@ -469,18 +482,18 @@ const VideoPlayer = ({
         videoElement.removeEventListener('pause', handlePause);
         videoElement.removeEventListener('volumechange', handleVolumeChange);
       }
-      
+
       if (playerContainer) {
         playerContainer.removeEventListener('mousemove', handleMouseMove);
         playerContainer.removeEventListener('mouseenter', () => setShowControls(true));
       }
-      
+
       if (timeout) {
         clearTimeout(timeout);
       }
     };
   }, [isPlaying]);
-  
+
   const videoUrl = getVideoUrl();
 
   return (
@@ -553,7 +566,7 @@ const VideoPlayer = ({
                 >
                   <Settings size={20} />
                 </button>
-                
+
                 {/* Use Device Type to decide which menu to render */}
                 {useIsMobile() ? (
                   <VideoPlayerMobileMenu 
@@ -589,13 +602,13 @@ const VideoPlayer = ({
                 className="relative w-full h-10 px-4 cursor-pointer flex items-center group" 
                 onMouseMove={(e) => {
                   if (!progressBarRef.current || !videoRef.current) return;
-                  
+
                   const progressBar = progressBarRef.current;
                   const bounds = progressBar.getBoundingClientRect();
                   const x = e.clientX - bounds.left;
                   const width = bounds.width;
                   const percentage = x / width;
-                  
+
                   const videoDuration = videoRef.current.duration;
                   if (!isNaN(videoDuration)) {
                     const previewTime = percentage * videoDuration;
@@ -614,7 +627,7 @@ const VideoPlayer = ({
                     <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black/90"></div>
                   </div>
                 )}
-                
+
                 {/* Progress bar track */}
                 <div 
                   ref={progressBarRef}
@@ -626,7 +639,7 @@ const VideoPlayer = ({
                     className="absolute top-0 left-0 h-full bg-gray-500/70 rounded-full"
                     style={{ width: `${bufferProgress}%` }}
                   ></div>
-                  
+
                   {/* Played progress - red for YouTube */}
                   <div 
                     className="absolute top-0 left-0 h-full bg-red-600 rounded-full"
@@ -637,7 +650,7 @@ const VideoPlayer = ({
                   </div>
                 </div>
               </div>
-              
+
               {/* Control buttons row */}
               <div className="flex justify-between items-center px-4 text-white">
                 {/* Left controls */}
@@ -650,7 +663,7 @@ const VideoPlayer = ({
                   >
                     {isPlaying ? <Pause size={22} /> : <Play size={22} />}
                   </button>
-                  
+
                   {/* Previous/Next episode buttons */}
                   <button 
                     className="text-white p-2 hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:cursor-not-allowed" 
@@ -660,7 +673,7 @@ const VideoPlayer = ({
                   >
                     <SkipBack size={22} />
                   </button>
-                  
+
                   <button 
                     className="text-white p-2 hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:cursor-not-allowed" 
                     onClick={onNextEpisode}
@@ -669,7 +682,7 @@ const VideoPlayer = ({
                   >
                     <SkipForward size={22} />
                   </button>
-                  
+
                   {/* Volume control - YouTube style */}
                   <div className="relative flex items-center group">
                     <button 
@@ -688,7 +701,7 @@ const VideoPlayer = ({
                         )}
                       </div>
                     </button>
-                    
+
                     <div 
                       className={cn(
                         "hidden group-hover:block absolute bottom-full left-0 pb-3",
@@ -702,7 +715,7 @@ const VideoPlayer = ({
                         <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-black/90 px-2 py-1 rounded text-xs text-white font-medium z-10 border border-gray-800 whitespace-nowrap pointer-events-none">
                           {Math.round((isMuted ? 0 : volume) * 100)}%
                         </div>
-                        
+
                         {/* Vertical slider container */}
                         <div className="h-full w-full flex flex-col items-center justify-center relative" 
                           onClick={(e) => {
@@ -726,14 +739,14 @@ const VideoPlayer = ({
                               className="w-full bg-white rounded-full absolute bottom-0"
                               style={{ height: `${(isMuted ? 0 : volume) * 100}%` }}
                             ></div>
-                            
+
                             {/* Slider thumb */}
                             <div 
                               className="absolute w-3 h-3 bg-white rounded-full left-1/2 -translate-x-1/2 cursor-pointer"
                               style={{ bottom: `calc(${(isMuted ? 0 : volume) * 100}% - 6px)` }}
                             ></div>
                           </div>
-                          
+
                           {/* Hidden input for accessibility */}
                           <input 
                             type="range" 
@@ -749,7 +762,7 @@ const VideoPlayer = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Time display */}
                   <div className="text-white text-xs font-medium ml-1">
                     <span className="tabular-nums">{formatTime(videoRef.current?.currentTime || 0)}</span>
@@ -757,7 +770,7 @@ const VideoPlayer = ({
                     <span className="tabular-nums text-white/70">{formatTime(duration)}</span>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-1">
                   {/* YouTube styled buttons */}
                   <button
@@ -767,7 +780,7 @@ const VideoPlayer = ({
                   >
                     <Settings size={20} />
                   </button>
-                  
+
                   {/* Fullscreen button */}
                   <button 
                     className="text-white p-2 hover:text-white/80 transition rounded-full" 
@@ -782,7 +795,7 @@ const VideoPlayer = ({
           </div>
         </AspectRatio>
       </div>
-      
+
       {/* Episode navigation bar */}
       <div className="bg-black py-3 px-4 flex justify-between items-center border-t border-gray-800/30">
         <button 
