@@ -138,7 +138,7 @@ const VideoPlayerPage = () => {
 
         <div className="p-4 space-y-4 md:space-y-6 rounded-t-xl backdrop-blur-sm bg-black/40 border-t border-white/5">
           {/* Episode Info */}
-          <div className="backdrop-blur-md bg-black/20 p-4 rounded-lg border border-white/10">
+          <div className="glass-effect p-4 rounded-lg border border-white/10 transition-all duration-300 hover:scale-[1.02] hover:border-white/20">
             <h2 className="text-2xl font-bold mb-2">{anime.title}</h2>
             <p className="text-gray-400">Episode {currentEpisode.episode_number}: {currentEpisode.title}</p>
           </div>
@@ -158,9 +158,10 @@ const VideoPlayerPage = () => {
                   onClick={() => setLocation(`/watch/${animeId}/${ep.id}`)}
                   className={cn(
                     "p-4 rounded-lg text-left transition-all duration-300 flex flex-col glass-card",
+                    "hover:scale-[1.05] hover:shadow-lg hover:shadow-primary/20",
                     ep.id === currentEpisode.id 
                       ? "bg-primary/20 text-white shadow-lg shadow-primary/30 border-primary/30" 
-                      : "text-gray-300 hover:scale-[1.02]"
+                      : "text-gray-300 glass-effect"
                   )}
                 >
                   <div className="font-medium text-base">Episode {ep.episode_number}</div>

@@ -71,7 +71,7 @@ const GenrePage = () => {
             : `Showing all anime in the ${decodeURIComponent(genre)} genre`}
         </p>
       </div>
-      
+
       {/* Genre filters */}
       <div className="mb-8 overflow-x-auto pb-2 -mx-4 px-4">
         <div className="flex flex-nowrap gap-2 min-w-max">
@@ -81,7 +81,7 @@ const GenrePage = () => {
             asButton 
             onClick={() => window.location.href = '/genre/all'}
           />
-          
+
           {sortedGenres.map(g => (
             <GenrePill 
               key={g}
@@ -93,12 +93,12 @@ const GenrePage = () => {
           ))}
         </div>
       </div>
-      
+
       {/* Anime grid */}
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-6">
           {Array(12).fill(0).map((_, i) => (
-            <div key={i} className="rounded-lg overflow-hidden">
+            <div key={i} className="rounded-lg overflow-hidden glass-effect transition-all duration-300 hover:scale-[1.05]">
               <Skeleton className="h-48 w-full rounded-lg" />
               <div className="p-2">
                 <Skeleton className="h-4 w-3/4 mb-2 rounded-md" />
@@ -110,26 +110,21 @@ const GenrePage = () => {
       ) : filteredAnime.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-6">
           {filteredAnime.map(anime => (
-            <AnimeCard key={anime.id} anime={anime} />
+            <div key={anime.id} className="transition-all duration-300 hover:scale-[1.05] hover:shadow-lg hover:shadow-primary/20">
+              <AnimeCard anime={anime} />
+            </div>
           ))}
         </div>
       ) : (
-        <div className="text-center py-10 bg-dark-900/50 rounded-lg border border-dark-700 p-6">
+        <div className="text-center py-10 glass-effect rounded-lg border border-white/10 p-6">
           <div className="text-4xl mb-4">🔍</div>
           <h3 className="text-xl font-semibold mb-2">No Anime Found</h3>
           <p className="text-slate-400 mb-6">We couldn't find any anime in the {decodeURIComponent(genre)} genre.</p>
           <Link href="/genre/all">
-            <button className="bg-primary hover:bg-primary/90 transition px-6 py-2.5 rounded-lg text-white font-medium">
+            <button className="bg-primary hover:bg-primary/90 transition px-6 py-2.5 rounded-lg text-white font-medium hover:scale-[1.02]">
               Browse All Genres
             </button>
           </Link>
-        </div>
-      )}
-      
-      {/* Pagination placeholder for future implementation */}
-      {!isLoading && filteredAnime.length > 0 && (
-        <div className="mt-10 flex justify-center">
-          {/* Will be implemented in future */}
         </div>
       )}
     </div>
