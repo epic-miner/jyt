@@ -52,6 +52,8 @@ const VideoPlayer = ({
   const [showQualityMenu, setShowQualityMenu] = useState(false);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [timePreview, setTimePreview] = useState<{ time: number; position: number } | null>(null);
+  const [showTitle, setShowTitle] = useState(true);
+  const [bufferProgress, setBufferProgress] = useState(0);
 
   // Get available quality options
   const availableQualities: { quality: VideoQuality; url: string | undefined }[] = [
@@ -115,16 +117,30 @@ const VideoPlayer = ({
       setError('Failed to load video. The video might be unavailable or the format is not supported.');
     };
 
+    // Track buffer progress
+    const handleProgress = () => {
+      if (!videoRef.current) return;
+      if (videoRef.current.buffered.length > 0) {
+        const bufferedEnd = videoRef.current.buffered.end(videoRef.current.buffered.length - 1);
+        const duration = videoRef.current.duration;
+        if (duration > 0) {
+          setBufferProgress((bufferedEnd / duration) * 100);
+        }
+      }
+    };
+
     const videoElement = videoRef.current;
     videoElement.addEventListener('timeupdate', handleTimeUpdate);
     videoElement.addEventListener('loadeddata', handleVideoLoad);
     videoElement.addEventListener('error', handleVideoError);
+    videoElement.addEventListener('progress', handleProgress);
 
     return () => {
       if (videoElement) {
         videoElement.removeEventListener('timeupdate', handleTimeUpdate);
         videoElement.removeEventListener('loadeddata', handleVideoLoad);
         videoElement.removeEventListener('error', handleVideoError);
+        videoElement.removeEventListener('progress', handleProgress);
       }
     };
   }, [anime, episode]);
@@ -252,11 +268,20 @@ const VideoPlayer = ({
       }
     };
   }, [selectedQuality]);
+  
+  // Hide title after a few seconds
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShowTitle(false);
+    }, 5000);
+    
+    return () => clearTimeout(timeout);
+  }, []);
 
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
-      if (videoRef.current && videoRef.current.requestFullscreen) {
-        videoRef.current.requestFullscreen();
+      if (playerContainerRef.current && playerContainerRef.current.requestFullscreen) {
+        playerContainerRef.current.requestFullscreen();
       }
     } else if (document.exitFullscreen) {
       document.exitFullscreen();
@@ -471,7 +496,7 @@ const VideoPlayer = ({
               Your browser does not support the video tag.
             </video>
 
-            {/* YouTube-style Title overlay that fades out */}
+            {/* YouTube-style Title overlay at top */}
             <div className={cn(
               "absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 to-transparent text-white z-10 transition-opacity duration-500",
               !showControls && "opacity-0"
@@ -480,53 +505,71 @@ const VideoPlayer = ({
               <p className="text-sm text-gray-300">{anime.title}</p>
             </div>
 
-            {/* Quality selector */}
+            {/* Settings gear for quality selection (YouTube style) */}
             <div className={cn(
-              "absolute top-4 left-4 z-10",
+              "absolute top-4 right-4 z-30",
               !showControls && "opacity-0 transition-opacity duration-300"
             )}>
               <div className="relative inline-block">
                 <button 
-                  className="bg-dark-900/90 text-white px-2.5 py-1.5 rounded text-sm flex items-center gap-1 hover:bg-dark-800/90 transition"
+                  className="bg-black/60 hover:bg-black/80 text-white p-2 rounded-full"
                   onClick={() => setShowQualityMenu(!showQualityMenu)}
+                  aria-label="Settings"
                 >
-                  <Settings size={16} className="text-white" />
+                  <Settings size={20} />
                 </button>
-
+                
                 {showQualityMenu && (
-                  <div className="absolute top-full mt-1 left-0 bg-dark-900/95 rounded shadow-lg overflow-hidden z-20 w-60 border border-dark-700">
-                    <div className="px-4 py-2 border-b border-dark-700 text-xs text-slate-400 font-medium uppercase">
-                      Quality
-                    </div>
-                    {availableQualities.map(({ quality, url }) => (
-                      <button
-                        key={quality}
-                        className={`block w-full text-left px-4 py-2.5 text-sm hover:bg-dark-800/70 transition flex items-center justify-between ${selectedQuality === quality ? 'text-primary' : 'text-white'}`}
-                        onClick={() => handleQualityChange(quality)}
-                        disabled={!url}
+                  <div className="absolute right-0 top-10 bg-black/95 rounded-lg overflow-hidden z-40 w-64 border border-gray-800 shadow-xl">
+                    {/* YouTube-style header with back button */}
+                    <div className="flex items-center px-4 py-3 border-b border-gray-800/50">
+                      <button 
+                        className="mr-2 p-1 hover:bg-gray-700/50 rounded-full"
+                        onClick={() => setShowQualityMenu(false)}
                       >
-                        <div className="flex items-center">
-                          <span>{quality === 'auto' ? 'Auto (recommended)' : quality}</span>
-                          {quality === 'auto' && selectedQuality !== 'auto' && (
-                            <span className="ml-2 text-xs text-slate-400">Current: {selectedQuality}</span>
-                          )}
-                        </div>
-                        {selectedQuality === quality && (
-                          <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            className="h-5 w-5" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round"
-                          >
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        )}
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          fill="none" 
+                          viewBox="0 0 24 24" 
+                          strokeWidth={2} 
+                          stroke="currentColor" 
+                          className="w-5 h-5 text-white"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
                       </button>
-                    ))}
+                      <span className="text-sm font-medium text-white">Quality</span>
+                    </div>
+                    
+                    {/* Quality options */}
+                    <div className="max-h-80 overflow-y-auto">
+                      {availableQualities.map(({ quality, url }) => (
+                        <button
+                          key={quality}
+                          className={`block w-full text-left px-4 py-3 text-sm hover:bg-gray-700/50 transition flex items-center justify-between ${selectedQuality === quality ? 'font-medium' : 'text-white'}`}
+                          onClick={() => handleQualityChange(quality)}
+                          disabled={!url}
+                        >
+                          <div className="flex items-center">
+                            {quality === '1080p' && <span className="text-xs bg-white/20 px-1 mr-2 rounded font-medium">HD</span>}
+                            <span>
+                              {quality === 'auto' ? 'Auto' : quality}
+                              {quality === '1080p' && ' Premium'}
+                            </span>
+                          </div>
+                          {selectedQuality === quality && (
+                            <svg 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              viewBox="0 0 24 24" 
+                              fill="currentColor"
+                              className="w-5 h-5 text-white"
+                            >
+                              <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
@@ -534,14 +577,12 @@ const VideoPlayer = ({
 
             {/* YouTube-style custom controls overlay */}
             <div className={cn(
-              "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent pt-16 pb-4 px-4 z-10 transition-opacity duration-300",
+              "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent pt-16 pb-2 z-10 transition-opacity duration-300",
               !showControls && "opacity-0 pointer-events-none"
             )}>
-              {/* Progress bar - YouTube style with preview and buffer indicator */}
+              {/* Progress bar - YouTube style (thin line with hover effect) */}
               <div 
-                ref={progressBarRef}
-                className="w-full h-10 group flex items-center cursor-pointer -mt-6 px-1"
-                onClick={seekToPosition}
+                className="relative w-full h-10 px-4 cursor-pointer flex items-center group" 
                 onMouseMove={(e) => {
                   if (!progressBarRef.current || !videoRef.current) return;
                   
@@ -549,86 +590,66 @@ const VideoPlayer = ({
                   const bounds = progressBar.getBoundingClientRect();
                   const x = e.clientX - bounds.left;
                   const width = bounds.width;
-                  const percentage = Math.min(Math.max(x / width, 0), 1);
+                  const percentage = x / width;
                   
                   const videoDuration = videoRef.current.duration;
                   if (!isNaN(videoDuration)) {
                     const previewTime = percentage * videoDuration;
-                    setTimePreview({
-                      time: previewTime,
-                      position: percentage * 100
-                    });
+                    setTimePreview({ time: previewTime, position: percentage * 100 });
                   }
                 }}
                 onMouseLeave={() => setTimePreview(null)}
               >
-                <div className="w-full relative">
-                  {/* Time preview tooltip - YouTube style */}
-                  {timePreview && (
-                    <div 
-                      className="absolute -top-10 bg-black/90 px-2 py-1 rounded text-white text-xs font-medium transform -translate-x-1/2 pointer-events-none z-20 border border-gray-800"
-                      style={{ left: `${timePreview.position}%` }}
-                    >
-                      {formatTime(timePreview.time)}
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-black/90 border-r border-b border-gray-800 rotate-45"></div>
-                    </div>
-                  )}
-                  
-                  {/* Preview thumbnail - would be implemented in a real YouTube clone */}
-                  {timePreview && (
-                    <div 
-                      className="absolute -top-28 transform -translate-x-1/2 pointer-events-none rounded overflow-hidden shadow-lg border border-gray-800 hidden md:block"
-                      style={{ left: `${timePreview.position}%` }}
-                    >
-                      <div className="w-32 h-20 bg-dark-900 flex items-center justify-center text-xs text-gray-400">
-                        Preview not available
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Background track */}
-                  <div className="w-full bg-gray-600/50 h-1 group-hover:h-3 transition-all rounded-full overflow-hidden">
-                    {/* Buffered progress - simulated */}
-                    <div 
-                      className="absolute bg-gray-400/30 h-full rounded-full" 
-                      style={{ width: `${Math.min(100, currentTime + 15)}%` }}
-                    ></div>
-                    
-                    {/* Actual progress */}
-                    <div 
-                      className="bg-red-500 h-full rounded-full relative" 
-                      style={{ width: `${currentTime}%` }}
-                    >
-                      {/* Draggable thumb - only visible on hover */}
-                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3 w-3 bg-red-500 rounded-full scale-0 group-hover:scale-100 transition-transform"></div>
-                    </div>
+                {/* Time preview tooltip (YouTube style) */}
+                {timePreview && (
+                  <div 
+                    className="absolute bottom-6 bg-black/90 px-2 py-1 rounded text-xs text-white font-medium z-10 whitespace-nowrap pointer-events-none transform -translate-x-1/2"
+                    style={{ left: `${timePreview.position}%` }}
+                  >
+                    {formatTime(timePreview.time)}
+                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black/90"></div>
                   </div>
+                )}
+                
+                {/* Progress bar track */}
+                <div 
+                  ref={progressBarRef}
+                  className="w-full h-1 bg-gray-600/50 rounded-full relative group-hover:h-3 transition-all duration-150"
+                  onClick={seekToPosition}
+                >
+                  {/* Buffered progress */}
+                  <div 
+                    className="absolute top-0 left-0 h-full bg-gray-500/70 rounded-full"
+                    style={{ width: `${bufferProgress}%` }}
+                  ></div>
                   
-                  {/* Preview position indicator */}
-                  {timePreview && (
-                    <div 
-                      className="absolute top-0 bottom-0 w-0.5 bg-white/80 pointer-events-none"
-                      style={{ left: `${timePreview.position}%` }}
-                    ></div>
-                  )}
+                  {/* Played progress - red for YouTube */}
+                  <div 
+                    className="absolute top-0 left-0 h-full bg-red-600 rounded-full"
+                    style={{ width: `${currentTime}%` }}
+                  >
+                    {/* Thumb dot - larger on hover */}
+                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-0 h-0 bg-red-600 rounded-full group-hover:w-4 group-hover:h-4 transition-all duration-150"></div>
+                  </div>
                 </div>
               </div>
               
-              {/* Control buttons - YouTube style layout */}
-              <div className="flex justify-between items-center mt-1">
+              {/* Control buttons row */}
+              <div className="flex justify-between items-center px-4 text-white">
+                {/* Left controls */}
                 <div className="flex items-center space-x-2">
                   {/* Play/Pause button */}
                   <button 
                     className="text-white p-2 hover:text-white/80 transition rounded-full" 
                     onClick={togglePlay}
-                    aria-label={isPlaying ? "Pause" : "Play"}
+                    aria-label={isPlaying ? 'Pause' : 'Play'}
                   >
                     {isPlaying ? <Pause size={22} /> : <Play size={22} />}
                   </button>
                   
                   {/* Previous/Next episode buttons */}
                   <button 
-                    className="text-white p-2 hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:hover:text-white"
+                    className="text-white p-2 hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:cursor-not-allowed" 
                     onClick={onPreviousEpisode}
                     disabled={!hasPrevious}
                     aria-label="Previous episode"
@@ -637,7 +658,7 @@ const VideoPlayer = ({
                   </button>
                   
                   <button 
-                    className="text-white p-2 hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:hover:text-white"
+                    className="text-white p-2 hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:cursor-not-allowed" 
                     onClick={onNextEpisode}
                     disabled={!hasNext}
                     aria-label="Next episode"
@@ -672,7 +693,7 @@ const VideoPlayer = ({
                       onMouseLeave={() => setShowVolumeSlider(false)}
                     >
                       {/* YouTube-style vertical volume slider */}
-                      <div className="w-8 h-24 bg-dark-900/95 py-3 rounded shadow-lg border border-dark-700 flex flex-col items-center relative">
+                      <div className="w-8 h-24 bg-black/95 py-3 rounded shadow-lg border border-gray-800 flex flex-col items-center relative">
                         {/* Volume percentage display */}
                         <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-black/90 px-2 py-1 rounded text-xs text-white font-medium z-10 border border-gray-800 whitespace-nowrap pointer-events-none">
                           {Math.round((isMuted ? 0 : volume) * 100)}%
@@ -734,7 +755,14 @@ const VideoPlayer = ({
                 </div>
                 
                 <div className="flex items-center space-x-1">
-                  {/* Settings button (already implemented at top left) */}
+                  {/* YouTube styled buttons */}
+                  <button
+                    className="text-white p-2 hover:text-white/80 transition rounded-full"
+                    onClick={() => setShowQualityMenu(!showQualityMenu)}
+                    aria-label="Settings"
+                  >
+                    <Settings size={20} />
+                  </button>
                   
                   {/* Fullscreen button */}
                   <button 
@@ -752,21 +780,21 @@ const VideoPlayer = ({
       </div>
       
       {/* Episode navigation bar */}
-      <div className="bg-dark-900 py-3 px-4 flex justify-between items-center border-t border-dark-700">
+      <div className="bg-black py-3 px-4 flex justify-between items-center border-t border-gray-800/30">
         <button 
-          className="bg-dark-800 hover:bg-dark-700 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          className="bg-gray-800/70 hover:bg-gray-700/70 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           onClick={onPreviousEpisode}
           disabled={!hasPrevious}
         >
           <SkipBack size={16} className="mr-1" /> Previous
         </button>
 
-        <div className="text-sm text-slate-300">
+        <div className="text-sm text-gray-300">
           Episode <span className="font-bold">{episode.episode_number}</span>
         </div>
 
         <button 
-          className="bg-dark-800 hover:bg-dark-700 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          className="bg-gray-800/70 hover:bg-gray-700/70 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           onClick={onNextEpisode}
           disabled={!hasNext}
         >
