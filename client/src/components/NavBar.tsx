@@ -110,35 +110,6 @@ const NavBar = () => {
           </Link>
         </nav>
       </div>
-      {/* Mobile navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-dark-900/95 border-t border-dark-700/50 backdrop-blur-lg z-50">
-        <nav className="flex justify-around items-center py-2 px-4 max-w-md mx-auto">
-          <Link href="/">
-            <div className={`flex flex-col items-center p-2 ${location === '/' ? 'text-primary' : 'text-slate-400 hover:text-slate-200'}`}>
-              <i className="fas fa-home text-xl"></i>
-              <span className="text-[0.65rem] font-medium mt-1.5">Home</span>
-            </div>
-          </Link>
-          <Link href="/search">
-            <div className={`flex flex-col items-center p-2 ${location === '/search' ? 'text-primary' : 'text-slate-400 hover:text-slate-200'}`}>
-              <i className="fas fa-search text-xl"></i>
-              <span className="text-[0.65rem] font-medium mt-1.5">Search</span>
-            </div>
-          </Link>
-          <Link href="/genre/all">
-            <div className={`flex flex-col items-center p-2 ${location.startsWith('/genre') ? 'text-primary' : 'text-slate-400 hover:text-slate-200'}`}>
-              <i className="fas fa-tags text-xl"></i>
-              <span className="text-[0.65rem] font-medium mt-1.5">Genres</span>
-            </div>
-          </Link>
-          <Link href="/recently-watched">
-            <div className={`flex flex-col items-center p-2 ${location === '/recently-watched' ? 'text-primary' : 'text-slate-400 hover:text-slate-200'}`}>
-              <i className="fas fa-history text-xl"></i>
-              <span className="text-[0.65rem] font-medium mt-1.5">Recent</span>
-            </div>
-          </Link>
-        </nav>
-      </div>
     </header>
   );
 };
