@@ -3,6 +3,18 @@ import { Episode, Anime } from '@shared/types';
 import { updateWatchHistory } from '../lib/cookies';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { cn } from '@/lib/utils';
+import { 
+  Play, 
+  Pause, 
+  SkipBack, 
+  SkipForward, 
+  Volume2, 
+  Volume1, 
+  VolumeX, 
+  Maximize, 
+  Minimize,
+  Settings
+} from 'lucide-react';
 
 interface VideoPlayerProps {
   anime: Anime;
@@ -384,7 +396,7 @@ const VideoPlayer = ({
                   className="bg-dark-900/80 text-white px-3 py-1.5 rounded-full text-sm flex items-center space-x-1"
                   onClick={() => setShowQualityMenu(!showQualityMenu)}
                 >
-                  <i className="fas fa-cog text-xs mr-1"></i>
+                  <Settings size={14} className="mr-1" />
                   <span>{selectedQuality}</span>
                 </button>
 
@@ -398,7 +410,17 @@ const VideoPlayer = ({
                         disabled={!url}
                       >
                         {quality}
-                        {selectedQuality === quality && <i className="fas fa-check ml-2"></i>}
+                        {selectedQuality === quality && (
+                          <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            className="ml-2 inline h-4 w-4" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
                       </button>
                     ))}
                   </div>
@@ -433,7 +455,7 @@ const VideoPlayer = ({
                     className="text-white p-2 hover:text-primary transition" 
                     onClick={togglePlay}
                   >
-                    <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-xl`}></i>
+                    {isPlaying ? <Pause size={24} /> : <Play size={24} />}
                   </button>
                   
                   {/* Previous/Next episode buttons */}
@@ -442,7 +464,7 @@ const VideoPlayer = ({
                     onClick={onPreviousEpisode}
                     disabled={!hasPrevious}
                   >
-                    <i className="fas fa-step-backward"></i>
+                    <SkipBack size={20} />
                   </button>
                   
                   <button 
@@ -450,7 +472,7 @@ const VideoPlayer = ({
                     onClick={onNextEpisode}
                     disabled={!hasNext}
                   >
-                    <i className="fas fa-step-forward"></i>
+                    <SkipForward size={20} />
                   </button>
                   
                   {/* Volume control */}
@@ -460,7 +482,13 @@ const VideoPlayer = ({
                       onClick={toggleMute}
                       onMouseEnter={() => setShowVolumeSlider(true)}
                     >
-                      <i className={`fas ${isMuted || volume === 0 ? 'fa-volume-mute' : volume < 0.5 ? 'fa-volume-down' : 'fa-volume-up'} text-lg`}></i>
+                      {isMuted || volume === 0 ? (
+                        <VolumeX size={20} />
+                      ) : volume < 0.5 ? (
+                        <Volume1 size={20} />
+                      ) : (
+                        <Volume2 size={20} />
+                      )}
                     </button>
                     
                     <div 
@@ -496,7 +524,7 @@ const VideoPlayer = ({
                     className="text-white p-2 hover:text-primary transition" 
                     onClick={toggleFullScreen}
                   >
-                    <i className={`fas ${isFullScreen ? 'fa-compress' : 'fa-expand'} text-lg`}></i>
+                    {isFullScreen ? <Minimize size={20} /> : <Maximize size={20} />}
                   </button>
                 </div>
               </div>
@@ -508,11 +536,11 @@ const VideoPlayer = ({
       {/* Episode navigation bar */}
       <div className="bg-dark-900 py-3 px-4 flex justify-between items-center border-t border-dark-700">
         <button 
-          className="bg-dark-800 hover:bg-dark-700 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-dark-800 hover:bg-dark-700 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           onClick={onPreviousEpisode}
           disabled={!hasPrevious}
         >
-          <i className="fas fa-step-backward mr-1"></i> Previous
+          <SkipBack size={16} className="mr-1" /> Previous
         </button>
 
         <div className="text-sm text-slate-300">
@@ -520,11 +548,11 @@ const VideoPlayer = ({
         </div>
 
         <button 
-          className="bg-dark-800 hover:bg-dark-700 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-dark-800 hover:bg-dark-700 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           onClick={onNextEpisode}
           disabled={!hasNext}
         >
-          Next <i className="fas fa-step-forward ml-1"></i>
+          Next <SkipForward size={16} className="ml-1" />
         </button>
       </div>
     </div>
