@@ -11,46 +11,46 @@ import { Episode } from '@shared/types';
 const VideoPlayerPage = () => {
   const [, params] = useRoute('/watch/:animeId/:episodeId');
   const [, setLocation] = useLocation();
-  
+
   const animeId = params?.animeId || '';
   const episodeId = params?.episodeId || '';
-  
+
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState<number>(-1);
-  
+
   // Fetch anime details
   const { data: anime, isLoading: isLoadingAnime } = useQuery({
     queryKey: ['/api/anime', animeId],
     queryFn: () => fetchAnimeById(animeId),
     enabled: !!animeId,
   });
-  
+
   // Fetch current episode
   const { data: currentEpisode, isLoading: isLoadingEpisode } = useQuery({
     queryKey: ['/api/episodes', episodeId],
     queryFn: () => fetchEpisodeById(episodeId),
     enabled: !!episodeId,
   });
-  
+
   // Fetch all episodes for the anime
   const { data: allEpisodes } = useQuery({
     queryKey: ['/api/episodes', animeId, 'all'],
     queryFn: () => fetchEpisodesByAnimeId(animeId),
     enabled: !!animeId,
   });
-  
+
   useEffect(() => {
     if (allEpisodes) {
       // Sort episodes by episode number
       const sortedEpisodes = [...allEpisodes].sort((a, b) => a.episode_number - b.episode_number);
       setEpisodes(sortedEpisodes);
-      
+
       // Find index of current episode
       const index = sortedEpisodes.findIndex(ep => ep.id.toString() === episodeId);
       setCurrentEpisodeIndex(index);
     }
   }, [allEpisodes, episodeId]);
-  
+
   // Update watch history and recently watched when playing an episode
   useEffect(() => {
     if (anime && currentEpisode) {
@@ -65,7 +65,7 @@ const VideoPlayerPage = () => {
         progress: 0, // Initial progress, will be updated by the video player
         timestamp: new Date().getTime()
       });
-      
+
       // Update recently watched anime
       updateRecentlyWatchedAnime({
         id: anime.id.toString(),
@@ -76,21 +76,21 @@ const VideoPlayerPage = () => {
       });
     }
   }, [anime, currentEpisode, animeId, episodeId]);
-  
+
   const handleNextEpisode = () => {
     if (currentEpisodeIndex < episodes.length - 1) {
       const nextEp = episodes[currentEpisodeIndex + 1];
       setLocation(`/watch/${animeId}/${nextEp.id}`);
     }
   };
-  
+
   const handlePreviousEpisode = () => {
     if (currentEpisodeIndex > 0) {
       const prevEp = episodes[currentEpisodeIndex - 1];
       setLocation(`/watch/${animeId}/${prevEp.id}`);
     }
   };
-  
+
   // Handle loading state
   if (isLoadingAnime || isLoadingEpisode) {
     return (
@@ -105,7 +105,7 @@ const VideoPlayerPage = () => {
       </div>
     );
   }
-  
+
   // Handle error state
   if (!anime || !currentEpisode) {
     return (
@@ -123,7 +123,7 @@ const VideoPlayerPage = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-black to-dark-950">
       <div className="max-w-7xl mx-auto w-full relative z-10">
@@ -135,19 +135,19 @@ const VideoPlayerPage = () => {
           hasNext={currentEpisodeIndex < episodes.length - 1}
           hasPrevious={currentEpisodeIndex > 0}
         />
-        
+
         <div className="p-4 space-y-4 md:space-y-6 rounded-t-xl backdrop-blur-sm bg-black/40 border-t border-white/5">
           {/* Episode Info */}
           <div className="backdrop-blur-md bg-black/20 p-4 rounded-lg border border-white/10">
             <h2 className="text-2xl font-bold mb-2">{anime.title}</h2>
             <p className="text-gray-400">Episode {currentEpisode.episode_number}: {currentEpisode.title}</p>
           </div>
-          
+
           {/* Episode Description */}
           <div>
             <p className="text-gray-300">{currentEpisode.description || "No description available."}</p>
           </div>
-          
+
           {/* Episodes List */}
           <div>
             <h3 className="text-xl font-semibold mb-3">Episodes</h3>
@@ -157,10 +157,10 @@ const VideoPlayerPage = () => {
                   key={ep.id}
                   onClick={() => setLocation(`/watch/${animeId}/${ep.id}`)}
                   className={cn(
-                    "p-4 rounded-lg text-left transition flex flex-col backdrop-blur-md border border-white/10",
+                    "p-4 rounded-lg text-left transition-all duration-300 flex flex-col glass-card",
                     ep.id === currentEpisode.id 
-                      ? "bg-primary/20 text-white shadow-lg shadow-primary/20" 
-                      : "bg-black/30 text-gray-300 hover:bg-black/40"
+                      ? "bg-primary/20 text-white shadow-lg shadow-primary/30 border-primary/30" 
+                      : "text-gray-300 hover:scale-[1.02]"
                   )}
                 >
                   <div className="font-medium text-base">Episode {ep.episode_number}</div>
