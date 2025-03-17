@@ -27,16 +27,16 @@ const NavBar = () => {
   }, []);
 
   return (
-    <header className={`bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 backdrop-blur-md sticky top-0 z-50 ${scrolled ? 'shadow-md' : 'border-b border-gray-200/60'}`}>
+    <header className={`bg-dark-900/95 backdrop-blur-md sticky top-0 z-50 ${scrolled ? 'shadow-md' : 'border-b border-dark-800/60'}`}>
       <div className="container mx-auto px-4 h-16 flex items-center justify-between max-w-7xl">
         {/* Logo */}
         <div className="flex items-center space-x-1">
           <Link href="/" className="flex items-center">
             <div className="relative flex items-center">
-              <span className="text-pink-200 text-2xl font-bold mr-1">
-                Anime<span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-purple-600">Flix</span>
+              <span className="text-primary text-2xl font-bold mr-1">
+                Anime<span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">Flix</span>
               </span>
-              <div className="absolute -top-0.5 -right-2 w-2 h-2 rounded-full bg-pink-200 animate-pulse"></div>
+              <div className="absolute -top-0.5 -right-2 w-2 h-2 rounded-full bg-primary animate-pulse"></div>
             </div>
           </Link>
         </div>
@@ -49,20 +49,20 @@ const NavBar = () => {
         {/* Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           <Link href="/">
-            <div className={`flex items-center gap-2 ${location === '/' ? 'text-pink-200 font-medium' : 'text-gray-300 hover:text-pink-200 transition-colors duration-200'}`}>
-              <i className="fas fa-home text-sm mr-2 text-pink-200"></i>
+            <div className={`flex items-center gap-2 ${location === '/' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
+              <i className="fas fa-home text-sm mr-2 text-primary"></i>
               <span>Home</span>
             </div>
           </Link>
           <Link href="/genre/all">
-            <div className={`flex items-center gap-2 ${location.startsWith('/genre') ? 'text-pink-200 font-medium' : 'text-gray-300 hover:text-pink-200 transition-colors duration-200'}`}>
-              <i className="fas fa-tags text-sm mr-2 text-pink-200"></i>
+            <div className={`flex items-center gap-2 ${location.startsWith('/genre') ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
+              <i className="fas fa-tags text-sm mr-2 text-primary"></i>
               <span>Genres</span>
             </div>
           </Link>
           <Link href="/recently-watched">
-            <div className={`flex items-center gap-2 ${location === '/recently-watched' ? 'text-pink-200 font-medium' : 'text-gray-300 hover:text-pink-200 transition-colors duration-200'}`}>
-              <i className="fas fa-history text-sm mr-2 text-pink-200"></i>
+            <div className={`flex items-center gap-2 ${location === '/recently-watched' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
+              <i className="fas fa-history text-sm mr-2 text-primary"></i>
               <span>Recently Watched</span>
             </div>
           </Link>
@@ -70,7 +70,7 @@ const NavBar = () => {
 
         {/* Mobile menu button */}
         <button 
-          className="md:hidden text-pink-200 focus:outline-none p-2" 
+          className="md:hidden text-white focus:outline-none p-2" 
           onClick={toggleMobileMenu}
           aria-label="Toggle mobile menu"
         >
@@ -85,26 +85,26 @@ const NavBar = () => {
 
       {/* Mobile menu with smooth transition */}
       <div 
-        className={`md:hidden bg-gray-800 border-t border-gray-700 overflow-hidden transition-all duration-300 ease-in-out ${
+        className={`md:hidden bg-dark-800 border-t border-dark-700 overflow-hidden transition-all duration-300 ease-in-out ${
           mobileMenuOpen ? 'max-h-48 py-3' : 'max-h-0'
         }`}
       >
         <nav className="flex flex-col space-y-3 px-4">
           <Link href="/">
-            <div className={`flex items-center gap-2 ${location === '/' ? 'text-pink-200 font-medium' : 'text-gray-300 hover:text-pink-200 transition-colors duration-200'} py-2`}>
-              <i className="fas fa-home text-sm mr-3 text-pink-200"></i>
+            <div className={`flex items-center gap-2 ${location === '/' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'} py-2`}>
+              <i className="fas fa-home text-sm mr-3 text-primary"></i>
               <span>Home</span>
             </div>
           </Link>
           <Link href="/genre/all">
-            <div className={`flex items-center gap-2 ${location.startsWith('/genre') ? 'text-pink-200 font-medium' : 'text-gray-300 hover:text-pink-200 transition-colors duration-200'} py-2`}>
-              <i className="fas fa-tags text-sm mr-3 text-pink-200"></i>
+            <div className={`flex items-center gap-2 ${location.startsWith('/genre') ? 'text-white font-medium' : 'text-slate-300 hover:text-white'} py-2`}>
+              <i className="fas fa-tags text-sm mr-3 text-primary"></i>
               <span>Genres</span>
             </div>
           </Link>
           <Link href="/recently-watched">
-            <div className={`flex items-center gap-2 ${location === '/recently-watched' ? 'text-pink-200 font-medium' : 'text-gray-300 hover:text-pink-200 transition-colors duration-200'} py-2`}>
-              <i className="fas fa-history text-sm mr-3 text-pink-200"></i>
+            <div className={`flex items-center gap-2 ${location === '/recently-watched' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'} py-2`}>
+              <i className="fas fa-history text-sm mr-3 text-primary"></i>
               <span>Recently Watched</span>
             </div>
           </Link>
