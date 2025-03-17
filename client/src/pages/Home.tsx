@@ -32,55 +32,55 @@ const SectionTitle = ({ icon, title, viewAllLink, viewAllText = 'View All' }: {
 const Home = () => {
   const [continueWatching, setContinueWatching] = useState<WatchHistoryItem[]>([]);
   const [recentlyWatched, setRecentlyWatched] = useState<RecentlyWatchedAnime[]>([]);
-  
+
   const { data: animeList, isLoading: isLoadingAnime } = useQuery({
     queryKey: ['/api/anime'],
     queryFn: fetchAllAnime,
   });
-  
+
   useEffect(() => {
     // Get watch history and recently watched from cookies
     const history = getWatchHistory();
     const recents = getRecentlyWatchedAnime();
-    
+
     // Filter out duplicate anime titles by keeping only one entry per anime
     // We'll show only the most recent episode for each anime
     const uniqueAnimeMap = new Map<string, WatchHistoryItem>();
-    
+
     history.forEach(item => {
       if (!uniqueAnimeMap.has(item.animeId) || 
           uniqueAnimeMap.get(item.animeId)!.timestamp < item.timestamp) {
         uniqueAnimeMap.set(item.animeId, item);
       }
     });
-    
+
     // Convert map back to array and sort by timestamp (most recent first)
     const uniqueHistory = Array.from(uniqueAnimeMap.values())
       .sort((a, b) => b.timestamp - a.timestamp);
-    
+
     setContinueWatching(uniqueHistory);
     setRecentlyWatched(recents);
   }, []);
-  
+
   // Extract and process unique genres from the anime list
   const extractGenres = () => {
     if (!animeList) return [];
-    
+
     // Extract all genres and flatten the array
     const genreArrays = animeList.map(anime => 
       anime.genre.split(',').map(g => g.trim())
     );
-    
+
     // Create a Set to get unique genres and convert back to array
     const uniqueGenresSet = new Set(genreArrays.flat());
     return Array.from(uniqueGenresSet).sort((a, b) => a.localeCompare(b));
   };
 
   const genres = extractGenres();
-  
+
   // Get popular anime (for now, just use the full list)
   const popularAnime = animeList || [];
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-dark-950 to-dark-900 pb-24 md:pb-8">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -104,18 +104,18 @@ const Home = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent"></div>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
-                
+
                 <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full md:max-w-[600px]">
                   {/* Featured Badge */}
                   <div className="bg-primary text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4 inline-block shadow-lg">
                     FEATURED
                   </div>
-                  
+
                   {/* Title */}
                   <h1 className="text-2xl md:text-4xl font-bold mb-3 text-white">
                     {animeList[0].title}
                   </h1>
-                  
+
                   {/* Genres */}
                   <div className="flex flex-wrap gap-2 mb-4">
                     {animeList[0].genre.split(',').map((genre, index) => (
@@ -127,12 +127,12 @@ const Home = () => {
                       </span>
                     ))}
                   </div>
-                  
+
                   {/* Description */}
                   <p className="text-sm md:text-base text-slate-200 mb-6 line-clamp-2 md:line-clamp-3">
                     {animeList[0].description || "Experience the adventure in this featured anime series."}
                   </p>
-                  
+
                   {/* Action Buttons */}
                   <div className="flex flex-wrap gap-3">
                     <Link href={`/anime/${animeList[0].id}`}>
@@ -151,7 +151,7 @@ const Home = () => {
             )
           )}
         </section>
-        
+
         {/* Continue watching section - only show if there are items */}
         {continueWatching.length > 0 && (
           <section className="mb-12">
@@ -160,7 +160,7 @@ const Home = () => {
               title="Continue Watching" 
               viewAllLink="/recently-watched" 
             />
-            
+
             <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-6">
               {continueWatching.slice(0, 6).map((item) => (
                 <Link href={`/watch/${item.animeId}/${item.episodeId}`} key={`${item.animeId}-${item.episodeId}`}>
@@ -182,7 +182,7 @@ const Home = () => {
             </div>
           </section>
         )}
-        
+
         {/* Popular anime section */}
         <section className="mb-12">
           <SectionTitle 
@@ -190,7 +190,7 @@ const Home = () => {
             title="Popular Now" 
             viewAllLink="/search?sort=popular" 
           />
-          
+
           <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-6">
             {isLoadingAnime ? (
               Array(12).fill(0).map((_, i) => (
@@ -204,14 +204,16 @@ const Home = () => {
               ))
             ) : (
               popularAnime.slice(0, 12).map((anime) => (
-                <Link href={`/anime/${anime.id}`} key={anime.id}>
-                  <AnimeCard anime={anime} />
-                </Link>
+                <AnimeCard 
+                  key={anime.id} 
+                  anime={anime} 
+                  className="block"
+                />
               ))
             )}
           </div>
         </section>
-        
+
         {/* Genre section */}
         <section className="mb-12">
           <SectionTitle 
@@ -220,7 +222,7 @@ const Home = () => {
             viewAllLink="/genre/all" 
             viewAllText="All Genres"
           />
-          
+
           <div className="mb-4 overflow-x-auto pb-2 -mx-4 px-4">
             <div className="flex flex-nowrap gap-2 min-w-max">
               {isLoadingAnime ? (
@@ -237,7 +239,7 @@ const Home = () => {
               )}
             </div>
           </div>
-          
+
           {/* Genre Grid for larger screens */}
           <div className="hidden md:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
             {isLoadingAnime ? (
