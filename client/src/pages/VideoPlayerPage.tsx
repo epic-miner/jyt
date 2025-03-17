@@ -134,6 +134,39 @@ const VideoPlayerPage = () => {
           hasNext={currentEpisodeIndex < episodes.length - 1}
           hasPrevious={currentEpisodeIndex > 0}
         />
+        
+        <div className="p-4 space-y-6">
+          {/* Episode Info */}
+          <div>
+            <h2 className="text-2xl font-bold mb-2">{anime.title}</h2>
+            <p className="text-gray-400">Episode {currentEpisode.episode_number}: {currentEpisode.title}</p>
+          </div>
+          
+          {/* Episode Description */}
+          <div>
+            <p className="text-gray-300">{currentEpisode.description || "No description available."}</p>
+          </div>
+          
+          {/* Episodes List */}
+          <div>
+            <h3 className="text-xl font-semibold mb-3">Episodes</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+              {episodes.map((ep) => (
+                <button
+                  key={ep.id}
+                  onClick={() => setLocation(`/watch/${animeId}/${ep.id}`)}
+                  className={cn(
+                    "p-2 rounded text-left hover:bg-gray-800 transition",
+                    ep.id === currentEpisode.id ? "bg-primary text-white" : "bg-gray-900 text-gray-300"
+                  )}
+                >
+                  <div className="font-medium">Episode {ep.episode_number}</div>
+                  <div className="text-sm truncate">{ep.title}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
