@@ -141,6 +141,98 @@ const VideoPlayer = ({
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
+  
+  // YouTube-style keyboard controls
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore keyboard shortcuts when user is typing in an input or textarea
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        (e.ctrlKey || e.altKey || e.metaKey)
+      ) {
+        return;
+      }
+      
+      switch (e.key) {
+        case ' ': // Spacebar - Play/Pause
+        case 'k': // YouTube's play/pause shortcut
+          e.preventDefault();
+          togglePlay();
+          break;
+          
+        case 'f': // Full screen
+          e.preventDefault();
+          toggleFullScreen();
+          break;
+          
+        case 'm': // Mute/unmute
+          e.preventDefault();
+          toggleMute();
+          break;
+          
+        case 'ArrowLeft': // Rewind 5 seconds
+          e.preventDefault();
+          if (videoRef.current) {
+            videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 5);
+          }
+          break;
+          
+        case 'ArrowRight': // Fast forward 5 seconds
+          e.preventDefault();
+          if (videoRef.current) {
+            videoRef.current.currentTime = Math.min(
+              videoRef.current.duration || 0, 
+              videoRef.current.currentTime + 5
+            );
+          }
+          break;
+          
+        case 'ArrowUp': // Volume up
+          e.preventDefault();
+          if (videoRef.current) {
+            const newVolume = Math.min(1, volume + 0.05);
+            videoRef.current.volume = newVolume;
+            setVolume(newVolume);
+            setIsMuted(false);
+          }
+          break;
+          
+        case 'ArrowDown': // Volume down
+          e.preventDefault();
+          if (videoRef.current) {
+            const newVolume = Math.max(0, volume - 0.05);
+            videoRef.current.volume = newVolume;
+            setVolume(newVolume);
+            if (newVolume === 0) setIsMuted(true);
+          }
+          break;
+          
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9': // Seek to percentage of video
+          e.preventDefault();
+          if (videoRef.current) {
+            const percent = parseInt(e.key) * 10;
+            videoRef.current.currentTime = videoRef.current.duration * (percent / 100);
+          }
+          break;
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [volume, isMuted, isFullScreen, isPlaying]);
 
   // Handle quality change
   useEffect(() => {
@@ -451,11 +543,49 @@ const VideoPlayer = ({
                 className="w-full h-10 group flex items-center cursor-pointer -mt-6 px-1"
                 onClick={seekToPosition}
                 onMouseMove={(e) => {
-                  // This would handle showing time preview on hover in a real implementation
-                  // For now it's just for visual effect
+                  if (!progressBarRef.current || !videoRef.current) return;
+                  
+                  const progressBar = progressBarRef.current;
+                  const bounds = progressBar.getBoundingClientRect();
+                  const x = e.clientX - bounds.left;
+                  const width = bounds.width;
+                  const percentage = Math.min(Math.max(x / width, 0), 1);
+                  
+                  const videoDuration = videoRef.current.duration;
+                  if (!isNaN(videoDuration)) {
+                    const previewTime = percentage * videoDuration;
+                    setTimePreview({
+                      time: previewTime,
+                      position: percentage * 100
+                    });
+                  }
                 }}
+                onMouseLeave={() => setTimePreview(null)}
               >
                 <div className="w-full relative">
+                  {/* Time preview tooltip - YouTube style */}
+                  {timePreview && (
+                    <div 
+                      className="absolute -top-10 bg-black/90 px-2 py-1 rounded text-white text-xs font-medium transform -translate-x-1/2 pointer-events-none z-20 border border-gray-800"
+                      style={{ left: `${timePreview.position}%` }}
+                    >
+                      {formatTime(timePreview.time)}
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-black/90 border-r border-b border-gray-800 rotate-45"></div>
+                    </div>
+                  )}
+                  
+                  {/* Preview thumbnail - would be implemented in a real YouTube clone */}
+                  {timePreview && (
+                    <div 
+                      className="absolute -top-28 transform -translate-x-1/2 pointer-events-none rounded overflow-hidden shadow-lg border border-gray-800 hidden md:block"
+                      style={{ left: `${timePreview.position}%` }}
+                    >
+                      <div className="w-32 h-20 bg-dark-900 flex items-center justify-center text-xs text-gray-400">
+                        Preview not available
+                      </div>
+                    </div>
+                  )}
+                  
                   {/* Background track */}
                   <div className="w-full bg-gray-600/50 h-1 group-hover:h-3 transition-all rounded-full overflow-hidden">
                     {/* Buffered progress - simulated */}
@@ -473,6 +603,14 @@ const VideoPlayer = ({
                       <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3 w-3 bg-red-500 rounded-full scale-0 group-hover:scale-100 transition-transform"></div>
                     </div>
                   </div>
+                  
+                  {/* Preview position indicator */}
+                  {timePreview && (
+                    <div 
+                      className="absolute top-0 bottom-0 w-0.5 bg-white/80 pointer-events-none"
+                      style={{ left: `${timePreview.position}%` }}
+                    ></div>
+                  )}
                 </div>
               </div>
               
