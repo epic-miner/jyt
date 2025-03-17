@@ -28,15 +28,15 @@ const NavBar = () => {
 
   return (
     <header className={`bg-dark-900/95 backdrop-blur-md sticky top-0 z-50 ${scrolled ? 'shadow-md' : 'border-b border-dark-800/60'}`}>
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between max-w-7xl">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between max-w-7xl">
         {/* Logo */}
         <div className="flex items-center space-x-1">
           <Link href="/" className="flex items-center">
-            <div className="relative">
+            <div className="relative flex items-center">
               <span className="text-primary text-2xl font-bold mr-1">
                 Anime<span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">Flix</span>
               </span>
-              <div className="absolute -top-1 -right-2 w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+              <div className="absolute -top-0.5 -right-2 w-2 h-2 rounded-full bg-primary animate-pulse"></div>
             </div>
           </Link>
         </div>
