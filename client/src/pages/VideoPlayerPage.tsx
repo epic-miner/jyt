@@ -125,8 +125,8 @@ const VideoPlayerPage = () => {
   }
   
   return (
-    <div className="min-h-screen flex flex-col bg-black">
-      <div className="max-w-7xl mx-auto w-full">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-black to-dark-950">
+      <div className="max-w-7xl mx-auto w-full relative z-10">
         <VideoPlayer 
           anime={anime}
           episode={currentEpisode}
@@ -136,9 +136,9 @@ const VideoPlayerPage = () => {
           hasPrevious={currentEpisodeIndex > 0}
         />
         
-        <div className="p-4 space-y-4 md:space-y-6">
+        <div className="p-4 space-y-4 md:space-y-6 rounded-t-xl backdrop-blur-sm bg-black/40 border-t border-white/5">
           {/* Episode Info */}
-          <div>
+          <div className="backdrop-blur-md bg-black/20 p-4 rounded-lg border border-white/10">
             <h2 className="text-2xl font-bold mb-2">{anime.title}</h2>
             <p className="text-gray-400">Episode {currentEpisode.episode_number}: {currentEpisode.title}</p>
           </div>
@@ -151,14 +151,16 @@ const VideoPlayerPage = () => {
           {/* Episodes List */}
           <div>
             <h3 className="text-xl font-semibold mb-3">Episodes</h3>
-            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {episodes.map((ep) => (
                 <button
                   key={ep.id}
                   onClick={() => setLocation(`/watch/${animeId}/${ep.id}`)}
                   className={cn(
-                    "p-3 rounded text-left hover:bg-gray-800 transition flex flex-col",
-                    ep.id === currentEpisode.id ? "bg-primary text-white" : "bg-gray-900 text-gray-300"
+                    "p-4 rounded-lg text-left transition flex flex-col backdrop-blur-md border border-white/10",
+                    ep.id === currentEpisode.id 
+                      ? "bg-primary/20 text-white shadow-lg shadow-primary/20" 
+                      : "bg-black/30 text-gray-300 hover:bg-black/40"
                   )}
                 >
                   <div className="font-medium text-base">Episode {ep.episode_number}</div>
