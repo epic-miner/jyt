@@ -58,8 +58,6 @@ const VideoPlayer = ({
   const [timePreview, setTimePreview] = useState<{ time: number; position: number } | null>(null);
   const [showTitle, setShowTitle] = useState(true);
   const [bufferProgress, setBufferProgress] = useState(0);
-  const [playbackRate, setPlaybackRate] = useState(1.0); // Added playbackRate state
-  const [playbackSpeed, setPlaybackSpeed] = useState(1); // Added playbackSpeed state
 
   // Get available quality options
   const availableQualities: { quality: VideoQuality; url: string | undefined }[] = [
@@ -441,16 +439,6 @@ const VideoPlayer = ({
     }
   };
 
-  const changePlaybackRate = () => {
-    if (!videoRef.current) return;
-    const rates = [0.5, 1, 1.5, 2];
-    const currentIndex = rates.indexOf(videoRef.current.playbackRate);
-    const nextIndex = (currentIndex + 1) % rates.length;
-    videoRef.current.playbackRate = rates[nextIndex];
-    setPlaybackRate(rates[nextIndex]);
-  };
-
-
   // Effect to update duration and playing state
   useEffect(() => {
     if (!videoRef.current) return;
@@ -475,7 +463,6 @@ const VideoPlayer = ({
     videoElement.addEventListener('play', handlePlay);
     videoElement.addEventListener('pause', handlePause);
     videoElement.addEventListener('volumechange', handleVolumeChange);
-    videoElement.addEventListener('ratechange', () => setPlaybackRate(videoRef.current.playbackRate)); // Added ratechange listener
 
     // Auto-hide controls after inactivity
     let timeout: ReturnType<typeof setTimeout> | null = null;
@@ -506,7 +493,6 @@ const VideoPlayer = ({
         videoElement.removeEventListener('play', handlePlay);
         videoElement.removeEventListener('pause', handlePause);
         videoElement.removeEventListener('volumechange', handleVolumeChange);
-        videoElement.removeEventListener('ratechange', () => setPlaybackRate(videoRef.current.playbackRate)); // Added ratechange listener removal
       }
 
       if (playerContainer) {
@@ -709,16 +695,6 @@ const VideoPlayer = ({
                     <SkipForward size={22} />
                   </button>
 
-                  {/* Playback Speed Control */}
-                  <div className="flex items-center text-gray-400">
-                    <span className="mr-2">{playbackRate}x</span>
-                    <button onClick={changePlaybackRate}>
-                      <svg className="w-5 h-5" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
-                      </svg>
-                    </button>
-                  </div>
-
                   {/* Volume control - YouTube style */}
                   <div className="relative flex items-center group">
                     <button 
@@ -839,7 +815,7 @@ const VideoPlayer = ({
           onClick={onPreviousEpisode}
           disabled={!hasPrevious}
         >
-          <SkipBack size={16} className="mr1 mr-1" /> Previous
+          <SkipBack size={16} className="mr-1" /> Previous
         </button>
 
         <div className="text-sm text-gray-300">
@@ -847,7 +823,7 @@ const VideoPlayer = ({
         </div>
 
         <button 
-          className="bggray-800/70 hover:bg-gray-700/70 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          className="bg-gray-800/70 hover:bg-gray-700/70 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           onClick={onNextEpisode}
           disabled={!hasNext}
         >
