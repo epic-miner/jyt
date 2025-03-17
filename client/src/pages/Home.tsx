@@ -1,11 +1,33 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'wouter';
 import AnimeCard from '../components/AnimeCard';
 import GenrePill from '../components/GenrePill';
 import { Skeleton } from '@/components/ui/skeleton';
 import { fetchAllAnime } from '../lib/api';
 import { getRecentlyWatchedAnime, getWatchHistory } from '../lib/cookies';
 import { Anime, RecentlyWatchedAnime, WatchHistoryItem } from '@shared/types';
+
+// Section title component for consistent styling
+const SectionTitle = ({ icon, title, viewAllLink, viewAllText = 'View All' }: { 
+  icon: string, 
+  title: string, 
+  viewAllLink?: string,
+  viewAllText?: string 
+}) => (
+  <div className="flex items-center justify-between mb-6">
+    <h2 className="text-xl font-bold flex items-center">
+      <i className={`fas fa-${icon} mr-2.5 text-primary`}></i> {title}
+    </h2>
+    {viewAllLink && (
+      <Link href={viewAllLink}>
+        <span className="text-sm text-primary hover:text-primary/80 transition-colors duration-200 font-medium flex items-center cursor-pointer">
+          {viewAllText} <i className="fas fa-chevron-right ml-1 text-xs"></i>
+        </span>
+      </Link>
+    )}
+  </div>
+);
 
 const Home = () => {
   const [continueWatching, setContinueWatching] = useState<WatchHistoryItem[]>([]);
@@ -25,41 +47,89 @@ const Home = () => {
     setRecentlyWatched(recents);
   }, []);
   
-  // Extract unique genres from the anime list
-  const allGenres = animeList ? Array.from(new Set(animeList.map(anime => anime.genre))) : [];
+  // Extract and process unique genres from the anime list
+  const extractGenres = () => {
+    if (!animeList) return [];
+    
+    // Extract all genres and flatten the array
+    const genreArrays = animeList.map(anime => 
+      anime.genre.split(',').map(g => g.trim())
+    );
+    
+    // Create a Set to get unique genres and convert back to array
+    const uniqueGenresSet = new Set(genreArrays.flat());
+    return Array.from(uniqueGenresSet).sort((a, b) => a.localeCompare(b));
+  };
+
+  const genres = extractGenres();
   
-  // Get popular anime (for now, just use the full list - in a real app we might have a popularity metric)
+  // Get popular anime (for now, just use the full list)
   const popularAnime = animeList || [];
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-dark-950 to-dark-900">
+    <div className="min-h-screen bg-gradient-to-b from-dark-950 to-dark-900 pb-20 md:pb-6">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Featured anime section */}
         <section className="mb-12">
           {isLoadingAnime ? (
-            <Skeleton className="relative rounded-2xl overflow-hidden h-[300px] md:h-[400px] lg:h-[450px]" />
+            <div className="relative rounded-2xl overflow-hidden shadow-xl">
+              <Skeleton className="h-[300px] md:h-[450px] w-full rounded-2xl" />
+            </div>
           ) : (
             animeList && animeList.length > 0 && (
-              <div className="relative rounded-2xl overflow-hidden h-[300px] md:h-[400px] lg:h-[450px] bg-gradient-to-r from-dark-800 to-dark-900 shadow-xl">
+              <div className="relative rounded-2xl overflow-hidden h-[300px] md:h-[450px] bg-gradient-to-r from-dark-800 to-dark-900 shadow-xl border border-dark-700/40 group">
                 <img 
                   src={animeList[0].thumbnail_url} 
                   alt={animeList[0].title} 
-                  className="w-full h-full object-cover opacity-60"
+                  className="w-full h-full object-cover opacity-60 group-hover:opacity-70 transition-all duration-700 scale-105 group-hover:scale-100"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = 'https://via.placeholder.com/1200x600?text=Featured+Anime';
+                  }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
+                
                 <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full md:max-w-[600px]">
-                  <div className="bg-primary text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4 inline-block shadow-lg">FEATURED</div>
-                  <h1 className="text-2xl md:text-4xl font-bold mb-3 text-white">{animeList[0].title}</h1>
+                  {/* Featured Badge */}
+                  <div className="bg-primary text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4 inline-block shadow-lg">
+                    FEATURED
+                  </div>
+                  
+                  {/* Title */}
+                  <h1 className="text-2xl md:text-4xl font-bold mb-3 text-white">
+                    {animeList[0].title}
+                  </h1>
+                  
+                  {/* Genres */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {animeList[0].genre.split(',').map((genre, index) => (
+                      <span 
+                        key={index} 
+                        className="text-xs bg-dark-800/60 backdrop-blur-sm text-slate-300 px-2.5 py-1 rounded-full"
+                      >
+                        {genre.trim()}
+                      </span>
+                    ))}
+                  </div>
+                  
+                  {/* Description */}
                   <p className="text-sm md:text-base text-slate-200 mb-6 line-clamp-2 md:line-clamp-3">
-                    {animeList[0].description}
+                    {animeList[0].description || "Experience the adventure in this featured anime series."}
                   </p>
+                  
+                  {/* Action Buttons */}
                   <div className="flex flex-wrap gap-3">
-                    <a href={`/anime/${animeList[0].id}`} className="bg-primary hover:bg-primary/90 transition px-6 py-2.5 rounded-full flex items-center shadow-lg text-sm md:text-base font-medium">
-                      <i className="fas fa-play mr-2"></i> Watch Now
-                    </a>
-                    <a href={`/anime/${animeList[0].id}`} className="bg-dark-700/80 hover:bg-dark-700 transition px-6 py-2.5 rounded-full shadow-lg text-sm md:text-base font-medium backdrop-blur-sm">
-                      <i className="fas fa-info-circle mr-2"></i> Details
-                    </a>
+                    <Link href={`/anime/${animeList[0].id}`}>
+                      <span className="bg-primary hover:bg-primary/90 transition-all duration-300 px-6 py-2.5 rounded-full flex items-center shadow-lg text-sm md:text-base font-medium cursor-pointer">
+                        <i className="fas fa-play mr-2"></i> Watch Now
+                      </span>
+                    </Link>
+                    <Link href={`/anime/${animeList[0].id}`}>
+                      <span className="bg-dark-800/80 hover:bg-dark-800 transition-all duration-300 px-6 py-2.5 rounded-full shadow-lg text-sm md:text-base font-medium backdrop-blur-sm border border-dark-700/50 hover:border-primary/30 cursor-pointer">
+                        <i className="fas fa-info-circle mr-2"></i> Details
+                      </span>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -69,71 +139,50 @@ const Home = () => {
         
         {/* Continue watching section - only show if there are items */}
         {continueWatching.length > 0 && (
-          <section className="mb-12 px-1">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xl font-bold flex items-center">
-                <i className="fas fa-history mr-2 text-primary"></i> Continue Watching
-              </h2>
-              <a href="/recently-watched" className="text-sm text-primary hover:underline">
-                View All
-              </a>
-            </div>
-            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5">
+          <section className="mb-12">
+            <SectionTitle 
+              icon="history" 
+              title="Continue Watching" 
+              viewAllLink="/recently-watched" 
+            />
+            
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-6">
               {continueWatching.slice(0, 6).map((item) => (
-                <a href={`/watch/${item.animeId}/${item.episodeId}`} key={`${item.animeId}-${item.episodeId}`} className="block">
-                  <div className="rounded-xl overflow-hidden bg-dark-800 transition hover:scale-105 cursor-pointer shadow-md h-full">
-                    <div className="relative aspect-video overflow-hidden">
-                      <img 
-                        src={item.animeThumbnail} 
-                        alt={item.animeTitle} 
-                        className="w-full h-full object-cover transition-transform hover:scale-110 duration-300"
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-                        <div className="w-full bg-gray-700/60 rounded-full h-1.5">
-                          <div 
-                            className="bg-primary h-1.5 rounded-full" 
-                            style={{ width: `${item.progress}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                      <div className="absolute top-2 right-2 bg-primary/80 text-white text-xs px-2 py-1 rounded-full font-medium">
-                        EP {item.episodeNumber}
-                      </div>
-                    </div>
-                    <div className="p-3">
-                      <h3 className="font-semibold text-sm line-clamp-1">
-                        {item.animeTitle}
-                      </h3>
-                      <div className="flex items-center justify-between mt-1">
-                        <p className="text-xs text-slate-400">Episode {item.episodeNumber}</p>
-                        <p className="text-xs text-primary">{Math.round(item.progress)}%</p>
-                      </div>
-                    </div>
-                  </div>
-                </a>
+                <Link href={`/watch/${item.animeId}/${item.episodeId}`} key={`${item.animeId}-${item.episodeId}`}>
+                  <AnimeCard
+                    anime={{
+                      id: parseInt(item.animeId),
+                      title: item.animeTitle,
+                      thumbnail_url: item.animeThumbnail,
+                      genre: "",
+                      description: ""
+                    }}
+                    showProgress={true}
+                    progress={item.progress}
+                    episodeNumber={item.episodeNumber}
+                  />
+                </Link>
               ))}
             </div>
           </section>
         )}
         
         {/* Popular anime section */}
-        <section className="mb-12 px-1">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-bold flex items-center">
-              <i className="fas fa-fire mr-2 text-primary"></i> Popular Now
-            </h2>
-            <a href="/search?sort=popular" className="text-sm text-primary hover:underline">
-              View All
-            </a>
-          </div>
-          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5">
+        <section className="mb-12">
+          <SectionTitle 
+            icon="fire" 
+            title="Popular Now" 
+            viewAllLink="/search?sort=popular" 
+          />
+          
+          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-6">
             {isLoadingAnime ? (
-              Array(6).fill(0).map((_, i) => (
-                <div key={i} className="rounded-xl overflow-hidden bg-dark-800 shadow-md">
-                  <Skeleton className="aspect-[2/3] w-full" />
+              Array(12).fill(0).map((_, i) => (
+                <div key={i} className="rounded-xl overflow-hidden bg-dark-800/60 shadow-md border border-dark-700/30">
+                  <Skeleton className="aspect-[2/3] w-full rounded-t-xl" />
                   <div className="p-3">
-                    <Skeleton className="h-4 w-3/4 mb-2" />
-                    <Skeleton className="h-3 w-1/2" />
+                    <Skeleton className="h-4 w-3/4 mb-2 rounded-md" />
+                    <Skeleton className="h-3 w-1/2 rounded-md" />
                   </div>
                 </div>
               ))
@@ -146,26 +195,48 @@ const Home = () => {
         </section>
         
         {/* Genre section */}
-        <section className="mb-12 px-1">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-bold flex items-center">
-              <i className="fas fa-tags mr-2 text-primary"></i> Browse by Genre
-            </h2>
+        <section className="mb-12">
+          <SectionTitle 
+            icon="tags" 
+            title="Browse by Genre" 
+            viewAllLink="/genre/all" 
+            viewAllText="All Genres"
+          />
+          
+          <div className="mb-4 overflow-x-auto pb-2 -mx-4 px-4">
+            <div className="flex flex-nowrap gap-2 min-w-max">
+              {isLoadingAnime ? (
+                Array(10).fill(0).map((_, i) => (
+                  <Skeleton key={i} className="h-9 w-24 rounded-full" />
+                ))
+              ) : (
+                genres.slice(0, 20).map((genre) => (
+                  <GenrePill 
+                    key={genre} 
+                    genre={genre}
+                  />
+                ))
+              )}
+            </div>
           </div>
-          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+          
+          {/* Genre Grid for larger screens */}
+          <div className="hidden md:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
             {isLoadingAnime ? (
               Array(6).fill(0).map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full rounded-xl" />
+                <Skeleton key={i} className="h-16 w-full rounded-xl" />
               ))
             ) : (
-              allGenres.map((genre) => (
-                <a 
+              genres.slice(0, 12).map((genre) => (
+                <Link 
                   key={genre} 
                   href={`/genre/${encodeURIComponent(genre)}`}
-                  className="bg-dark-800 hover:bg-dark-700 transition text-center py-3.5 rounded-xl shadow-md border border-dark-700 hover:border-primary/30"
                 >
-                  <span className="text-sm font-medium">{genre}</span>
-                </a>
+                  <span className="bg-dark-800/70 hover:bg-dark-800 transition-all duration-300 py-4 px-2 rounded-xl shadow-md border border-dark-700/50 hover:border-primary/20 flex items-center justify-center group cursor-pointer">
+                    <i className="fas fa-tag mr-2 text-primary/70 group-hover:text-primary transition-colors duration-300"></i>
+                    <span className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors duration-300">{genre}</span>
+                  </span>
+                </Link>
               ))
             )}
           </div>
