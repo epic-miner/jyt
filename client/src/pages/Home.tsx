@@ -67,7 +67,7 @@ const Home = () => {
   const popularAnime = animeList || [];
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-dark-950 to-dark-900 pb-20 md:pb-6">
+    <div className="min-h-screen bg-gradient-to-b from-dark-950 to-dark-900 pb-24 md:pb-8">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Featured anime section */}
         <section className="mb-12">

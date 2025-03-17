@@ -30,9 +30,15 @@ const GenrePage = () => {
   
   useEffect(() => {
     if (allAnime) {
-      // Extract unique genres
-      const uniqueGenres = [...new Set(allAnime.map(anime => anime.genre.split(',').map(g => g.trim())).flat())];
-      setGenres(uniqueGenres);
+      // Extract unique genres using a regular object as a map for compatibility
+      const genreMap: Record<string, boolean> = {};
+      allAnime.forEach(anime => {
+        anime.genre.split(',').forEach(g => {
+          const trimmed = g.trim();
+          if (trimmed) genreMap[trimmed] = true;
+        });
+      });
+      setGenres(Object.keys(genreMap));
       
       // Set filtered anime based on genre or all anime
       if (isAllGenres) {
@@ -53,7 +59,7 @@ const GenrePage = () => {
   const sortedGenres = [...genres].sort((a, b) => a.localeCompare(b));
   
   return (
-    <div className="container mx-auto px-4 py-6 pb-20 md:pb-6">
+    <div className="container mx-auto px-4 py-6 pb-24 md:pb-8">
       {/* Header with genre title */}
       <div className="flex flex-col space-y-2 mb-6">
         <h1 className="text-2xl font-bold text-white">
