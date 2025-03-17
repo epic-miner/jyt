@@ -30,19 +30,20 @@ const NavBar = () => {
     <header className={`bg-dark-900/95 backdrop-blur-md sticky top-0 z-50 ${scrolled ? 'shadow-md' : 'border-b border-dark-800/60'}`}>
       <div className="container mx-auto px-4 h-16 flex items-center justify-between max-w-7xl">
         {/* Logo */}
-        <div className="flex items-center space-x-1">
+        <div className="flex-shrink-0 w-32">
           <Link href="/" className="flex items-center">
             <div className="relative flex items-center">
-              <span className="text-primary text-2xl font-bold mr-1">
-                9<span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">anime</span>
+              <span className="text-2xl font-bold">
+                <span className="text-primary">9</span>
+                <span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">anime</span>
               </span>
-              <div className="absolute -top-0.5 -right-2 w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+              <div className="absolute -top-0.5 -right-2 w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
             </div>
           </Link>
         </div>
 
         {/* Search bar (desktop) */}
-        <div className="hidden md:block flex-grow max-w-xl mx-6">
+        <div className="hidden md:block flex-grow max-w-xl mx-8">
           <SearchBar />
         </div>
 
