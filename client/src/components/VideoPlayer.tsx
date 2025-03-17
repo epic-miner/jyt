@@ -58,6 +58,8 @@ const VideoPlayer = ({
   const [timePreview, setTimePreview] = useState<{ time: number; position: number } | null>(null);
   const [showTitle, setShowTitle] = useState(true);
   const [bufferProgress, setBufferProgress] = useState(0);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+
 
   // Get available quality options
   const availableQualities: { quality: VideoQuality; url: string | undefined }[] = [
@@ -418,6 +420,13 @@ const VideoPlayer = ({
     }
   };
 
+  const handlePlaybackSpeedChange = (newSpeed: number) => {
+    if (!videoRef.current) return;
+    videoRef.current.playbackRate = newSpeed;
+    setPlaybackSpeed(newSpeed);
+  };
+
+
   const formatTime = (timeInSeconds: number) => {
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = Math.floor(timeInSeconds % 60);
@@ -463,6 +472,9 @@ const VideoPlayer = ({
     videoElement.addEventListener('play', handlePlay);
     videoElement.addEventListener('pause', handlePause);
     videoElement.addEventListener('volumechange', handleVolumeChange);
+    videoElement.addEventListener('ratechange', () => {
+        setPlaybackSpeed(videoRef.current?.playbackRate || 1);
+    });
 
     // Auto-hide controls after inactivity
     let timeout: ReturnType<typeof setTimeout> | null = null;
@@ -493,6 +505,9 @@ const VideoPlayer = ({
         videoElement.removeEventListener('play', handlePlay);
         videoElement.removeEventListener('pause', handlePause);
         videoElement.removeEventListener('volumechange', handleVolumeChange);
+        videoElement.removeEventListener('ratechange', () => {
+            setPlaybackSpeed(videoRef.current?.playbackRate || 1);
+        });
       }
 
       if (playerContainer) {
@@ -591,6 +606,8 @@ const VideoPlayer = ({
                     backToMainMenu={backToMainMenu}
                     openQualitySubmenu={openQualitySubmenu}
                     availableQualities={availableQualities}
+                    playbackSpeed={playbackSpeed}
+                    handlePlaybackSpeedChange={handlePlaybackSpeedChange}
                   />
                 ) : (
                   <VideoPlayerDesktopMenu 
@@ -599,6 +616,8 @@ const VideoPlayer = ({
                     selectedQuality={selectedQuality}
                     handleQualityChange={handleQualityChange}
                     availableQualities={availableQualities}
+                    playbackSpeed={playbackSpeed}
+                    handlePlaybackSpeedChange={handlePlaybackSpeedChange}
                   />
                 )}
               </div>

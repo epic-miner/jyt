@@ -93,8 +93,14 @@ const VideoPlayerPage = () => {
   // Handle loading state
   if (isLoadingAnime || isLoadingEpisode) {
     return (
-      <div className="h-screen flex flex-col bg-black">
-        <Skeleton className="w-full flex-grow" />
+      <div className="h-screen flex flex-col bg-black p-4">
+        <div className="max-w-7xl mx-auto w-full space-y-4">
+          <Skeleton className="w-full aspect-video rounded-lg" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </div>
       </div>
     );
   }
