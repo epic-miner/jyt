@@ -4,6 +4,7 @@ export interface Anime {
   thumbnail_url: string;
   genre: string;
   description: string;
+  episode_count?: number; // Adding episode count field
 }
 
 export interface Episode {

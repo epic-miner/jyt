@@ -4,7 +4,7 @@ import { Link, useLocation } from 'wouter';
 import AnimeCard from '../components/AnimeCard';
 import GenrePill from '../components/GenrePill';
 import { Skeleton } from '@/components/ui/skeleton';
-import { fetchAllAnime } from '../lib/api';
+import { fetchAllAnime, fetchEpisodesByAnimeId } from '../lib/api';
 import { getRecentlyWatchedAnime, getWatchHistory } from '../lib/cookies';
 import { Anime, RecentlyWatchedAnime, WatchHistoryItem } from '@shared/types';
 
@@ -40,13 +40,32 @@ const Home = () => {
     queryFn: fetchAllAnime,
   });
 
+  const { data: episodeCounts } = useQuery({
+    queryKey: ['/api/episodes/counts'],
+    queryFn: async () => {
+      if (!animeList) return {};
+      const counts: Record<number, number> = {};
+
+      await Promise.all(
+        animeList.slice(0, 12).map(async (anime) => {
+          try {
+            const episodes = await fetchEpisodesByAnimeId(anime.id.toString());
+            counts[anime.id] = episodes.length;
+          } catch (error) {
+            console.error(`Error fetching episodes for anime ${anime.id}:`, error);
+            counts[anime.id] = 0;
+          }
+        })
+      );
+
+      return counts;
+    },
+    enabled: !!animeList,
+  });
+
   useEffect(() => {
-    // Get watch history and recently watched from cookies
     const history = getWatchHistory();
     const recents = getRecentlyWatchedAnime();
-
-    // Filter out duplicate anime titles by keeping only one entry per anime
-    // We'll show only the most recent episode for each anime
     const uniqueAnimeMap = new Map<string, WatchHistoryItem>();
 
     history.forEach(item => {
@@ -56,7 +75,6 @@ const Home = () => {
       }
     });
 
-    // Convert map back to array and sort by timestamp (most recent first)
     const uniqueHistory = Array.from(uniqueAnimeMap.values())
       .sort((a, b) => b.timestamp - a.timestamp);
 
@@ -64,37 +82,28 @@ const Home = () => {
     setRecentlyWatched(recents);
   }, []);
 
-  // Extract and process unique genres from the anime list
   const extractGenres = () => {
     if (!animeList) return [];
-
-    // Extract all genres and flatten the array
     const genreArrays = animeList.map(anime => 
       anime.genre.split(',').map(g => g.trim())
     );
-
-    // Create a Set to get unique genres and convert back to array
     const uniqueGenresSet = new Set(genreArrays.flat());
     return Array.from(uniqueGenresSet).sort((a, b) => a.localeCompare(b));
   };
 
   const genres = extractGenres();
-
-  // Get popular anime (for now, just use the full list)
   const popularAnime = animeList || [];
 
   const handleQuickPlay = (animeId: string) => {
-    // If there are episodes, navigate to the first episode
     const anime = animeList?.find(a => a.id.toString() === animeId);
     if (anime) {
-      setLocation(`/watch/${animeId}/1`); // Assuming the first episode has ID 1
+      setLocation(`/watch/${animeId}/1`); 
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-dark-950 to-dark-900 pb-24 md:pb-8">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
-        {/* Featured anime section */}
         <section className="mb-12">
           {isLoadingAnime ? (
             <div className="relative rounded-2xl overflow-hidden shadow-xl">
@@ -116,17 +125,14 @@ const Home = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
 
                 <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full md:max-w-[600px]">
-                  {/* Featured Badge */}
                   <div className="bg-primary text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4 inline-block shadow-lg">
                     FEATURED
                   </div>
 
-                  {/* Title */}
                   <h1 className="text-2xl md:text-4xl font-bold mb-3 text-white">
                     {animeList[0].title}
                   </h1>
 
-                  {/* Genres */}
                   <div className="flex flex-wrap gap-2 mb-4">
                     {animeList[0].genre.split(',').map((genre, index) => (
                       <span 
@@ -138,12 +144,10 @@ const Home = () => {
                     ))}
                   </div>
 
-                  {/* Description */}
                   <p className="text-sm md:text-base text-slate-200 mb-6 line-clamp-2 md:line-clamp-3">
                     {animeList[0].description || "Experience the adventure in this featured anime series."}
                   </p>
 
-                  {/* Action Buttons */}
                   <div className="flex flex-wrap gap-3">
                     <Link href={`/anime/${animeList[0].id}`}>
                       <span className="bg-primary hover:bg-primary/90 transition-all duration-300 px-6 py-2.5 rounded-full flex items-center shadow-lg text-sm md:text-base font-medium cursor-pointer">
@@ -162,7 +166,6 @@ const Home = () => {
           )}
         </section>
 
-        {/* Continue watching section - only show if there are items */}
         {continueWatching.length > 0 && (
           <section className="mb-12">
             <SectionTitle 
@@ -191,7 +194,6 @@ const Home = () => {
           </section>
         )}
 
-        {/* Popular anime section */}
         <section className="mb-12">
           <SectionTitle 
             icon="fire" 
@@ -216,7 +218,7 @@ const Home = () => {
                   key={anime.id} 
                   anime={anime}
                   rating={4.5} 
-                  episodeCount={12} 
+                  episodeCount={episodeCounts?.[anime.id] || undefined}
                   onQuickPlay={() => handleQuickPlay(anime.id.toString())}
                 />
               ))
@@ -224,7 +226,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Genre section */}
         <section className="mb-12">
           <SectionTitle 
             icon="tags" 
@@ -250,7 +251,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Genre Grid for larger screens */}
           <div className="hidden md:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
             {isLoadingAnime ? (
               Array(6).fill(0).map((_, i) => (
