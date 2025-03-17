@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Episode, Anime } from '@shared/types';
 import { updateWatchHistory } from '../lib/cookies';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { cn } from '@/lib/utils';
 
 interface VideoPlayerProps {
   anime: Anime;
@@ -22,12 +24,21 @@ const VideoPlayer = ({
   hasPrevious 
 }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  
   const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showControls, setShowControls] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedQuality, setSelectedQuality] = useState<VideoQuality>('auto');
   const [showQualityMenu, setShowQualityMenu] = useState(false);
+  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
 
   // Get available quality options
   const availableQualities: { quality: VideoQuality; url: string | undefined }[] = [
@@ -182,82 +193,319 @@ const VideoPlayer = ({
     return episode.video_url_max_quality || '';
   };
 
+  // Additional player functions
+  const togglePlay = () => {
+    if (!videoRef.current) return;
+    
+    if (videoRef.current.paused) {
+      videoRef.current.play();
+      setIsPlaying(true);
+    } else {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    }
+  };
+  
+  const toggleMute = () => {
+    if (!videoRef.current) return;
+    
+    const newMutedState = !isMuted;
+    videoRef.current.muted = newMutedState;
+    setIsMuted(newMutedState);
+  };
+  
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!videoRef.current) return;
+    
+    const newVolume = parseFloat(e.target.value);
+    videoRef.current.volume = newVolume;
+    setVolume(newVolume);
+    
+    if (newVolume === 0) {
+      setIsMuted(true);
+    } else if (isMuted) {
+      setIsMuted(false);
+    }
+  };
+  
+  const formatTime = (timeInSeconds: number) => {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
+  
+  const seekToPosition = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!videoRef.current || !progressBarRef.current) return;
+    
+    const progressBar = progressBarRef.current;
+    const bounds = progressBar.getBoundingClientRect();
+    const x = e.clientX - bounds.left;
+    const width = bounds.width;
+    const percentage = x / width;
+    
+    const videoDuration = videoRef.current.duration;
+    if (!isNaN(videoDuration)) {
+      videoRef.current.currentTime = percentage * videoDuration;
+    }
+  };
+  
+  // Effect to update duration and playing state
+  useEffect(() => {
+    if (!videoRef.current) return;
+    
+    const handleDurationChange = () => {
+      if (videoRef.current) {
+        setDuration(videoRef.current.duration);
+      }
+    };
+    
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleVolumeChange = () => {
+      if (videoRef.current) {
+        setVolume(videoRef.current.volume);
+        setIsMuted(videoRef.current.muted);
+      }
+    };
+    
+    const videoElement = videoRef.current;
+    videoElement.addEventListener('durationchange', handleDurationChange);
+    videoElement.addEventListener('play', handlePlay);
+    videoElement.addEventListener('pause', handlePause);
+    videoElement.addEventListener('volumechange', handleVolumeChange);
+    
+    // Auto-hide controls after inactivity
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    
+    const handleMouseMove = () => {
+      setShowControls(true);
+      
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      
+      timeout = setTimeout(() => {
+        if (isPlaying) {
+          setShowControls(false);
+        }
+      }, 3000);
+    };
+    
+    const playerContainer = playerContainerRef.current;
+    if (playerContainer) {
+      playerContainer.addEventListener('mousemove', handleMouseMove);
+      playerContainer.addEventListener('mouseenter', () => setShowControls(true));
+    }
+    
+    return () => {
+      if (videoElement) {
+        videoElement.removeEventListener('durationchange', handleDurationChange);
+        videoElement.removeEventListener('play', handlePlay);
+        videoElement.removeEventListener('pause', handlePause);
+        videoElement.removeEventListener('volumechange', handleVolumeChange);
+      }
+      
+      if (playerContainer) {
+        playerContainer.removeEventListener('mousemove', handleMouseMove);
+        playerContainer.removeEventListener('mouseenter', () => setShowControls(true));
+      }
+      
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, [isPlaying]);
+  
   const videoUrl = getVideoUrl();
 
   return (
-    <div className="relative w-full flex-grow video-container bg-black">
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
-          <div className="flex flex-col items-center">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            <p className="mt-4 text-white">Loading video...</p>
-          </div>
-        </div>
-      )}
-
-      {error && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
-          <div className="text-center max-w-md p-6 bg-dark-800 rounded-lg">
-            <i className="fas fa-exclamation-circle text-red-500 text-4xl mb-4"></i>
-            <h3 className="text-xl font-bold mb-2">Video Error</h3>
-            <p className="text-slate-300 mb-4">{error}</p>
-            <button 
-              onClick={() => window.location.reload()}
-              className="bg-primary hover:bg-primary/90 transition px-4 py-2 rounded-lg"
-            >
-              Retry
-            </button>
-          </div>
-        </div>
-      )}
-
-      <video
-        ref={videoRef}
-        className="w-full h-full object-contain"
-        controls
-        autoPlay
-        playsInline
-        preload="auto"
-        controlsList="nodownload"
+    <div className="w-full flex flex-col bg-black">
+      {/* Main video container with 16:9 aspect ratio */}
+      <div 
+        ref={playerContainerRef}
+        className="relative w-full bg-black overflow-hidden"
       >
-        <source src={videoUrl} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+        <AspectRatio ratio={16 / 9} className="w-full">
+          <div className="w-full h-full relative">
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  <p className="mt-4 text-white">Loading video...</p>
+                </div>
+              </div>
+            )}
 
-      <div className="absolute top-4 right-4 bg-dark-900/80 px-3 py-1.5 rounded-full text-white text-sm z-10">
-        <span>{anime.title}</span> - <span>Episode {episode.episode_number}</span>
-      </div>
+            {error && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
+                <div className="text-center max-w-md p-6 bg-dark-800 rounded-lg">
+                  <i className="fas fa-exclamation-circle text-red-500 text-4xl mb-4"></i>
+                  <h3 className="text-xl font-bold mb-2">Video Error</h3>
+                  <p className="text-slate-300 mb-4">{error}</p>
+                  <button 
+                    onClick={() => window.location.reload()}
+                    className="bg-primary hover:bg-primary/90 transition px-4 py-2 rounded-lg"
+                  >
+                    Retry
+                  </button>
+                </div>
+              </div>
+            )}
 
-      {/* Quality selector */}
-      <div className="absolute top-4 left-4 z-10">
-        <div className="relative inline-block">
-          <button 
-            className="bg-dark-900/80 text-white px-3 py-1.5 rounded-full text-sm flex items-center space-x-1"
-            onClick={() => setShowQualityMenu(!showQualityMenu)}
-          >
-            <i className="fas fa-cog text-xs"></i>
-            <span>{selectedQuality}</span>
-          </button>
+            {/* Video element */}
+            <video
+              ref={videoRef}
+              className="w-full h-full object-contain"
+              autoPlay
+              playsInline
+              preload="auto"
+              onClick={togglePlay}
+              controlsList="nodownload"
+            >
+              <source src={videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
 
-          {showQualityMenu && (
-            <div className="absolute top-full mt-1 left-0 bg-dark-900 rounded-lg shadow-lg overflow-hidden z-20">
-              {availableQualities.map(({ quality, url }) => (
-                <button
-                  key={quality}
-                  className={`block w-full text-left px-4 py-2 text-sm hover:bg-dark-800 transition ${selectedQuality === quality ? 'bg-primary/20 font-medium' : ''}`}
-                  onClick={() => handleQualityChange(quality)}
-                  disabled={!url}
-                >
-                  {quality}
-                  {selectedQuality === quality && <i className="fas fa-check ml-2"></i>}
-                </button>
-              ))}
+            {/* Title overlay */}
+            <div className={cn(
+              "absolute top-4 right-4 bg-dark-900/80 px-3 py-1.5 rounded-full text-white text-sm z-10",
+              !showControls && "opacity-0 transition-opacity duration-300"
+            )}>
+              <span>{anime.title}</span> - <span>Episode {episode.episode_number}</span>
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* Episode navigation */}
+            {/* Quality selector */}
+            <div className={cn(
+              "absolute top-4 left-4 z-10",
+              !showControls && "opacity-0 transition-opacity duration-300"
+            )}>
+              <div className="relative inline-block">
+                <button 
+                  className="bg-dark-900/80 text-white px-3 py-1.5 rounded-full text-sm flex items-center space-x-1"
+                  onClick={() => setShowQualityMenu(!showQualityMenu)}
+                >
+                  <i className="fas fa-cog text-xs mr-1"></i>
+                  <span>{selectedQuality}</span>
+                </button>
+
+                {showQualityMenu && (
+                  <div className="absolute top-full mt-1 left-0 bg-dark-900 rounded-lg shadow-lg overflow-hidden z-20">
+                    {availableQualities.map(({ quality, url }) => (
+                      <button
+                        key={quality}
+                        className={`block w-full text-left px-4 py-2 text-sm hover:bg-dark-800 transition ${selectedQuality === quality ? 'bg-primary/20 font-medium' : ''}`}
+                        onClick={() => handleQualityChange(quality)}
+                        disabled={!url}
+                      >
+                        {quality}
+                        {selectedQuality === quality && <i className="fas fa-check ml-2"></i>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* YouTube-style custom controls overlay */}
+            <div className={cn(
+              "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent pt-16 pb-4 px-4 z-10 transition-opacity duration-300",
+              !showControls && "opacity-0 pointer-events-none"
+            )}>
+              {/* Progress bar */}
+              <div 
+                ref={progressBarRef}
+                className="w-full h-3 group flex items-center cursor-pointer"
+                onClick={seekToPosition}
+              >
+                <div className="w-full bg-gray-600/50 h-1 group-hover:h-3 transition-all rounded-full overflow-hidden">
+                  <div 
+                    className="bg-primary h-full rounded-full" 
+                    style={{ width: `${currentTime}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              {/* Control buttons */}
+              <div className="flex justify-between items-center mt-2">
+                <div className="flex items-center space-x-3">
+                  {/* Play/Pause button */}
+                  <button 
+                    className="text-white p-2 hover:text-primary transition" 
+                    onClick={togglePlay}
+                  >
+                    <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'} text-xl`}></i>
+                  </button>
+                  
+                  {/* Previous/Next episode buttons */}
+                  <button 
+                    className="text-white p-2 hover:text-primary transition disabled:opacity-50 disabled:hover:text-white"
+                    onClick={onPreviousEpisode}
+                    disabled={!hasPrevious}
+                  >
+                    <i className="fas fa-step-backward"></i>
+                  </button>
+                  
+                  <button 
+                    className="text-white p-2 hover:text-primary transition disabled:opacity-50 disabled:hover:text-white"
+                    onClick={onNextEpisode}
+                    disabled={!hasNext}
+                  >
+                    <i className="fas fa-step-forward"></i>
+                  </button>
+                  
+                  {/* Volume control */}
+                  <div className="relative flex items-center group">
+                    <button 
+                      className="text-white p-2 hover:text-primary transition" 
+                      onClick={toggleMute}
+                      onMouseEnter={() => setShowVolumeSlider(true)}
+                    >
+                      <i className={`fas ${isMuted || volume === 0 ? 'fa-volume-mute' : volume < 0.5 ? 'fa-volume-down' : 'fa-volume-up'} text-lg`}></i>
+                    </button>
+                    
+                    <div 
+                      className={cn(
+                        "hidden group-hover:block absolute bottom-full left-0 pb-2",
+                        showVolumeSlider && "block"
+                      )}
+                      onMouseLeave={() => setShowVolumeSlider(false)}
+                    >
+                      <div className="bg-dark-900/90 p-2 rounded-lg transform rotate-270">
+                        <input 
+                          type="range" 
+                          min="0" 
+                          max="1" 
+                          step="0.01" 
+                          value={isMuted ? 0 : volume}
+                          onChange={handleVolumeChange}
+                          className="w-24 h-2 appearance-none bg-gray-700 rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Time display */}
+                  <div className="text-white text-sm hidden sm:block">
+                    {formatTime(videoRef.current?.currentTime || 0)} / {formatTime(duration)}
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  {/* Fullscreen button */}
+                  <button 
+                    className="text-white p-2 hover:text-primary transition" 
+                    onClick={toggleFullScreen}
+                  >
+                    <i className={`fas ${isFullScreen ? 'fa-compress' : 'fa-expand'} text-lg`}></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </AspectRatio>
+      </div>
+      
+      {/* Episode navigation bar */}
       <div className="bg-dark-900 py-3 px-4 flex justify-between items-center border-t border-dark-700">
         <button 
           className="bg-dark-800 hover:bg-dark-700 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed"
@@ -278,22 +526,6 @@ const VideoPlayer = ({
         >
           Next <i className="fas fa-step-forward ml-1"></i>
         </button>
-      </div>
-
-      {/* Custom video controls for better experience */}
-      <div className="absolute bottom-16 left-0 right-0 z-10 px-4 hidden">
-        <div className="w-full bg-gray-700/50 rounded-full h-2">
-          <div 
-            className="bg-primary h-2 rounded-full" 
-            style={{ width: `${currentTime}%` }}
-          ></div>
-        </div>
-
-        <div className="flex justify-between items-center mt-2">
-          <button className="text-white p-2" onClick={toggleFullScreen}>
-            <i className={`fas ${isFullScreen ? 'fa-compress' : 'fa-expand'}`}></i>
-          </button>
-        </div>
       </div>
     </div>
   );

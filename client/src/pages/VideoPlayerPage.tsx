@@ -118,15 +118,17 @@ const VideoPlayerPage = () => {
   }
   
   return (
-    <div className="h-screen flex flex-col bg-black">
-      <VideoPlayer 
-        anime={anime}
-        episode={currentEpisode}
-        onNextEpisode={handleNextEpisode}
-        onPreviousEpisode={handlePreviousEpisode}
-        hasNext={currentEpisodeIndex < episodes.length - 1}
-        hasPrevious={currentEpisodeIndex > 0}
-      />
+    <div className="min-h-screen flex flex-col bg-black">
+      <div className="max-w-7xl mx-auto w-full">
+        <VideoPlayer 
+          anime={anime}
+          episode={currentEpisode}
+          onNextEpisode={handleNextEpisode}
+          onPreviousEpisode={handlePreviousEpisode}
+          hasNext={currentEpisodeIndex < episodes.length - 1}
+          hasPrevious={currentEpisodeIndex > 0}
+        />
+      </div>
     </div>
   );
 };
