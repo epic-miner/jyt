@@ -19,70 +19,75 @@ const VideoPlayerDesktopMenu = ({
 }: VideoPlayerDesktopMenuProps) => {
   if (!showQualityMenu) return null;
 
+  // Extended list of qualities for YouTube-like interface
+  const allQualities = [
+    { quality: '1080p' as VideoQuality, label: '1080p Premium', hdBadge: true, extra: 'Enhanced bitrate' },
+    { quality: '1080p' as VideoQuality, label: '1080p', hdBadge: true },
+    { quality: '720p' as VideoQuality, label: '720p', hdBadge: true },
+    { quality: '480p' as VideoQuality, label: '480p' },
+    { quality: '360p' as VideoQuality, label: '360p' },
+    { quality: '240p' as VideoQuality, label: '240p' },
+    { quality: '144p' as VideoQuality, label: '144p' },
+    { quality: 'auto' as VideoQuality, label: 'Auto' }
+  ].filter(q => {
+    // Only show qualities that are available in our video
+    if (q.quality === 'auto') return true;
+    return availableQualities.some(aq => aq.quality === q.quality);
+  });
+
   return (
-    <div className="absolute right-0 top-10 bg-black/90 rounded-md overflow-hidden z-40 w-[250px] shadow-xl">
+    <div className="absolute right-0 top-10 bg-black/90 rounded-md overflow-hidden z-40 w-48 shadow-xl">
       {/* YouTube-style header with back button */}
-      <div className="flex items-center px-4 py-2 border-b border-gray-800/50">
+      <div className="flex items-center px-2 py-1.5 border-b border-gray-800/50">
         <button
-          className="mr-2 p-1 hover:bg-gray-700/50 rounded-full"
+          className="mr-1.5 p-1 hover:bg-gray-700/50 rounded-full"
           onClick={() => setShowQualityMenu(false)}
         >
           <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
+            width="14"
+            height="14"
             viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-5 h-5 text-white"
+            className="text-white"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            <path 
+              fill="currentColor" 
+              strokeWidth="1"
+              d="M20,11H7.83l5.59-5.59L12,4l-8,8l8,8l1.41-1.41L7.83,13H20V11z" 
+            />
           </svg>
         </button>
         <span className="text-sm font-medium text-white">Quality</span>
       </div>
 
-      {/* Quality options */}
-      <div className="py-1">
-        {availableQualities.map(({ quality, url }) => (
+      {/* Quality options - exactly matching YouTube's style */}
+      <div className="py-1 max-h-80 overflow-y-auto">
+        {allQualities.map(({ quality, label, hdBadge, extra }) => (
           <button
-            key={quality}
+            key={quality + (extra ? '-premium' : '')}
             className={cn(
-              "w-full text-left px-4 py-3 text-sm text-white hover:bg-gray-700/40 transition flex items-center justify-between",
+              "w-full text-left px-3 py-2 text-sm text-white hover:bg-gray-700/40 transition flex items-center justify-between",
               selectedQuality === quality && "bg-gray-700/20"
             )}
             onClick={() => handleQualityChange(quality)}
-            disabled={!url}
+            disabled={!availableQualities.some(q => q.quality === quality)}
           >
-            <div className="flex items-center">
-              {quality === '1080p' && (
-                <>
-                  <span className="mr-2 text-base">1080p Premium</span>
-                  <span className="text-xs bg-white/20 px-1 rounded font-medium">HD</span>
-                </>
-              )}
-              {quality === '1080p' ? (
-                <span className="text-xs text-gray-400 ml-2">Enhanced bitrate</span>
-              ) : (
-                <div className="flex items-center">
-                  {quality !== 'auto' ? (
-                    <>
-                      <span className="text-base">{quality}</span>
-                      {quality === '720p' && (
-                        <span className="text-xs bg-white/20 px-1 rounded font-medium ml-2">HD</span>
-                      )}
-                    </>
-                  ) : (
-                    <span className="text-base">Auto</span>
-                  )}
-                </div>
+            <div className="flex flex-col items-start">
+              <div className="flex items-center">
+                <span className="text-sm">{label}</span>
+                {hdBadge && (
+                  <span className="text-[10px] bg-white/20 px-1 rounded font-medium ml-1.5">HD</span>
+                )}
+              </div>
+              {extra && (
+                <span className="text-[10px] text-gray-400">{extra}</span>
               )}
             </div>
             {selectedQuality === quality && (
               <svg
-                width="24"
-                height="24"
+                width="18"
+                height="18"
                 viewBox="0 0 24 24"
-                className="w-5 h-5 text-white"
+                className="text-white"
               >
                 <path 
                   fill="currentColor" 
