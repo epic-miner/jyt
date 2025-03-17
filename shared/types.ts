@@ -13,6 +13,9 @@ export interface Episode {
   episode_number: number;
   thumbnail_url: string;
   video_url_max_quality: string;
+  video_url_1080p?: string;
+  video_url_720p?: string;
+  video_url_480p?: string;
   description?: string;
   anime_title?: string;
 }

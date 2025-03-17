@@ -11,6 +11,8 @@ interface VideoPlayerProps {
   hasPrevious: boolean;
 }
 
+type VideoQuality = '1080p' | '720p' | '480p' | 'auto';
+
 const VideoPlayer = ({ 
   anime, 
   episode, 
@@ -24,6 +26,16 @@ const VideoPlayer = ({
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedQuality, setSelectedQuality] = useState<VideoQuality>('auto');
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
+  
+  // Get available quality options
+  const availableQualities: { quality: VideoQuality; url: string | undefined }[] = [
+    { quality: 'auto' as VideoQuality, url: episode.video_url_max_quality },
+    { quality: '1080p' as VideoQuality, url: episode.video_url_1080p },
+    { quality: '720p' as VideoQuality, url: episode.video_url_720p },
+    { quality: '480p' as VideoQuality, url: episode.video_url_480p }
+  ].filter(q => q.url);
   
   // Update watch history every 5 seconds while playing
   useEffect(() => {
@@ -106,6 +118,25 @@ const VideoPlayer = ({
     };
   }, []);
   
+  // Handle quality change
+  useEffect(() => {
+    if (!videoRef.current) return;
+    
+    // Save current playback time
+    const currentPlaybackTime = videoRef.current.currentTime;
+    const wasPlaying = !videoRef.current.paused;
+    
+    // Update source and restore playback position
+    videoRef.current.onloadeddata = () => {
+      if (videoRef.current) {
+        videoRef.current.currentTime = currentPlaybackTime;
+        if (wasPlaying) {
+          videoRef.current.play().catch(e => console.error('Error playing video after quality change:', e));
+        }
+      }
+    };
+  }, [selectedQuality]);
+  
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
       const videoContainer = document.querySelector('.video-container') as HTMLElement;
@@ -117,11 +148,42 @@ const VideoPlayer = ({
     }
   };
   
-  // Determine video URL to use
-  const videoUrl = episode.video_url_max_quality || 
-                   episode.video_url_1080p || 
-                   episode.video_url_720p || 
-                   episode.video_url_480p;
+  const handleQualityChange = (quality: VideoQuality) => {
+    setSelectedQuality(quality);
+    setShowQualityMenu(false);
+    
+    // Workaround for React bug with video source changes
+    if (videoRef.current) {
+      videoRef.current.load();
+    }
+  };
+  
+  // Determine video URL to use based on selected quality
+  const getVideoUrl = (): string => {
+    if (selectedQuality === 'auto') {
+      return episode.video_url_max_quality || 
+             episode.video_url_1080p || 
+             episode.video_url_720p || 
+             episode.video_url_480p || '';
+    }
+    
+    if (selectedQuality === '1080p' && episode.video_url_1080p) {
+      return episode.video_url_1080p;
+    }
+    
+    if (selectedQuality === '720p' && episode.video_url_720p) {
+      return episode.video_url_720p;
+    }
+    
+    if (selectedQuality === '480p' && episode.video_url_480p) {
+      return episode.video_url_480p;
+    }
+    
+    // Fallback to max quality if selected quality isn't available
+    return episode.video_url_max_quality || '';
+  };
+  
+  const videoUrl = getVideoUrl();
   
   return (
     <div className="relative w-full flex-grow video-container bg-black">
@@ -164,6 +226,35 @@ const VideoPlayer = ({
       
       <div className="absolute top-4 right-4 bg-dark-900/80 px-3 py-1.5 rounded-full text-white text-sm z-10">
         <span>{anime.title}</span> - <span>Episode {episode.episode_number}</span>
+      </div>
+      
+      {/* Quality selector */}
+      <div className="absolute top-4 left-4 z-10">
+        <div className="relative inline-block">
+          <button 
+            className="bg-dark-900/80 text-white px-3 py-1.5 rounded-full text-sm flex items-center space-x-1"
+            onClick={() => setShowQualityMenu(!showQualityMenu)}
+          >
+            <i className="fas fa-cog text-xs"></i>
+            <span>{selectedQuality}</span>
+          </button>
+          
+          {showQualityMenu && (
+            <div className="absolute top-full mt-1 left-0 bg-dark-900 rounded-lg shadow-lg overflow-hidden z-20">
+              {availableQualities.map(({ quality, url }) => (
+                <button
+                  key={quality}
+                  className={`block w-full text-left px-4 py-2 text-sm hover:bg-dark-800 transition ${selectedQuality === quality ? 'bg-primary/20 font-medium' : ''}`}
+                  onClick={() => handleQualityChange(quality)}
+                  disabled={!url}
+                >
+                  {quality}
+                  {selectedQuality === quality && <i className="fas fa-check ml-2"></i>}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
       
       {/* Episode navigation */}
