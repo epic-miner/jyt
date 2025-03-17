@@ -645,48 +645,71 @@ const VideoPlayer = ({
                     <SkipForward size={22} />
                   </button>
                   
-                  {/* Volume control */}
+                  {/* Volume control - YouTube style */}
                   <div className="relative flex items-center group">
                     <button 
-                      className="text-white p-2 hover:text-white/80 transition rounded-full" 
+                      className="text-white p-2 hover:text-white/80 transition rounded-full flex items-center" 
                       onClick={toggleMute}
                       onMouseEnter={() => setShowVolumeSlider(true)}
                       aria-label={isMuted ? "Unmute" : "Mute"}
                     >
-                      {isMuted || volume === 0 ? (
-                        <VolumeX size={22} />
-                      ) : volume < 0.5 ? (
-                        <Volume1 size={22} />
-                      ) : (
-                        <Volume2 size={22} />
-                      )}
+                      <div className="flex items-center justify-center w-6 h-6">
+                        {isMuted || volume === 0 ? (
+                          <VolumeX size={22} />
+                        ) : volume < 0.5 ? (
+                          <Volume1 size={22} />
+                        ) : (
+                          <Volume2 size={22} />
+                        )}
+                      </div>
                     </button>
                     
                     <div 
                       className={cn(
-                        "hidden group-hover:block absolute bottom-full left-0 pb-2",
+                        "hidden group-hover:block absolute bottom-full left-0 pb-3",
                         showVolumeSlider && "block"
                       )}
                       onMouseLeave={() => setShowVolumeSlider(false)}
                     >
-                      <div className="bg-dark-900/95 p-3 rounded shadow-lg border border-dark-700">
-                        <div className="h-20 flex flex-col items-center justify-center relative">
+                      {/* YouTube-style vertical volume slider */}
+                      <div className="w-8 h-24 bg-dark-900/95 py-3 rounded shadow-lg border border-dark-700 flex flex-col items-center relative">
+                        {/* Volume percentage display */}
+                        <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-black/90 px-2 py-1 rounded text-xs text-white font-medium z-10 border border-gray-800 whitespace-nowrap pointer-events-none">
+                          {Math.round((isMuted ? 0 : volume) * 100)}%
+                        </div>
+                        
+                        {/* Vertical slider container */}
+                        <div className="h-full w-full flex flex-col items-center justify-center relative" 
+                          onClick={(e) => {
+                            if (!videoRef.current) return;
+                            const container = e.currentTarget;
+                            const rect = container.getBoundingClientRect();
+                            const height = rect.height;
+                            const y = e.clientY - rect.top;
+                            // Calculate volume (0-1) based on click position, invert because 0 is bottom
+                            const newVolume = Math.min(Math.max(1 - (y / height), 0), 1);
+                            videoRef.current.volume = newVolume;
+                            setVolume(newVolume);
+                            if (newVolume === 0) setIsMuted(true);
+                            else if (isMuted) setIsMuted(false);
+                          }}
+                        >
                           {/* Vertical slider track */}
-                          <div className="h-full w-1.5 bg-gray-700 rounded-full relative flex items-center justify-center">
-                            {/* Filled portion of slider */}
+                          <div className="h-full w-1.5 bg-gray-700 rounded-full relative">
+                            {/* Filled portion */}
                             <div 
-                              className="w-full bg-red-500 rounded-full absolute bottom-0"
+                              className="w-full bg-white rounded-full absolute bottom-0"
                               style={{ height: `${(isMuted ? 0 : volume) * 100}%` }}
                             ></div>
                             
                             {/* Slider thumb */}
                             <div 
-                              className="absolute w-3 h-3 bg-red-500 rounded-full left-1/2 -translate-x-1/2 cursor-pointer"
+                              className="absolute w-3 h-3 bg-white rounded-full left-1/2 -translate-x-1/2 cursor-pointer"
                               style={{ bottom: `calc(${(isMuted ? 0 : volume) * 100}% - 6px)` }}
                             ></div>
                           </div>
                           
-                          {/* Hidden actual input for functionality */}
+                          {/* Hidden input for accessibility */}
                           <input 
                             type="range" 
                             min="0" 
