@@ -9,26 +9,28 @@ import SearchResults from "./pages/SearchResults";
 import RecentlyWatched from "./pages/RecentlyWatched";
 import GenrePage from "./pages/GenrePage";
 import NotFound from "./pages/not-found";
-import ScrollToTop from "./components/ScrollToTop"; // Import the ScrollToTop component
-
+import ScrollToTop from "./components/ScrollToTop";
+import { PageTransition } from "./components/PageTransition";
 
 function App() {
   return (
-    <div className="min-h-screen flex flex-col bg-dark-900 text-slate-50 font-sans">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-black via-dark-950 to-dark-900 text-slate-50 font-sans">
       <NavBar />
-      <main className="flex-grow">
-        <Switch>
-          <Route path="/" component={Home} />
-          <Route path="/anime/:id" component={AnimeDetails} />
-          <Route path="/watch/:animeId/:episodeId" component={VideoPlayerPage} />
-          <Route path="/search" component={SearchResults} />
-          <Route path="/recently-watched" component={RecentlyWatched} />
-          <Route path="/genre/:genre" component={GenrePage} />
-          <Route component={NotFound} />
-        </Switch>
+      <main className="flex-grow relative">
+        <PageTransition>
+          <Switch>
+            <Route path="/" component={Home} />
+            <Route path="/anime/:id" component={AnimeDetails} />
+            <Route path="/watch/:animeId/:episodeId" component={VideoPlayerPage} />
+            <Route path="/search" component={SearchResults} />
+            <Route path="/recently-watched" component={RecentlyWatched} />
+            <Route path="/genre/:genre" component={GenrePage} />
+            <Route component={NotFound} />
+          </Switch>
+        </PageTransition>
       </main>
       <MobileNav />
-      <ScrollToTop /> {/* Added ScrollToTop component */}
+      <ScrollToTop />
       <Toaster />
     </div>
   );
