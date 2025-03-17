@@ -520,9 +520,9 @@ const VideoPlayer = ({
                 </button>
                 
                 {showQualityMenu && (
-                  <div className="absolute right-0 top-10 bg-black/95 rounded-lg overflow-hidden z-40 w-64 border border-gray-800 shadow-xl">
-                    {/* YouTube-style header with back button */}
-                    <div className="flex items-center px-4 py-3 border-b border-gray-800/50">
+                  <div className="absolute right-0 top-10 bg-black/95 rounded-lg overflow-hidden z-40 w-52 shadow-xl">
+                    {/* Simple YouTube-style header */}
+                    <div className="flex items-center px-4 py-2 border-b border-gray-800/50">
                       <button 
                         className="mr-2 p-1 hover:bg-gray-700/50 rounded-full"
                         onClick={() => setShowQualityMenu(false)}
@@ -541,30 +541,38 @@ const VideoPlayer = ({
                       <span className="text-sm font-medium text-white">Quality</span>
                     </div>
                     
-                    {/* Quality options */}
-                    <div className="max-h-80 overflow-y-auto">
+                    {/* Quality options - simplified like in screenshot */}
+                    <div className="py-1">
                       {availableQualities.map(({ quality, url }) => (
                         <button
                           key={quality}
-                          className={`block w-full text-left px-4 py-3 text-sm hover:bg-gray-700/50 transition flex items-center justify-between ${selectedQuality === quality ? 'font-medium' : 'text-white'}`}
+                          className="block w-full text-left px-4 py-2.5 text-sm text-white hover:bg-gray-700/40 transition flex items-center justify-between"
                           onClick={() => handleQualityChange(quality)}
                           disabled={!url}
                         >
                           <div className="flex items-center">
-                            {quality === '1080p' && <span className="text-xs bg-white/20 px-1 mr-2 rounded font-medium">HD</span>}
-                            <span>
-                              {quality === 'auto' ? 'Auto' : quality}
-                              {quality === '1080p' && ' Premium'}
-                            </span>
+                            {quality === 'auto' ? (
+                              'Auto'
+                            ) : (
+                              <div className="flex items-center">
+                                {quality === '1080p' && (
+                                  <span className="text-xs bg-white/20 px-1 rounded font-medium mr-1.5">HD</span>
+                                )}
+                                <span>{quality}{quality === '1080p' ? ' Premium' : ''}</span>
+                              </div>
+                            )}
                           </div>
                           {selectedQuality === quality && (
                             <svg 
-                              xmlns="http://www.w3.org/2000/svg" 
-                              viewBox="0 0 24 24" 
-                              fill="currentColor"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
                               className="w-5 h-5 text-white"
                             >
-                              <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
+                              <path 
+                                fill="currentColor" 
+                                d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" 
+                              />
                             </svg>
                           )}
                         </button>
