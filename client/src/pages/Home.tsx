@@ -43,7 +43,22 @@ const Home = () => {
     const history = getWatchHistory();
     const recents = getRecentlyWatchedAnime();
     
-    setContinueWatching(history);
+    // Filter out duplicate anime titles by keeping only one entry per anime
+    // We'll show only the most recent episode for each anime
+    const uniqueAnimeMap = new Map<string, WatchHistoryItem>();
+    
+    history.forEach(item => {
+      if (!uniqueAnimeMap.has(item.animeId) || 
+          uniqueAnimeMap.get(item.animeId)!.timestamp < item.timestamp) {
+        uniqueAnimeMap.set(item.animeId, item);
+      }
+    });
+    
+    // Convert map back to array and sort by timestamp (most recent first)
+    const uniqueHistory = Array.from(uniqueAnimeMap.values())
+      .sort((a, b) => b.timestamp - a.timestamp);
+    
+    setContinueWatching(uniqueHistory);
     setRecentlyWatched(recents);
   }, []);
   
