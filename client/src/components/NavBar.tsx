@@ -34,7 +34,7 @@ const NavBar = () => {
           <Link href="/" className="flex items-center">
             <div className="relative flex items-center">
               <span className="text-primary text-2xl font-bold mr-1">
-                Anime<span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">Flix</span>
+                9<span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">anime</span>
               </span>
               <div className="absolute -top-0.5 -right-2 w-2 h-2 rounded-full bg-primary animate-pulse"></div>
             </div>
