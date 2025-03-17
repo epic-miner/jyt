@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { cn } from '../lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { useRoute, useLocation } from 'wouter';
 import { Skeleton } from '@/components/ui/skeleton';
