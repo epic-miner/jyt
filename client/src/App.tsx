@@ -9,6 +9,8 @@ import SearchResults from "./pages/SearchResults";
 import RecentlyWatched from "./pages/RecentlyWatched";
 import GenrePage from "./pages/GenrePage";
 import NotFound from "./pages/not-found";
+import ScrollToTop from "./components/ScrollToTop"; // Import the ScrollToTop component
+
 
 function App() {
   return (
@@ -26,6 +28,7 @@ function App() {
         </Switch>
       </main>
       <MobileNav />
+      <ScrollToTop /> {/* Added ScrollToTop component */}
       <Toaster />
     </div>
   );

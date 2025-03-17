@@ -1,4 +1,3 @@
-
 import { Link } from 'wouter';
 import { Anime } from '@shared/types';
 
@@ -8,9 +7,24 @@ interface AnimeCardProps {
   progress?: number;
   episodeNumber?: string;
   showEpisodeLabel?: boolean;
+  isLoading?: boolean; // Added isLoading prop
+  isFeatured?: boolean;
 }
 
-const AnimeCard = ({ anime, showProgress, progress, episodeNumber, showEpisodeLabel }: AnimeCardProps) => {
+const AnimeCard = ({ anime, showProgress, progress, episodeNumber, showEpisodeLabel, isLoading = false, isFeatured = false }: AnimeCardProps) => {
+  if (isLoading) {
+    return (
+      <div className={`relative overflow-hidden rounded-lg bg-dark-800 ${isFeatured ? 'col-span-2' : ''}`}>
+        <div className="animate-pulse">
+          <div className="h-48 bg-dark-700"></div>
+          <div className="p-4">
+            <div className="h-4 w-3/4 bg-dark-700 rounded"></div>
+            <div className="mt-2 h-3 w-1/2 bg-dark-700 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <Link href={`/anime/${anime.id}`} className="block">
       <div className="bg-dark-800 rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">

@@ -49,19 +49,19 @@ const NavBar = () => {
         {/* Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           <Link href="/">
-            <div className={`flex items-center ${location === '/' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
+            <div className={`flex items-center gap-2 ${location === '/' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
               <i className="fas fa-home text-sm mr-2 text-primary"></i>
               <span>Home</span>
             </div>
           </Link>
           <Link href="/genre/all">
-            <div className={`flex items-center ${location.startsWith('/genre') ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
+            <div className={`flex items-center gap-2 ${location.startsWith('/genre') ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
               <i className="fas fa-tags text-sm mr-2 text-primary"></i>
               <span>Genres</span>
             </div>
           </Link>
           <Link href="/recently-watched">
-            <div className={`flex items-center ${location === '/recently-watched' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
+            <div className={`flex items-center gap-2 ${location === '/recently-watched' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
               <i className="fas fa-history text-sm mr-2 text-primary"></i>
               <span>Recently Watched</span>
             </div>
@@ -91,19 +91,19 @@ const NavBar = () => {
       >
         <nav className="flex flex-col space-y-3 px-4">
           <Link href="/">
-            <div className={`flex items-center ${location === '/' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'} py-2`}>
+            <div className={`flex items-center gap-2 ${location === '/' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'} py-2`}>
               <i className="fas fa-home text-sm mr-3 text-primary"></i>
               <span>Home</span>
             </div>
           </Link>
           <Link href="/genre/all">
-            <div className={`flex items-center ${location.startsWith('/genre') ? 'text-white font-medium' : 'text-slate-300 hover:text-white'} py-2`}>
+            <div className={`flex items-center gap-2 ${location.startsWith('/genre') ? 'text-white font-medium' : 'text-slate-300 hover:text-white'} py-2`}>
               <i className="fas fa-tags text-sm mr-3 text-primary"></i>
               <span>Genres</span>
             </div>
           </Link>
           <Link href="/recently-watched">
-            <div className={`flex items-center ${location === '/recently-watched' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'} py-2`}>
+            <div className={`flex items-center gap-2 ${location === '/recently-watched' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'} py-2`}>
               <i className="fas fa-history text-sm mr-3 text-primary"></i>
               <span>Recently Watched</span>
             </div>
