@@ -139,9 +139,8 @@ const VideoPlayer = ({
 
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
-      const videoContainer = document.querySelector('.video-container') as HTMLElement;
-      if (videoContainer && videoContainer.requestFullscreen) {
-        videoContainer.requestFullscreen();
+      if (videoRef.current && videoRef.current.requestFullscreen) {
+        videoRef.current.requestFullscreen();
       }
     } else if (document.exitFullscreen) {
       document.exitFullscreen();
