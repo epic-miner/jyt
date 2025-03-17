@@ -8,10 +8,13 @@ interface GenrePillProps {
 }
 
 const GenrePill = ({ genre, isActive = false, asButton = false, onClick }: GenrePillProps) => {
-  const baseClasses = `${isActive 
-    ? 'bg-primary text-white' 
-    : 'bg-dark-700 text-slate-300 hover:bg-dark-600'} 
-    text-xs px-2.5 py-1 rounded transition`;
+  const baseClasses = `
+    ${isActive 
+      ? 'bg-primary text-white shadow-md shadow-primary/20' 
+      : 'bg-dark-800/80 text-slate-300 hover:bg-dark-700/90 hover:text-white border border-dark-700/50'} 
+    text-xs font-medium px-3 py-1.5 rounded-full transition-all duration-200
+    flex items-center justify-center whitespace-nowrap
+  `;
   
   if (asButton) {
     return (
