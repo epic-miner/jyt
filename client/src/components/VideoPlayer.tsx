@@ -51,6 +51,7 @@ const VideoPlayer = ({
   const [selectedQuality, setSelectedQuality] = useState<VideoQuality>('auto');
   const [showQualityMenu, setShowQualityMenu] = useState(false);
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [timePreview, setTimePreview] = useState<{ time: number; position: number } | null>(null);
 
   // Get available quality options
   const availableQualities: { quality: VideoQuality; url: string | undefined }[] = [
@@ -378,12 +379,13 @@ const VideoPlayer = ({
               Your browser does not support the video tag.
             </video>
 
-            {/* Title overlay */}
+            {/* YouTube-style Title overlay that fades out */}
             <div className={cn(
-              "absolute top-4 right-4 bg-dark-900/80 px-3 py-1.5 rounded-full text-white text-sm z-10",
-              !showControls && "opacity-0 transition-opacity duration-300"
+              "absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 to-transparent text-white z-10 transition-opacity duration-500",
+              !showControls && "opacity-0"
             )}>
-              <span>{anime.title}</span> - <span>Episode {episode.episode_number}</span>
+              <h2 className="text-base font-semibold">{episode.title || `Episode ${episode.episode_number}`}</h2>
+              <p className="text-sm text-gray-300">{anime.title}</p>
             </div>
 
             {/* Quality selector */}
@@ -393,32 +395,42 @@ const VideoPlayer = ({
             )}>
               <div className="relative inline-block">
                 <button 
-                  className="bg-dark-900/80 text-white px-3 py-1.5 rounded-full text-sm flex items-center space-x-1"
+                  className="bg-dark-900/90 text-white px-2.5 py-1.5 rounded text-sm flex items-center gap-1 hover:bg-dark-800/90 transition"
                   onClick={() => setShowQualityMenu(!showQualityMenu)}
                 >
-                  <Settings size={14} className="mr-1" />
-                  <span>{selectedQuality}</span>
+                  <Settings size={16} className="text-white" />
                 </button>
 
                 {showQualityMenu && (
-                  <div className="absolute top-full mt-1 left-0 bg-dark-900 rounded-lg shadow-lg overflow-hidden z-20">
+                  <div className="absolute top-full mt-1 left-0 bg-dark-900/95 rounded shadow-lg overflow-hidden z-20 w-60 border border-dark-700">
+                    <div className="px-4 py-2 border-b border-dark-700 text-xs text-slate-400 font-medium uppercase">
+                      Quality
+                    </div>
                     {availableQualities.map(({ quality, url }) => (
                       <button
                         key={quality}
-                        className={`block w-full text-left px-4 py-2 text-sm hover:bg-dark-800 transition ${selectedQuality === quality ? 'bg-primary/20 font-medium' : ''}`}
+                        className={`block w-full text-left px-4 py-2.5 text-sm hover:bg-dark-800/70 transition flex items-center justify-between ${selectedQuality === quality ? 'text-primary' : 'text-white'}`}
                         onClick={() => handleQualityChange(quality)}
                         disabled={!url}
                       >
-                        {quality}
+                        <div className="flex items-center">
+                          <span>{quality === 'auto' ? 'Auto (recommended)' : quality}</span>
+                          {quality === 'auto' && selectedQuality !== 'auto' && (
+                            <span className="ml-2 text-xs text-slate-400">Current: {selectedQuality}</span>
+                          )}
+                        </div>
                         {selectedQuality === quality && (
                           <svg 
                             xmlns="http://www.w3.org/2000/svg" 
-                            className="ml-2 inline h-4 w-4" 
-                            fill="none" 
+                            className="h-5 w-5" 
                             viewBox="0 0 24 24" 
-                            stroke="currentColor"
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
                           >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            <polyline points="20 6 9 17 4 12" />
                           </svg>
                         )}
                       </button>
@@ -433,61 +445,82 @@ const VideoPlayer = ({
               "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent pt-16 pb-4 px-4 z-10 transition-opacity duration-300",
               !showControls && "opacity-0 pointer-events-none"
             )}>
-              {/* Progress bar */}
+              {/* Progress bar - YouTube style with preview and buffer indicator */}
               <div 
                 ref={progressBarRef}
-                className="w-full h-3 group flex items-center cursor-pointer"
+                className="w-full h-10 group flex items-center cursor-pointer -mt-6 px-1"
                 onClick={seekToPosition}
+                onMouseMove={(e) => {
+                  // This would handle showing time preview on hover in a real implementation
+                  // For now it's just for visual effect
+                }}
               >
-                <div className="w-full bg-gray-600/50 h-1 group-hover:h-3 transition-all rounded-full overflow-hidden">
-                  <div 
-                    className="bg-primary h-full rounded-full" 
-                    style={{ width: `${currentTime}%` }}
-                  ></div>
+                <div className="w-full relative">
+                  {/* Background track */}
+                  <div className="w-full bg-gray-600/50 h-1 group-hover:h-3 transition-all rounded-full overflow-hidden">
+                    {/* Buffered progress - simulated */}
+                    <div 
+                      className="absolute bg-gray-400/30 h-full rounded-full" 
+                      style={{ width: `${Math.min(100, currentTime + 15)}%` }}
+                    ></div>
+                    
+                    {/* Actual progress */}
+                    <div 
+                      className="bg-red-500 h-full rounded-full relative" 
+                      style={{ width: `${currentTime}%` }}
+                    >
+                      {/* Draggable thumb - only visible on hover */}
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3 w-3 bg-red-500 rounded-full scale-0 group-hover:scale-100 transition-transform"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
               
-              {/* Control buttons */}
-              <div className="flex justify-between items-center mt-2">
-                <div className="flex items-center space-x-3">
+              {/* Control buttons - YouTube style layout */}
+              <div className="flex justify-between items-center mt-1">
+                <div className="flex items-center space-x-2">
                   {/* Play/Pause button */}
                   <button 
-                    className="text-white p-2 hover:text-primary transition" 
+                    className="text-white p-2 hover:text-white/80 transition rounded-full" 
                     onClick={togglePlay}
+                    aria-label={isPlaying ? "Pause" : "Play"}
                   >
-                    {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+                    {isPlaying ? <Pause size={22} /> : <Play size={22} />}
                   </button>
                   
                   {/* Previous/Next episode buttons */}
                   <button 
-                    className="text-white p-2 hover:text-primary transition disabled:opacity-50 disabled:hover:text-white"
+                    className="text-white p-2 hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:hover:text-white"
                     onClick={onPreviousEpisode}
                     disabled={!hasPrevious}
+                    aria-label="Previous episode"
                   >
-                    <SkipBack size={20} />
+                    <SkipBack size={22} />
                   </button>
                   
                   <button 
-                    className="text-white p-2 hover:text-primary transition disabled:opacity-50 disabled:hover:text-white"
+                    className="text-white p-2 hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:hover:text-white"
                     onClick={onNextEpisode}
                     disabled={!hasNext}
+                    aria-label="Next episode"
                   >
-                    <SkipForward size={20} />
+                    <SkipForward size={22} />
                   </button>
                   
                   {/* Volume control */}
                   <div className="relative flex items-center group">
                     <button 
-                      className="text-white p-2 hover:text-primary transition" 
+                      className="text-white p-2 hover:text-white/80 transition rounded-full" 
                       onClick={toggleMute}
                       onMouseEnter={() => setShowVolumeSlider(true)}
+                      aria-label={isMuted ? "Unmute" : "Mute"}
                     >
                       {isMuted || volume === 0 ? (
-                        <VolumeX size={20} />
+                        <VolumeX size={22} />
                       ) : volume < 0.5 ? (
-                        <Volume1 size={20} />
+                        <Volume1 size={22} />
                       ) : (
-                        <Volume2 size={20} />
+                        <Volume2 size={22} />
                       )}
                     </button>
                     
@@ -498,33 +531,57 @@ const VideoPlayer = ({
                       )}
                       onMouseLeave={() => setShowVolumeSlider(false)}
                     >
-                      <div className="bg-dark-900/90 p-2 rounded-lg transform rotate-270">
-                        <input 
-                          type="range" 
-                          min="0" 
-                          max="1" 
-                          step="0.01" 
-                          value={isMuted ? 0 : volume}
-                          onChange={handleVolumeChange}
-                          className="w-24 h-2 appearance-none bg-gray-700 rounded-full outline-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full"
-                        />
+                      <div className="bg-dark-900/95 p-3 rounded shadow-lg border border-dark-700">
+                        <div className="h-20 flex flex-col items-center justify-center relative">
+                          {/* Vertical slider track */}
+                          <div className="h-full w-1.5 bg-gray-700 rounded-full relative flex items-center justify-center">
+                            {/* Filled portion of slider */}
+                            <div 
+                              className="w-full bg-red-500 rounded-full absolute bottom-0"
+                              style={{ height: `${(isMuted ? 0 : volume) * 100}%` }}
+                            ></div>
+                            
+                            {/* Slider thumb */}
+                            <div 
+                              className="absolute w-3 h-3 bg-red-500 rounded-full left-1/2 -translate-x-1/2 cursor-pointer"
+                              style={{ bottom: `calc(${(isMuted ? 0 : volume) * 100}% - 6px)` }}
+                            ></div>
+                          </div>
+                          
+                          {/* Hidden actual input for functionality */}
+                          <input 
+                            type="range" 
+                            min="0" 
+                            max="1" 
+                            step="0.01" 
+                            value={isMuted ? 0 : volume}
+                            onChange={handleVolumeChange}
+                            className="sr-only"
+                            aria-label="Volume"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                   
                   {/* Time display */}
-                  <div className="text-white text-sm hidden sm:block">
-                    {formatTime(videoRef.current?.currentTime || 0)} / {formatTime(duration)}
+                  <div className="text-white text-xs font-medium ml-1">
+                    <span className="tabular-nums">{formatTime(videoRef.current?.currentTime || 0)}</span>
+                    <span className="mx-1 text-white/70">/</span>
+                    <span className="tabular-nums text-white/70">{formatTime(duration)}</span>
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-1">
+                  {/* Settings button (already implemented at top left) */}
+                  
                   {/* Fullscreen button */}
                   <button 
-                    className="text-white p-2 hover:text-primary transition" 
+                    className="text-white p-2 hover:text-white/80 transition rounded-full" 
                     onClick={toggleFullScreen}
+                    aria-label={isFullScreen ? "Exit fullscreen" : "Enter fullscreen"}
                   >
-                    {isFullScreen ? <Minimize size={20} /> : <Maximize size={20} />}
+                    {isFullScreen ? <Minimize size={22} /> : <Maximize size={22} />}
                   </button>
                 </div>
               </div>
