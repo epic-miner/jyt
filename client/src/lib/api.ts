@@ -41,8 +41,24 @@ export const fetchEpisodeById = async (id: string): Promise<Episode> => {
 };
 
 export const searchAnime = async (query: string, type: string = 'all'): Promise<Anime[]> => {
-  const response = await api.get(`/search?q=${query}&type=${type}`);
-  return response.data;
+  try {
+    const response = await api.get(`/search?q=${query}&type=${type}`);
+    
+    // Check if response has the expected structure (API returns a complex object)
+    if (response.data && response.data.results && response.data.results.anime) {
+      return response.data.results.anime;
+    } else if (Array.isArray(response.data)) {
+      // Handle case where API returns a direct array
+      return response.data;
+    }
+    
+    // Fallback to empty array if data structure doesn't match
+    console.warn('Search API response format unexpected:', response.data);
+    return [];
+  } catch (error) {
+    console.error('Error searching anime:', error);
+    throw error;
+  }
 };
 
 export const fetchAnimeByGenre = async (genre: string): Promise<Anime[]> => {

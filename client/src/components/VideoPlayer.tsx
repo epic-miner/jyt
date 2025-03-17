@@ -22,6 +22,8 @@ const VideoPlayer = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Update watch history every 5 seconds while playing
   useEffect(() => {
@@ -68,11 +70,25 @@ const VideoPlayer = ({
       }
     };
     
-    videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
+    const handleVideoLoad = () => {
+      setIsLoading(false);
+    };
+    
+    const handleVideoError = () => {
+      setIsLoading(false);
+      setError('Failed to load video. The video might be unavailable or the format is not supported.');
+    };
+    
+    const videoElement = videoRef.current;
+    videoElement.addEventListener('timeupdate', handleTimeUpdate);
+    videoElement.addEventListener('loadeddata', handleVideoLoad);
+    videoElement.addEventListener('error', handleVideoError);
     
     return () => {
-      if (videoRef.current) {
-        videoRef.current.removeEventListener('timeupdate', handleTimeUpdate);
+      if (videoElement) {
+        videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+        videoElement.removeEventListener('loadeddata', handleVideoLoad);
+        videoElement.removeEventListener('error', handleVideoError);
       }
     };
   }, [anime, episode]);
@@ -101,16 +117,48 @@ const VideoPlayer = ({
     }
   };
   
+  // Determine video URL to use
+  const videoUrl = episode.video_url_max_quality || 
+                   episode.video_url_1080p || 
+                   episode.video_url_720p || 
+                   episode.video_url_480p;
+  
   return (
     <div className="relative w-full flex-grow video-container bg-black">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <p className="mt-4 text-white">Loading video...</p>
+          </div>
+        </div>
+      )}
+      
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
+          <div className="text-center max-w-md p-6 bg-dark-800 rounded-lg">
+            <i className="fas fa-exclamation-circle text-red-500 text-4xl mb-4"></i>
+            <h3 className="text-xl font-bold mb-2">Video Error</h3>
+            <p className="text-slate-300 mb-4">{error}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="bg-primary hover:bg-primary/90 transition px-4 py-2 rounded-lg"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
+      
       <video
         ref={videoRef}
         className="w-full h-full object-contain"
         controls
         autoPlay
         playsInline
+        controlsList="nodownload"
       >
-        <source src={episode.video_url_max_quality} type="video/mp4" />
+        <source src={videoUrl} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
       
@@ -139,6 +187,22 @@ const VideoPlayer = ({
         >
           Next <i className="fas fa-step-forward ml-1"></i>
         </button>
+      </div>
+      
+      {/* Custom video controls for better experience */}
+      <div className="absolute bottom-16 left-0 right-0 z-10 px-4 hidden">
+        <div className="w-full bg-gray-700/50 rounded-full h-2">
+          <div 
+            className="bg-primary h-2 rounded-full" 
+            style={{ width: `${currentTime}%` }}
+          ></div>
+        </div>
+        
+        <div className="flex justify-between items-center mt-2">
+          <button className="text-white p-2" onClick={toggleFullScreen}>
+            <i className={`fas ${isFullScreen ? 'fa-compress' : 'fa-expand'}`}></i>
+          </button>
+        </div>
       </div>
     </div>
   );
