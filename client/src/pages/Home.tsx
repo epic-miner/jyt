@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import AnimeCard from '../components/AnimeCard';
 import GenrePill from '../components/GenrePill';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -32,6 +32,8 @@ const SectionTitle = ({ icon, title, viewAllLink, viewAllText = 'View All' }: {
 const Home = () => {
   const [continueWatching, setContinueWatching] = useState<WatchHistoryItem[]>([]);
   const [recentlyWatched, setRecentlyWatched] = useState<RecentlyWatchedAnime[]>([]);
+  const location = useLocation();
+  const setLocation = location[1];
 
   const { data: animeList, isLoading: isLoadingAnime } = useQuery({
     queryKey: ['/api/anime'],
@@ -80,6 +82,14 @@ const Home = () => {
 
   // Get popular anime (for now, just use the full list)
   const popularAnime = animeList || [];
+
+  const handleQuickPlay = (animeId: string) => {
+    // If there are episodes, navigate to the first episode
+    const anime = animeList?.find(a => a.id.toString() === animeId);
+    if (anime) {
+      setLocation(`/watch/${animeId}/1`); // Assuming the first episode has ID 1
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-dark-950 to-dark-900 pb-24 md:pb-8">
@@ -163,21 +173,19 @@ const Home = () => {
 
             <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-6">
               {continueWatching.slice(0, 6).map((item) => (
-                <Link href={`/watch/${item.animeId}/${item.episodeId}`} key={`${item.animeId}-${item.episodeId}`}>
-                  <AnimeCard
-                    anime={{
-                      id: parseInt(item.animeId),
-                      title: item.animeTitle,
-                      thumbnail_url: item.animeThumbnail,
-                      genre: "",
-                      description: ""
-                    }}
-                    showProgress={true}
-                    progress={item.progress}
-                    episodeNumber={item.episodeNumber}
-                    showEpisodeLabel={true}
-                  />
-                </Link>
+                <AnimeCard
+                  key={`${item.animeId}-${item.episodeId}`}
+                  anime={{
+                    id: parseInt(item.animeId),
+                    title: item.animeTitle,
+                    thumbnail_url: item.animeThumbnail,
+                    genre: "",
+                    description: ""
+                  }}
+                  showProgress={true}
+                  progress={item.progress}
+                  onQuickPlay={() => setLocation(`/watch/${item.animeId}/${item.episodeId}`)}
+                />
               ))}
             </div>
           </section>
@@ -206,8 +214,10 @@ const Home = () => {
               popularAnime.slice(0, 12).map((anime) => (
                 <AnimeCard 
                   key={anime.id} 
-                  anime={anime} 
-                  className="block"
+                  anime={anime}
+                  rating={4.5} 
+                  episodeCount={12} 
+                  onQuickPlay={() => handleQuickPlay(anime.id.toString())}
                 />
               ))
             )}
