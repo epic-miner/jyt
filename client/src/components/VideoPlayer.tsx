@@ -116,9 +116,17 @@ const VideoPlayer = ({
       setIsLoading(false);
     };
 
-    const handleVideoError = () => {
-      setIsLoading(false);
+    const handleVideoError = (e: Event) => {
+      const target = e.target as HTMLVideoElement;
+      console.error('Video error:', target.error);
       setError('Failed to load video. The video might be unavailable or the format is not supported.');
+      setIsLoading(false);
+
+      // Reset video source if error is fatal
+      if (target.error?.code === 2 || target.error?.code === 1) {
+        target.src = '';
+        target.load();
+      }
     };
 
     // Track buffer progress

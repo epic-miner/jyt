@@ -3,65 +3,23 @@ import { Anime } from '@shared/types';
 
 interface AnimeCardProps {
   anime: Anime;
-  showProgress?: boolean;
-  progress?: number;
-  episodeNumber?: string;
-  showEpisodeLabel?: boolean;
-  isLoading?: boolean; // Added isLoading prop
-  isFeatured?: boolean;
+  className?: string;
 }
 
-const AnimeCard = ({ anime, showProgress, progress, episodeNumber, showEpisodeLabel, isLoading = false, isFeatured = false }: AnimeCardProps) => {
-  if (isLoading) {
-    return (
-      <div className={`relative overflow-hidden rounded-lg bg-dark-800 ${isFeatured ? 'col-span-2' : ''}`}>
-        <div className="animate-pulse">
-          <div className="h-48 bg-dark-700"></div>
-          <div className="p-4">
-            <div className="h-4 w-3/4 bg-dark-700 rounded"></div>
-            <div className="mt-2 h-3 w-1/2 bg-dark-700 rounded"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+const AnimeCard = ({ anime, className }: AnimeCardProps) => {
   return (
-    <Link href={`/anime/${anime.id}`} className="block">
-      <div className="bg-dark-800 rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
-        <div className="relative">
+    <Link href={`/anime/${anime.id}`} className={className}>
+      <div className="relative group cursor-pointer">
+        <div className="aspect-[2/3] rounded-lg overflow-hidden">
           <img 
             src={anime.thumbnail_url} 
-            alt={anime.title} 
-            className="w-full h-48 object-cover"
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = 'https://via.placeholder.com/300x400?text=No+Image';
-            }}
+            alt={anime.title}
+            className="w-full h-full object-cover"
           />
-          {showEpisodeLabel && episodeNumber && (
-            <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-1.5 py-0.5 rounded">
-              EP {episodeNumber}
-            </div>
-          )}
-          {showProgress && progress !== undefined && (
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-              <div className="w-full bg-gray-700 rounded-full h-1.5">
-                <div 
-                  className="bg-primary h-1.5 rounded-full" 
-                  style={{ width: `${progress}%` }}
-                ></div>
-              </div>
-            </div>
-          )}
         </div>
-        <div className="p-3">
-          <h3 className="text-sm font-medium truncate">{anime.title}</h3>
-          {!showEpisodeLabel && (
-            <p className="text-xs text-gray-400 mt-1">{anime.genre || 'Unknown genre'}</p>
-          )}
-          {showEpisodeLabel && episodeNumber && (
-            <p className="text-xs text-gray-400 mt-1">Episode {episodeNumber}</p>
-          )}
+        <div className="mt-2">
+          <h3 className="text-sm font-medium line-clamp-2">{anime.title}</h3>
+          <p className="text-xs text-gray-400 mt-1">{anime.genre}</p>
         </div>
       </div>
     </Link>
