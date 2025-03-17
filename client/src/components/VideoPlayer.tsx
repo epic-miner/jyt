@@ -158,20 +158,24 @@ const VideoPlayer = ({
       // Toggle header and footer visibility
       const header = document.querySelector('header');
       const footer = document.querySelector('footer');
+      const bottomNav = document.querySelector('nav');
 
-      if (header) header.style.display = isFullscreen ? 'none' : 'block';
-      if (footer) footer.style.display = isFullscreen ? 'none' : 'block';
+      if (header) header.style.visibility = isFullscreen ? 'hidden' : 'visible';
+      if (footer) footer.style.visibility = isFullscreen ? 'hidden' : 'visible';
+      if (bottomNav) bottomNav.style.visibility = isFullscreen ? 'hidden' : 'visible';
     };
 
     document.addEventListener('fullscreenchange', handleFullScreenChange);
 
     return () => {
       document.removeEventListener('fullscreenchange', handleFullScreenChange);
-      // Reset header and footer visibility on cleanup
+      // Reset visibility on cleanup
       const header = document.querySelector('header');
       const footer = document.querySelector('footer');
-      if (header) header.style.display = 'block';
-      if (footer) footer.style.display = 'block';
+      const bottomNav = document.querySelector('nav');
+      if (header) header.style.visibility = 'visible';
+      if (footer) footer.style.visibility = 'visible';
+      if (bottomNav) bottomNav.style.visibility = 'visible';
     };
   }, []);
 
