@@ -837,17 +837,29 @@ const VideoPlayer = ({
           <SkipBack size={16} className="mr-1" /> Previous
         </button>
 
-        <div className="text-sm text-gray-300">
-          Episode <span className="font-bold">{episode.episode_number}</span>
+        <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/70 to-transparent">
+          <h1 className="text-xl font-bold text-white mb-1">{anime.title}</h1>
+          <div className="text-sm text-gray-200">
+            Episode {episode.episode_number}: {episode.title}
+          </div>
         </div>
 
-        <button 
-          className="bg-gray-800/70 hover:bg-gray-700/70 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-          onClick={onNextEpisode}
-          disabled={!hasNext}
-        >
-          Next <SkipForward size={16} className="ml-1" />
-        </button>
+        <div className="flex gap-2">
+          <button 
+            className="bg-primary/80 hover:bg-primary transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            onClick={onPreviousEpisode}
+            disabled={!hasPrevious}
+          >
+            <SkipBack size={16} className="mr-1" /> Previous
+          </button>
+          <button 
+            className="bg-primary/80 hover:bg-primary transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            onClick={onNextEpisode}
+            disabled={!hasNext}
+          >
+            Next <SkipForward size={16} className="ml-1" />
+          </button>
+        </div>
       </div>
     </div>
   );
