@@ -30,10 +30,10 @@ const NavBar = () => {
     <header className={`bg-dark-900/95 backdrop-blur-md sticky top-0 z-50 ${scrolled ? 'shadow-md' : 'border-b border-dark-800/60'}`}>
       <div className="container mx-auto px-4 h-16 flex items-center justify-between max-w-7xl">
         {/* Logo */}
-        <div className="flex-shrink-0 w-32">
+        <div className="flex-shrink-0 w-24 md:w-32">
           <Link href="/" className="flex items-center">
             <div className="relative flex items-center">
-              <span className="text-2xl font-bold">
+              <span className="text-xl md:text-2xl font-bold">
                 <span className="text-primary">9</span>
                 <span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">anime</span>
               </span>
@@ -71,7 +71,7 @@ const NavBar = () => {
 
         {/* Mobile menu button */}
         <button 
-          className="md:hidden text-white focus:outline-none p-2" 
+          className="md:hidden text-white focus:outline-none p-2 -mr-2" 
           onClick={toggleMobileMenu}
           aria-label="Toggle mobile menu"
         >
@@ -80,7 +80,7 @@ const NavBar = () => {
       </div>
 
       {/* Mobile search bar */}
-      <div className="md:hidden px-4 pb-3">
+      <div className="md:hidden px-4 pb-3 pt-1">
         <SearchBar />
       </div>
 

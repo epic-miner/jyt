@@ -32,7 +32,6 @@ const SearchBar = () => {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
-    
     if (value.trim().length > 2) {
       setShowResults(true);
     } else {
@@ -54,7 +53,7 @@ const SearchBar = () => {
       setShowResults(true);
     }
   };
-  
+
   const handleBlur = () => {
     // Delay hiding results to allow for clicks on the results
     setTimeout(() => {
@@ -62,7 +61,7 @@ const SearchBar = () => {
       setShowResults(false);
     }, 150);
   };
-  
+
   const handleClear = () => {
     setSearchTerm('');
     setShowResults(false);
@@ -137,14 +136,6 @@ const SearchBar = () => {
             </button>
           )}
         </div>
-        
-        <button 
-          type="submit" 
-          className="absolute right-0 top-0 h-full px-4 bg-primary rounded-r-full hidden" 
-          aria-label="Search"
-        >
-          <i className="fas fa-search text-white"></i>
-        </button>
       </form>
 
       {/* Search results dropdown */}
