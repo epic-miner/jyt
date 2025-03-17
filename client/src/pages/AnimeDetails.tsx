@@ -135,6 +135,8 @@ const AnimeDetails = () => {
             </div>
           ) : isEpisodesError || !episodes ? (
             <p className="text-slate-400">Failed to load episodes.</p>
+          ) : !Array.isArray(episodes) ? (
+            <p className="text-slate-400">Episode data is not in the expected format.</p>
           ) : episodes.length === 0 ? (
             <p className="text-slate-400">No episodes available for this anime.</p>
           ) : (
