@@ -162,6 +162,26 @@ const VideoPlayer = ({
     };
   }, []);
   
+  // Handle mobile rotation
+  useEffect(() => {
+    const handleOrientationChange = () => {
+      if (window.screen.orientation && playerContainerRef.current) {
+        const isLandscape = window.screen.orientation.type.includes('landscape');
+        if (isLandscape) {
+          document.documentElement.requestFullscreen?.();
+        } else if (document.fullscreenElement) {
+          document.exitFullscreen?.();
+        }
+      }
+    };
+
+    window.screen.orientation?.addEventListener('change', handleOrientationChange);
+    
+    return () => {
+      window.screen.orientation?.removeEventListener('change', handleOrientationChange);
+    };
+  }, []);
+
   // YouTube-style keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
