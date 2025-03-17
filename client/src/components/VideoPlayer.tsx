@@ -59,6 +59,7 @@ const VideoPlayer = ({
   const [showTitle, setShowTitle] = useState(true);
   const [bufferProgress, setBufferProgress] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1.0); // Added playbackRate state
+  const [playbackSpeed, setPlaybackSpeed] = useState(1); // Added playbackSpeed state
 
   // Get available quality options
   const availableQualities: { quality: VideoQuality; url: string | undefined }[] = [
@@ -838,7 +839,7 @@ const VideoPlayer = ({
           onClick={onPreviousEpisode}
           disabled={!hasPrevious}
         >
-          <SkipBack size={16} className="mr-1" /> Previous
+          <SkipBack size={16} className="mr1 mr-1" /> Previous
         </button>
 
         <div className="text-sm text-gray-300">

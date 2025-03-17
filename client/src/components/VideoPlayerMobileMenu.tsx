@@ -132,7 +132,10 @@ const VideoPlayerMobileMenu = ({
             <div className="h-px bg-gray-800 mx-4"></div>
             
             {/* Playback speed option */}
-            <button className="w-full text-left px-4 py-4 flex items-center justify-between">
+            <button 
+              className="w-full text-left px-4 py-4 flex items-center justify-between"
+              onClick={handlePlaybackSpeedChange}
+            >
               <div className="flex items-center">
                 <svg className="w-6 h-6 mr-6 text-white" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M13,2.05V4.05C17.39,4.59 20.5,8.58 19.96,12.97C19.5,16.61 16.64,19.5 13,19.93V21.93C18.5,21.38 22.5,16.5 21.95,11C21.5,6.25 17.73,2.5 13,2.05M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M12,10A2,2 0 0,0 10,12A2,2 0 0,0 12,14A2,2 0 0,0 14,12A2,2 0 0,0 12,10Z" />
@@ -141,7 +144,7 @@ const VideoPlayerMobileMenu = ({
               </div>
               
               <div className="flex items-center text-gray-400">
-                <span className="mr-2">1x</span>
+                <span className="mr-2">{playbackSpeed}x</span>
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
                 </svg>
