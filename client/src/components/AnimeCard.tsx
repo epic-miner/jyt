@@ -1,4 +1,3 @@
-import { Link } from 'wouter';
 import { Anime } from '@shared/types';
 
 interface AnimeCardProps {

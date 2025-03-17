@@ -175,6 +175,7 @@ const Home = () => {
                     showProgress={true}
                     progress={item.progress}
                     episodeNumber={item.episodeNumber}
+                    showEpisodeLabel={true}
                   />
                 </Link>
               ))}
@@ -203,7 +204,9 @@ const Home = () => {
               ))
             ) : (
               popularAnime.slice(0, 12).map((anime) => (
-                <AnimeCard key={anime.id} anime={anime} />
+                <Link href={`/anime/${anime.id}`} key={anime.id}>
+                  <AnimeCard anime={anime} />
+                </Link>
               ))
             )}
           </div>
