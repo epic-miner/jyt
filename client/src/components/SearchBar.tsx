@@ -7,7 +7,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const SearchBar = () => {
+interface SearchBarProps {
+  autoFocus?: boolean;
+}
+
+const SearchBar = ({ autoFocus = false }: SearchBarProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [showResults, setShowResults] = useState(false);
@@ -122,12 +126,13 @@ const SearchBar = () => {
             placeholder="Search anime by title, genre..."
             className={cn(
               "w-full bg-transparent",
-              "py-2.5 pl-12 pr-4", // Changed py-3 to py-2.5
+              "py-2.5 pl-12 pr-4",
               "text-base placeholder:text-muted-foreground/70",
               "outline-none focus:outline-none",
               "transition-colors duration-200"
             )}
             autoComplete="off"
+            autoFocus={autoFocus}
           />
           {searchTerm && (
             <button
