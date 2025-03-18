@@ -17,19 +17,19 @@ export const BackgroundParticles = () => {
 
   useEffect(() => {
     // Generate random particles with galaxy theme
-    const newParticles = Array.from({ length: 100 }, (_, i) => {
-      const type = Math.random() > 0.8 ? 'nebula' : Math.random() > 0.3 ? 'star' : 'dust';
-      const size = type === 'nebula' ? Math.random() * 200 + 100 : 
-                  type === 'star' ? Math.random() * 4 + 2 :
-                  Math.random() * 8 + 3;
+    const newParticles = Array.from({ length: 150 }, (_, i) => {
+      const type = Math.random() > 0.85 ? 'nebula' : Math.random() > 0.25 ? 'star' : 'dust';
+      const size = type === 'nebula' ? Math.random() * 300 + 150 : 
+                  type === 'star' ? Math.random() * 5 + 2 :
+                  Math.random() * 12 + 4;
 
       return {
         id: i,
         x: Math.random() * 100,
         y: Math.random() * 100,
         size,
-        duration: Math.random() * 20 + (type === 'nebula' ? 40 : 15),
-        delay: Math.random() * 5,
+        duration: Math.random() * 30 + (type === 'nebula' ? 50 : 20),
+        delay: Math.random() * 8,
         color: type === 'nebula' ? 'primary' : 'white',
         type
       };
@@ -45,10 +45,10 @@ export const BackgroundParticles = () => {
           key={particle.id}
           className={`absolute rounded-full ${
             particle.type === 'star' 
-              ? 'bg-white shadow-[0_0_20px_rgba(255,255,255,0.9)]' 
+              ? 'bg-white shadow-[0_0_30px_rgba(255,255,255,1)] animate-pulse' 
               : particle.type === 'nebula'
-              ? 'bg-gradient-to-br from-primary/30 to-primary/5 backdrop-blur-sm'
-              : 'bg-gradient-to-br from-primary/20 to-transparent'
+              ? 'bg-gradient-to-br from-primary/40 to-primary/5 backdrop-blur-sm'
+              : 'bg-gradient-to-br from-primary/30 to-transparent'
           }`}
           style={{
             left: `${particle.x}%`,
