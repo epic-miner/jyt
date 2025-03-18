@@ -557,15 +557,27 @@ const VideoPlayer = ({
       }
 
       if (playerContainer) {
-        playerContainer.removeEventListener('mousemove', handleMouseMove);
-        playerContainer.removeEventListener('mouseenter', () => setShowControls(true));
+        if (!isMobile) {
+          playerContainer.removeEventListener('mousemove', showControlsTemporarily);
+          playerContainer.removeEventListener('mouseenter', () => {
+            setShowControls(true);
+            setIsHovering(true);
+          });
+          playerContainer.removeEventListener('mouseleave', () => {
+            setIsHovering(false);
+            resetControlsTimeout();
+          });
+        }
+        
+        playerContainer.removeEventListener('touchstart', showControlsTemporarily);
+        playerContainer.removeEventListener('touchmove', showControlsTemporarily);
       }
 
       if (timeout) {
         clearTimeout(timeout);
       }
     };
-  }, [isPlaying]);
+  }, [isPlaying, isMobile]);
 
   const videoUrl = getVideoUrl();
 
