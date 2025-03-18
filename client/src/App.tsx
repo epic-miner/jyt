@@ -14,7 +14,10 @@ import { PageTransition } from "./components/PageTransition";
 import { useEffect } from "react";
 import { initializeGlobalSecurity } from "./lib/security";
 
+import { useConsoleProtection } from './hooks/useConsoleProtection';
+
 function App() {
+  useConsoleProtection();
   // Initialize global security measures
   useEffect(() => {
     initializeGlobalSecurity();
