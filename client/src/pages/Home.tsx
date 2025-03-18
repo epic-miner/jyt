@@ -104,68 +104,6 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-dark-950 to-dark-900 pb-24 md:pb-8">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <section className="mb-12">
-          {isLoadingAnime ? (
-            <div className="relative rounded-2xl overflow-hidden shadow-xl">
-              <Skeleton className="h-[300px] md:h-[450px] w-full rounded-2xl" />
-            </div>
-          ) : (
-            animeList && animeList.length > 0 && (
-              <div className="relative rounded-2xl overflow-hidden h-[300px] md:h-[450px] bg-gradient-to-r from-dark-800 to-dark-900 shadow-xl border border-dark-700/40 group">
-                <img 
-                  src={animeList[0].thumbnail_url} 
-                  alt={animeList[0].title} 
-                  className="w-full h-full object-cover opacity-60 group-hover:opacity-70 transition-all duration-700 scale-105 group-hover:scale-100"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = 'https://via.placeholder.com/1200x600?text=Featured+Anime';
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent"></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
-
-                <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full md:max-w-[600px]">
-                  <div className="bg-primary text-white text-xs font-semibold px-3 py-1.5 rounded-full mb-4 inline-block shadow-lg">
-                    FEATURED
-                  </div>
-
-                  <h1 className="text-2xl md:text-4xl font-bold mb-3 text-white">
-                    {animeList[0].title}
-                  </h1>
-
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {animeList[0].genre.split(',').map((genre, index) => (
-                      <span 
-                        key={index} 
-                        className="text-xs bg-dark-800/60 backdrop-blur-sm text-slate-300 px-2.5 py-1 rounded-full"
-                      >
-                        {genre.trim()}
-                      </span>
-                    ))}
-                  </div>
-
-                  <p className="text-sm md:text-base text-slate-200 mb-6 line-clamp-2 md:line-clamp-3">
-                    {animeList[0].description || "Experience the adventure in this featured anime series."}
-                  </p>
-
-                  <div className="flex flex-wrap gap-3">
-                    <Link href={`/anime/${animeList[0].id}`}>
-                      <span className="bg-primary hover:bg-primary/90 transition-all duration-300 px-6 py-2.5 rounded-full flex items-center shadow-lg text-sm md:text-base font-medium cursor-pointer">
-                        <i className="fas fa-play mr-2"></i> Watch Now
-                      </span>
-                    </Link>
-                    <Link href={`/anime/${animeList[0].id}`}>
-                      <span className="bg-dark-800/80 hover:bg-dark-800 transition-all duration-300 px-6 py-2.5 rounded-full shadow-lg text-sm md:text-base font-medium backdrop-blur-sm border border-dark-700/50 hover:border-primary/30 cursor-pointer">
-                        <i className="fas fa-info-circle mr-2"></i> Details
-                      </span>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            )
-          )}
-        </section>
-
         {continueWatching.length > 0 && (
           <section className="mb-8 md:mb-12">
             <SectionTitle 
