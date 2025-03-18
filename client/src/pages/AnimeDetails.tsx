@@ -92,14 +92,14 @@ const AnimeDetails = () => {
         className="relative h-[300px] md:h-[400px] overflow-hidden"
       >
         <motion.img
-          initial={{ scale: 1.1 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 20, repeat: Infinity, repeatType: "reverse" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
           src={bannerImage}
           alt={anime.title}
-          className="w-full h-full object-cover opacity-40"
+          className="w-full h-full object-cover opacity-60"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/80 to-transparent">
+        <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/60 to-transparent/30">
           {/* Animated neon lines */}
           <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent animate-pulse"></div>
           <div className="absolute -bottom-4 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent animate-pulse delay-75"></div>
