@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useRoute, Link } from 'wouter';
+import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import GenrePill from '../components/GenrePill';
@@ -80,27 +81,40 @@ const AnimeDetails = () => {
     : anime.thumbnail_url;
 
   return (
-    <div className="relative">
+    <div className="relative min-h-screen bg-dark-950">
       {/* Hero section with episode banner */}
-      <div className="relative h-[300px] md:h-[400px] overflow-hidden">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        className="relative h-[300px] md:h-[400px] overflow-hidden"
+      >
         <img 
           src={bannerImage} 
           alt={anime.title} 
           className="w-full h-full object-cover opacity-40 scale-105 transition-transform duration-1000"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/80 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/80 to-transparent">
+          {/* Add animated neon lines */}
+          <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent animate-pulse"></div>
+        </div>
         <Link href="/">
-          <button className="absolute top-4 left-4 bg-dark-800/80 hover:bg-dark-700 transition p-2 rounded-full text-white">
+          <button className="absolute top-4 left-4 bg-dark-800/80 hover:bg-dark-700 transition p-2 rounded-full text-white hover:shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)] hover:text-primary">
             <i className="fas fa-arrow-left"></i>
           </button>
         </Link>
-      </div>
+      </motion.div>
 
       {/* Anime info section */}
       <div className="container mx-auto px-4 -mt-32 relative z-10">
-        <div className="flex flex-col md:flex-row gap-6">
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col md:flex-row gap-6"
+        >
           {/* Anime poster */}
-          <div className="w-40 md:w-60 mx-auto md:mx-0 rounded-lg overflow-hidden shadow-lg ring-1 ring-white/10">
+          <div className="w-40 md:w-60 mx-auto md:mx-0 rounded-lg overflow-hidden shadow-lg ring-1 ring-white/10 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)] transition-shadow duration-300">
             <img 
               src={anime.thumbnail_url} 
               alt={anime.title} 
@@ -110,7 +124,9 @@ const AnimeDetails = () => {
 
           {/* Anime details */}
           <div className="flex-1">
-            <h1 className="text-2xl md:text-4xl font-bold mb-2">{anime.title}</h1>
+            <h1 className="text-2xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-white to-primary bg-clip-text text-transparent">
+              {anime.title}
+            </h1>
             <div className="flex flex-wrap gap-2 mb-3">
               {genres.map((genre) => (
                 <GenrePill key={genre} genre={genre} />
@@ -120,17 +136,25 @@ const AnimeDetails = () => {
 
             {episodes && episodes.length > 0 && (
               <Link href={`/watch/${anime.id}/${episodes[0].id}`}>
-                <button className="bg-primary hover:bg-primary/90 transition px-6 py-2 rounded-full flex items-center">
+                <button className="bg-primary hover:bg-primary/90 transition px-6 py-2 rounded-full flex items-center hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.4)] transform hover:scale-105 duration-300">
                   <i className="fas fa-play mr-2"></i> Watch First Episode
                 </button>
               </Link>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Episodes section */}
-        <div className="mt-10">
-          <h2 className="text-xl font-bold mb-4">Episodes</h2>
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mt-10 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-primary/10 hover:border-primary/20 transition-all duration-300"
+        >
+          <h2 className="text-xl font-bold mb-4 relative inline-block">
+            Episodes
+            <div className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent"></div>
+          </h2>
 
           {isLoadingEpisodes ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -146,16 +170,22 @@ const AnimeDetails = () => {
             <p className="text-slate-400">No episodes available for this anime.</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {episodes.map((episode) => (
-                <EpisodeCard 
-                  key={episode.id} 
-                  episode={episode}
-                  animeId={anime.id.toString()}
-                />
+              {episodes.map((episode, index) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  key={episode.id}
+                >
+                  <EpisodeCard 
+                    episode={episode}
+                    animeId={anime.id.toString()}
+                  />
+                </motion.div>
               ))}
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
   );
