@@ -352,26 +352,19 @@ const VideoPlayer = ({
     return () => clearTimeout(timeout);
   }, []);
 
-  const toggleFullScreen = () => {
-    const element = playerContainerRef.current;
-    if (!element) return;
-
-    if (!document.fullscreenElement) {
-      if (element.requestFullscreen) {
-        element.requestFullscreen();
-      } else if (element.webkitRequestFullscreen) {
-        element.webkitRequestFullscreen();
-      } else if (element.msRequestFullscreen) {
-        element.msRequestFullscreen();
+  const toggleFullScreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        if (playerContainerRef.current) {
+          await playerContainerRef.current.requestFullscreen();
+          setIsFullScreen(true);
+        }
+      } else {
+        await document.exitFullscreen();
+        setIsFullScreen(false);
       }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
+    } catch (err) {
+      console.error('Fullscreen error:', err);
     }
   };
 
