@@ -508,6 +508,12 @@ const VideoPlayer = ({
     // Auto-hide controls after inactivity
     let timeout: ReturnType<typeof setTimeout> | null = null;
 
+    const hideControls = () => {
+      if (isPlaying && !isHovering && !showSettingsMenu) {
+        setShowControls(false);
+      }
+    };
+
     const handleMouseMove = () => {
       setShowControls(true);
 
@@ -515,11 +521,7 @@ const VideoPlayer = ({
         clearTimeout(timeout);
       }
 
-      timeout = setTimeout(() => {
-        if (isPlaying) {
-          setShowControls(false);
-        }
-      }, 3000);
+      timeout = setTimeout(hideControls, 3000);
     };
 
     const playerContainer = playerContainerRef.current;
@@ -528,9 +530,11 @@ const VideoPlayer = ({
       playerContainer.addEventListener('mouseenter', () => {
         setShowControls(true);
         setIsHovering(true);
+        if (timeout) clearTimeout(timeout);
       });
       playerContainer.addEventListener('mouseleave', () => {
         setIsHovering(false);
+        timeout = setTimeout(hideControls, 3000);
       });
     }
 
