@@ -125,37 +125,45 @@ const Home = () => {
             initial="hidden"
             animate="visible"
             variants={sectionVariants}
-            className="mb-8 md:mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5"
+            className="mb-8 md:mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-primary/10 relative overflow-hidden"
           >
-            <SectionTitle 
-              icon="history" 
-              title="Continue Watching" 
-              viewAllLink="/recently-watched" 
-            />
+            {/* Background animation effects */}
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-50"></div>
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
 
-            <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
-              {continueWatching.slice(0, 6).map((item, index) => (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  key={`${item.animeId}-${item.episodeId}`}
-                >
-                  <AnimeCard
-                    anime={{
-                      id: parseInt(item.animeId),
-                      title: item.animeTitle,
-                      thumbnail_url: item.animeThumbnail,
-                      genre: "",
-                      description: ""
-                    }}
-                    showProgress={true}
-                    progress={item.progress}
-                    onQuickPlay={() => setLocation(`/watch/${item.animeId}/${item.episodeId}`)}
-                    className="hover:scale-105 transition-transform duration-300"
-                  />
-                </motion.div>
-              ))}
+            <div className="relative">
+              <SectionTitle 
+                icon="history" 
+                title="Continue Watching" 
+                viewAllLink="/recently-watched" 
+              />
+
+              <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-3">
+                {continueWatching.slice(0, 8).map((item, index) => (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    key={`${item.animeId}-${item.episodeId}`}
+                    className="transform transition-transform duration-300 hover:scale-105"
+                  >
+                    <AnimeCard
+                      anime={{
+                        id: parseInt(item.animeId),
+                        title: item.animeTitle,
+                        thumbnail_url: item.animeThumbnail,
+                        genre: "",
+                        description: ""
+                      }}
+                      showProgress={true}
+                      progress={item.progress}
+                      onQuickPlay={() => setLocation(`/watch/${item.animeId}/${item.episodeId}`)}
+                      className="continue-watching-card" 
+                    />
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </motion.section>
         )}
