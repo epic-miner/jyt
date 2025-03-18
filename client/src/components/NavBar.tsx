@@ -11,12 +11,10 @@ const NavBar = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
-  // Close mobile menu on location change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location]);
 
-  // Add shadow on scroll
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -28,9 +26,9 @@ const NavBar = () => {
 
   return (
     <header className={`bg-dark-900/95 backdrop-blur-md sticky top-0 z-50 ${scrolled ? 'shadow-md' : 'border-b border-dark-800/60'}`}>
-      <div className="container mx-auto px-4 flex flex-col md:flex-row md:items-center md:h-16 max-w-7xl">
-        {/* Logo and Mobile Menu Button */}
-        <div className="flex items-center justify-between h-14 md:h-auto">
+      <div className="container mx-auto px-4">
+        {/* Top bar with logo and menu button */}
+        <div className="flex items-center justify-between h-12 md:h-16">
           <Link href="/" className="flex items-center">
             <div className="relative flex items-center">
               <span className="text-xl md:text-2xl font-bold">
@@ -41,9 +39,31 @@ const NavBar = () => {
             </div>
           </Link>
 
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
+            <Link href="/">
+              <div className={`flex items-center gap-2 ${location === '/' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
+                <i className="fas fa-home text-sm mr-2 text-primary"></i>
+                <span>Home</span>
+              </div>
+            </Link>
+            <Link href="/genre/all">
+              <div className={`flex items-center gap-2 ${location.startsWith('/genre') ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
+                <i className="fas fa-tags text-sm mr-2 text-primary"></i>
+                <span>Genres</span>
+              </div>
+            </Link>
+            <Link href="/recently-watched">
+              <div className={`flex items-center gap-2 ${location === '/recently-watched' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
+                <i className="fas fa-history text-sm mr-2 text-primary"></i>
+                <span>Recently Watched</span>
+              </div>
+            </Link>
+          </nav>
+
           {/* Mobile menu button */}
           <button 
-            className="md:hidden text-white focus:outline-none p-2 -mr-2" 
+            className="md:hidden text-white focus:outline-none p-2" 
             onClick={toggleMobileMenu}
             aria-label="Toggle mobile menu"
           >
@@ -56,35 +76,13 @@ const NavBar = () => {
           <SearchBar />
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
-          <Link href="/">
-            <div className={`flex items-center gap-2 ${location === '/' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
-              <i className="fas fa-home text-sm mr-2 text-primary"></i>
-              <span>Home</span>
-            </div>
-          </Link>
-          <Link href="/genre/all">
-            <div className={`flex items-center gap-2 ${location.startsWith('/genre') ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
-              <i className="fas fa-tags text-sm mr-2 text-primary"></i>
-              <span>Genres</span>
-            </div>
-          </Link>
-          <Link href="/recently-watched">
-            <div className={`flex items-center gap-2 ${location === '/recently-watched' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'}`}>
-              <i className="fas fa-history text-sm mr-2 text-primary"></i>
-              <span>Recently Watched</span>
-            </div>
-          </Link>
-        </nav>
-
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation Menu */}
         <div 
           className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-            mobileMenuOpen ? 'max-h-48 py-3' : 'max-h-0'
+            mobileMenuOpen ? 'max-h-48 py-2' : 'max-h-0'
           }`}
         >
-          <nav className="flex flex-col space-y-3">
+          <nav className="flex flex-col space-y-2">
             <Link href="/">
               <div className={`flex items-center gap-2 ${location === '/' ? 'text-white font-medium' : 'text-slate-300 hover:text-white'} py-2`}>
                 <i className="fas fa-home text-sm mr-3 text-primary"></i>
