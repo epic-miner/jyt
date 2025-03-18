@@ -107,12 +107,36 @@ const VideoPlayerPage = () => {
   }
 
   // Handle error state
-  if (!anime || !currentEpisode) {
+  if (!anime) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-black">
         <div className="text-center p-4">
-          <h1 className="text-2xl font-bold mb-2">Video not found</h1>
-          <p className="mb-4">The episode you're looking for doesn't exist or is unavailable.</p>
+          <h1 className="text-2xl font-bold mb-2">Anime not found</h1>
+          <p className="mb-4">This anime doesn't exist or is unavailable.</p>
+          <button 
+            className="bg-primary hover:bg-primary/90 transition px-6 py-2 rounded-full"
+            onClick={() => setLocation('/')}
+          >
+            Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // If no episode is specified, redirect to first episode
+  if (!currentEpisode && episodes.length > 0) {
+    setLocation(`/watch/${animeId}/${episodes[0].id}`);
+    return null;
+  }
+
+  // If no episodes available
+  if (!currentEpisode || episodes.length === 0) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center bg-black">
+        <div className="text-center p-4">
+          <h1 className="text-2xl font-bold mb-2">No episodes available</h1>
+          <p className="mb-4">This anime doesn't have any episodes yet.</p>
           <button 
             className="bg-primary hover:bg-primary/90 transition px-6 py-2 rounded-full"
             onClick={() => setLocation(`/anime/${animeId}`)}
