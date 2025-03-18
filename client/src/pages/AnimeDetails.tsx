@@ -11,21 +11,21 @@ import { updateRecentlyWatchedAnime } from '../lib/cookies';
 const AnimeDetails = () => {
   const [, params] = useRoute('/anime/:id');
   const animeId = params?.id || '';
-  
+
   // Fetch anime details
   const { data: anime, isLoading: isLoadingAnime, isError: isAnimeError } = useQuery({
     queryKey: ['/api/anime', animeId],
     queryFn: () => fetchAnimeById(animeId),
     enabled: !!animeId,
   });
-  
+
   // Fetch anime episodes
   const { data: episodes, isLoading: isLoadingEpisodes, isError: isEpisodesError } = useQuery({
     queryKey: ['/api/episodes', animeId],
     queryFn: () => fetchEpisodesByAnimeId(animeId),
     enabled: !!animeId,
   });
-  
+
   // Update recently watched when visiting anime details
   useEffect(() => {
     if (anime) {
@@ -38,9 +38,9 @@ const AnimeDetails = () => {
       });
     }
   }, [anime]);
-  
+
   // Handle loading state
-  if (isLoadingAnime) {
+  if (isLoadingAnime || isLoadingEpisodes) {
     return (
       <div className="container mx-auto px-4 py-6">
         <Skeleton className="h-[300px] md:h-[400px] w-full rounded-lg mb-4" />
@@ -57,7 +57,7 @@ const AnimeDetails = () => {
       </div>
     );
   }
-  
+
   // Handle error state
   if (isAnimeError || !anime) {
     return (
@@ -70,18 +70,23 @@ const AnimeDetails = () => {
       </div>
     );
   }
-  
+
   // Extract genres from comma-separated string
   const genres = anime.genre.split(',').map(g => g.trim());
-  
+
+  // Get first episode thumbnail for banner
+  const bannerImage = episodes && episodes.length > 0 
+    ? episodes[0].thumbnail_url 
+    : anime.thumbnail_url;
+
   return (
     <div className="relative">
-      {/* Hero section with anime banner */}
-      <div className="relative h-[300px] md:h-[400px]">
+      {/* Hero section with episode banner */}
+      <div className="relative h-[300px] md:h-[400px] overflow-hidden">
         <img 
-          src={anime.thumbnail_url} 
+          src={bannerImage} 
           alt={anime.title} 
-          className="w-full h-full object-cover opacity-40"
+          className="w-full h-full object-cover opacity-40 scale-105 transition-transform duration-1000"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/80 to-transparent"></div>
         <Link href="/">
@@ -90,19 +95,19 @@ const AnimeDetails = () => {
           </button>
         </Link>
       </div>
-      
+
       {/* Anime info section */}
       <div className="container mx-auto px-4 -mt-32 relative z-10">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Anime poster */}
-          <div className="w-40 md:w-60 mx-auto md:mx-0 rounded-lg overflow-hidden shadow-lg">
+          <div className="w-40 md:w-60 mx-auto md:mx-0 rounded-lg overflow-hidden shadow-lg ring-1 ring-white/10">
             <img 
               src={anime.thumbnail_url} 
               alt={anime.title} 
               className="w-full h-full object-cover"
             />
           </div>
-          
+
           {/* Anime details */}
           <div className="flex-1">
             <h1 className="text-2xl md:text-4xl font-bold mb-2">{anime.title}</h1>
@@ -112,7 +117,7 @@ const AnimeDetails = () => {
               ))}
             </div>
             <p className="text-slate-300 mb-6">{anime.description}</p>
-            
+
             {episodes && episodes.length > 0 && (
               <Link href={`/watch/${anime.id}/${episodes[0].id}`}>
                 <button className="bg-primary hover:bg-primary/90 transition px-6 py-2 rounded-full flex items-center">
@@ -122,11 +127,11 @@ const AnimeDetails = () => {
             )}
           </div>
         </div>
-        
+
         {/* Episodes section */}
         <div className="mt-10">
           <h2 className="text-xl font-bold mb-4">Episodes</h2>
-          
+
           {isLoadingEpisodes ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array(6).fill(0).map((_, i) => (
