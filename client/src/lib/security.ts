@@ -5,35 +5,108 @@ const disableConsole = () => {
   const noop = () => undefined;
   const methods = ['log', 'debug', 'info', 'warn', 'error', 'table', 'trace'];
 
+  // Save original console methods for our own use
+  const originalConsole = {
+    warn: console.warn,
+    error: console.error
+  };
+
+  // Override all console methods
   methods.forEach(method => {
     console[method] = noop;
   });
 
   // Add warning for console access
+  const showWarning = () => {
+    originalConsole.warn(
+      '%cStop!', 
+      'color: red; font-size: 30px; font-weight: bold;'
+    );
+    originalConsole.warn(
+      '%cThis is a security feature of our video player. Console access is restricted.',
+      'color: red; font-size: 16px;'
+    );
+    originalConsole.warn(
+      '%cAttempting to bypass security measures is prohibited.',
+      'color: red; font-size: 16px;'
+    );
+  };
+
+  // Periodically clear console and show warning
   setInterval(() => {
     console.clear();
-    console.warn('Console access is restricted for security purposes.');
+    showWarning();
   }, 100);
+
+  // Additional protection against console overrides
+  Object.defineProperty(window, 'console', {
+    get: function() {
+      return {
+        log: noop,
+        info: noop,
+        warn: noop,
+        error: noop,
+        debug: noop,
+        trace: noop,
+        clear: noop
+      };
+    },
+    set: function() {
+      return false;
+    }
+  });
 };
 
-// DevTools detection
+// DevTools detection with enhanced monitoring
 export const detectDevTools = (callback: () => void) => {
   const threshold = 160;
+  let isDevToolsOpen = false;
 
   const checkDevTools = () => {
     const widthThreshold = window.outerWidth - window.innerWidth > threshold;
     const heightThreshold = window.outerHeight - window.innerHeight > threshold;
 
     if (widthThreshold || heightThreshold) {
-      callback();
+      if (!isDevToolsOpen) {
+        isDevToolsOpen = true;
+        callback();
+      }
+    } else {
+      isDevToolsOpen = false;
     }
   };
 
+  // Multiple detection methods
   window.addEventListener('resize', checkDevTools);
+  window.addEventListener('mousemove', checkDevTools);
   setInterval(checkDevTools, 1000);
+
+  // Additional detection methods
+  const element = new Image();
+  Object.defineProperty(element, 'id', {
+    get: function() {
+      isDevToolsOpen = true;
+      callback();
+      return '';
+    }
+  });
+
+  // Check for Firefox dev tools
+  //@ts-ignore
+  if (window.devtools?.open) {
+    isDevToolsOpen = true;
+    callback();
+  }
+
+  // Regular checking
+  setInterval(() => {
+    for (let i = 0; i < 100; i++) {
+      console.debug(element);
+    }
+  }, 1000);
 };
 
-// Key combination prevention
+// Keep the rest of the file unchanged
 export const preventKeyboardShortcuts = () => {
   window.addEventListener('keydown', (e: KeyboardEvent) => {
     // Prevent F12
@@ -187,6 +260,9 @@ export const initializeGlobalSecurity = () => {
   disableConsole();
 
   detectDevTools(() => {
-    console.warn('Developer tools detected. Some features may be restricted.');
+    // Redirect or show warning when DevTools are detected
+    console.warn('%cWarning!', 'color: red; font-size: 30px; font-weight: bold;');
+    console.warn('%cDeveloper tools detected. This action has been logged.', 'color: red; font-size: 16px;');
+    console.warn('%cPlease close DevTools to continue using the site.', 'color: red; font-size: 16px;');
   });
 };
