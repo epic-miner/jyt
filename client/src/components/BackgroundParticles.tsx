@@ -1,3 +1,4 @@
+
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
@@ -16,7 +17,6 @@ export const BackgroundParticles = () => {
   const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
-    // Generate random particles with galaxy theme
     const newParticles = Array.from({ length: 200 }, (_, i) => {
       const type = Math.random() > 0.9 ? 'nebula' : Math.random() > 0.2 ? 'star' : 'dust';
       const size = type === 'nebula' ? Math.random() * 400 + 200 : 
@@ -38,8 +38,7 @@ export const BackgroundParticles = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-[-1]">
-      {/* Stars and dust particles */}
+    <div className="fixed inset-0 w-full h-full pointer-events-none overflow-hidden" style={{ position: 'fixed', zIndex: -1 }}>
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
@@ -75,19 +74,19 @@ export const BackgroundParticles = () => {
         />
       ))}
 
-      {/* Animated cosmic rays */}
+      {/* Cosmic rays */}
       <div className="absolute inset-0">
         {Array.from({ length: 8 }).map((_, i) => (
           <motion.div
             key={i}
-            className="absolute h-[1px] w-full bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+            className="absolute h-[1px] w-full bg-gradient-to-r from-transparent via-primary/50 to-transparent"
             style={{ 
               top: `${15 * (i + 1)}%`,
               transform: `rotate(${Math.random() * 40 - 20}deg)`
             }}
             animate={{
               x: ["-100%", "200%"],
-              opacity: [0, 0.6, 0],
+              opacity: [0, 0.8, 0],
             }}
             transition={{
               duration: 12 + i * 2,
@@ -99,10 +98,10 @@ export const BackgroundParticles = () => {
         ))}
       </div>
 
-      {/* Nebula effects */}
-      <div className="absolute inset-0 opacity-40">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/20 animate-pulse" />
-        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-primary/10 to-transparent animate-pulse delay-1000" />
+      {/* Enhanced nebula effects */}
+      <div className="absolute inset-0 opacity-50">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-primary/30 animate-pulse" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-primary/20 to-transparent animate-pulse delay-1000" />
       </div>
     </div>
   );
