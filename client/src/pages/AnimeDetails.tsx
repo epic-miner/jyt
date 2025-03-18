@@ -89,7 +89,7 @@ const AnimeDetails = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
-        className="relative h-[300px] md:h-[400px] overflow-hidden"
+        className="relative h-[300px] md:h-[400px] overflow-hidden group"
       >
         <motion.img
           initial={{ opacity: 0 }}
@@ -97,7 +97,7 @@ const AnimeDetails = () => {
           transition={{ duration: 0.5 }}
           src={bannerImage}
           alt={anime.title}
-          className="w-full h-full object-cover object-center opacity-75 transform-gpu will-change-transform"
+          className="w-full h-full object-cover object-center opacity-75 transform-gpu will-change-transform transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:opacity-85"
           loading="eager"
           decoding="sync"
         />
