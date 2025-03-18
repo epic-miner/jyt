@@ -97,7 +97,9 @@ const AnimeDetails = () => {
           transition={{ duration: 0.5 }}
           src={bannerImage}
           alt={anime.title}
-          className="w-full h-full object-cover opacity-75"
+          className="w-full h-full object-cover object-center opacity-75 transform-gpu will-change-transform"
+          loading="eager"
+          decoding="sync"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/60 to-transparent/30">
           {/* Animated neon lines */}
