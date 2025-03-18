@@ -337,12 +337,25 @@ const VideoPlayer = ({
   }, []);
 
   const toggleFullScreen = () => {
+    const element = playerContainerRef.current;
+    if (!element) return;
+
     if (!document.fullscreenElement) {
-      if (playerContainerRef.current && playerContainerRef.current.requestFullscreen) {
-        playerContainerRef.current.requestFullscreen();
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
       }
-    } else if (document.exitFullscreen) {
-      document.exitFullscreen();
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
     }
   };
 
