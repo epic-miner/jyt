@@ -17,11 +17,11 @@ export const BackgroundParticles = () => {
 
   useEffect(() => {
     // Generate random particles with galaxy theme
-    const newParticles = Array.from({ length: 150 }, (_, i) => {
-      const type = Math.random() > 0.85 ? 'nebula' : Math.random() > 0.25 ? 'star' : 'dust';
-      const size = type === 'nebula' ? Math.random() * 300 + 150 : 
-                  type === 'star' ? Math.random() * 5 + 2 :
-                  Math.random() * 12 + 4;
+    const newParticles = Array.from({ length: 200 }, (_, i) => {
+      const type = Math.random() > 0.9 ? 'nebula' : Math.random() > 0.2 ? 'star' : 'dust';
+      const size = type === 'nebula' ? Math.random() * 400 + 200 : 
+                  type === 'star' ? Math.random() * 6 + 2 :
+                  Math.random() * 15 + 5;
 
       return {
         id: i,
@@ -38,7 +38,7 @@ export const BackgroundParticles = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-[-1]">
       {/* Stars and dust particles */}
       {particles.map((particle) => (
         <motion.div
