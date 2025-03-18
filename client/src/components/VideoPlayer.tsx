@@ -61,6 +61,7 @@ const VideoPlayer = ({
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [isHovering, setIsHovering] = useState(false);
   const isMobile = useIsMobile();
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 
   // Get available quality options
