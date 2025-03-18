@@ -140,7 +140,7 @@ const AnimeDetails = () => {
             <motion.h1
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="text-2xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-white to-primary bg-clip-text text-transparent"
+              className="text-2xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-white to-primary bg-clip-text text-transparent hover:scale-[1.01] transition-transform duration-300"
             >
               {anime.title}
             </motion.h1>

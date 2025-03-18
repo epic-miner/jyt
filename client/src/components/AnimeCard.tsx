@@ -28,7 +28,7 @@ const AnimeCard = ({
     <Link href={`/anime/${anime.id}`} className={cn("block", className)}>
       <div className={cn(
         "relative group cursor-pointer glass-effect transition-all duration-300",
-        "hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20",
+        "hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20 hover:ring-2 hover:ring-primary/30", // Added glow effect
         isContinueWatching && "border-primary/30" // Special border for continue watching
       )}>
         {/* Main Image Container with aspect ratio */}
