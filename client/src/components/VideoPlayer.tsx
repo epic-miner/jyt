@@ -189,23 +189,30 @@ const VideoPlayer = ({
     };
   }, []);
 
-  // Handle mobile rotation
+  // Handle mobile rotation and fullscreen
   useEffect(() => {
     const handleOrientationChange = () => {
       if (window.screen.orientation && playerContainerRef.current) {
         const isLandscape = window.screen.orientation.type.includes('landscape');
-        if (isLandscape) {
-          document.documentElement.requestFullscreen?.();
-        } else if (document.fullscreenElement) {
-          document.exitFullscreen?.();
+        if (isLandscape && !document.fullscreenElement) {
+          playerContainerRef.current.requestFullscreen?.();
+          window.screen.orientation.lock?.('landscape').catch(() => {});
         }
       }
     };
 
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && window.screen.orientation) {
+        window.screen.orientation.unlock?.();
+      }
+    };
+
     window.screen.orientation?.addEventListener('change', handleOrientationChange);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
 
     return () => {
       window.screen.orientation?.removeEventListener('change', handleOrientationChange);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
   }, []);
 
