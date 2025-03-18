@@ -20,14 +20,14 @@ const EpisodeCard = ({ episode, animeId }: EpisodeCardProps) => {
             <img 
               src={episode.thumbnail_url} 
               alt={`Episode ${episode.episode_number}: ${episode.title}`} 
-              className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+              className="w-full h-full object-cover transform transition-all duration-700 ease-out group-hover:scale-105 group-hover:filter group-hover:brightness-110"
               loading="lazy"
             />
           </AspectRatio>
 
-          {/* Overlay with neon effect */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+          {/* Enhanced overlay with stronger gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-70 group-hover:opacity-90 transition-all duration-500 ease-out">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 ease-in-out"></div>
           </div>
 
           {/* Play button with enhanced neon effect */}
