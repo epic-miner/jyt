@@ -1,12 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
+import { motion } from 'framer-motion';
 import AnimeCard from '../components/AnimeCard';
 import GenrePill from '../components/GenrePill';
 import { Skeleton } from '@/components/ui/skeleton';
 import { fetchAllAnime, fetchEpisodesByAnimeId } from '../lib/api';
 import { getRecentlyWatchedAnime, getWatchHistory } from '../lib/cookies';
 import { Anime, RecentlyWatchedAnime, WatchHistoryItem } from '@shared/types';
+
+// Animation variants for sections
+const sectionVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" }
+  }
+};
 
 // Section title component for consistent styling
 const SectionTitle = ({ icon, title, viewAllLink, viewAllText = 'View All' }: { 
@@ -15,18 +26,23 @@ const SectionTitle = ({ icon, title, viewAllLink, viewAllText = 'View All' }: {
   viewAllLink?: string,
   viewAllText?: string 
 }) => (
-  <div className="flex items-center justify-between mb-6">
-    <h2 className="text-xl font-bold flex items-center">
+  <motion.div 
+    initial={{ opacity: 0, x: -20 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ duration: 0.5 }}
+    className="flex items-center justify-between mb-6"
+  >
+    <h2 className="text-2xl font-bold flex items-center bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
       <i className={`fas fa-${icon} mr-2.5 text-primary`}></i> {title}
     </h2>
     {viewAllLink && (
       <Link href={viewAllLink}>
-        <span className="text-sm text-primary hover:text-primary/80 transition-colors duration-200 font-medium flex items-center cursor-pointer">
+        <span className="text-sm text-primary hover:text-primary/80 transition-all duration-300 font-medium flex items-center cursor-pointer hover:translate-x-1">
           {viewAllText} <i className="fas fa-chevron-right ml-1 text-xs"></i>
         </span>
       </Link>
     )}
-  </div>
+  </motion.div>
 );
 
 const Home = () => {
@@ -102,45 +118,61 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-dark-950 to-dark-900 pb-24 md:pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-800 pb-24 md:pb-8">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {continueWatching.length > 0 && (
-          <section className="mb-8 md:mb-12">
+          <motion.section 
+            initial="hidden"
+            animate="visible"
+            variants={sectionVariants}
+            className="mb-8 md:mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5"
+          >
             <SectionTitle 
               icon="history" 
               title="Continue Watching" 
               viewAllLink="/recently-watched" 
             />
 
-            <div className="grid grid-cols-3 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 xs:gap-3 md:gap-4">
-              {continueWatching.slice(0, 6).map((item) => (
-                <AnimeCard
+            <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
+              {continueWatching.slice(0, 6).map((item, index) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
                   key={`${item.animeId}-${item.episodeId}`}
-                  anime={{
-                    id: parseInt(item.animeId),
-                    title: item.animeTitle,
-                    thumbnail_url: item.animeThumbnail,
-                    genre: "",
-                    description: ""
-                  }}
-                  showProgress={true}
-                  progress={item.progress}
-                  onQuickPlay={() => setLocation(`/watch/${item.animeId}/${item.episodeId}`)}
-                  className="mobile-card"
-                />
+                >
+                  <AnimeCard
+                    anime={{
+                      id: parseInt(item.animeId),
+                      title: item.animeTitle,
+                      thumbnail_url: item.animeThumbnail,
+                      genre: "",
+                      description: ""
+                    }}
+                    showProgress={true}
+                    progress={item.progress}
+                    onQuickPlay={() => setLocation(`/watch/${item.animeId}/${item.episodeId}`)}
+                    className="hover:scale-105 transition-transform duration-300"
+                  />
+                </motion.div>
               ))}
             </div>
-          </section>
+          </motion.section>
         )}
 
-        <section className="mb-12">
+        <motion.section 
+          initial="hidden"
+          animate="visible"
+          variants={sectionVariants}
+          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5"
+        >
           <SectionTitle 
             icon="fire" 
             title="Popular Now" 
             viewAllLink="/search?sort=popular" 
           />
 
-          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-6">
+          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {isLoadingAnime ? (
               Array(12).fill(0).map((_, i) => (
                 <div key={i} className="rounded-xl overflow-hidden bg-dark-800/60 shadow-md border border-dark-700/30">
@@ -152,20 +184,32 @@ const Home = () => {
                 </div>
               ))
             ) : (
-              popularAnime.slice(0, 12).map((anime) => (
-                <AnimeCard 
-                  key={anime.id} 
-                  anime={anime}
-                  rating={4.5} 
-                  episodeCount={episodeCounts?.[anime.id] || undefined}
-                  onQuickPlay={() => handleQuickPlay(anime.id.toString())}
-                />
+              popularAnime.slice(0, 12).map((anime, index) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  key={anime.id}
+                >
+                  <AnimeCard 
+                    anime={anime}
+                    rating={4.5} 
+                    episodeCount={episodeCounts?.[anime.id] || undefined}
+                    onQuickPlay={() => handleQuickPlay(anime.id.toString())}
+                    className="hover:scale-105 transition-transform duration-300"
+                  />
+                </motion.div>
               ))
             )}
           </div>
-        </section>
+        </motion.section>
 
-        <section className="mb-12">
+        <motion.section 
+          initial="hidden"
+          animate="visible"
+          variants={sectionVariants}
+          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5"
+        >
           <SectionTitle 
             icon="tags" 
             title="Browse by Genre" 
@@ -174,20 +218,28 @@ const Home = () => {
           />
 
           <div className="mb-4 overflow-x-auto pb-2 -mx-4 px-4">
-            <div className="flex flex-nowrap gap-2 min-w-max">
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex flex-nowrap gap-2 min-w-max"
+            >
               {isLoadingAnime ? (
                 Array(10).fill(0).map((_, i) => (
                   <Skeleton key={i} className="h-9 w-24 rounded-full" />
                 ))
               ) : (
-                genres.slice(0, 20).map((genre) => (
-                  <GenrePill 
-                    key={genre} 
-                    genre={genre}
-                  />
+                genres.slice(0, 20).map((genre, index) => (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    key={genre}
+                  >
+                    <GenrePill genre={genre} />
+                  </motion.div>
                 ))
               )}
-            </div>
+            </motion.div>
           </div>
 
           <div className="hidden md:grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4">
@@ -196,20 +248,24 @@ const Home = () => {
                 <Skeleton key={i} className="h-16 w-full rounded-xl" />
               ))
             ) : (
-              genres.slice(0, 12).map((genre) => (
-                <Link 
-                  key={genre} 
-                  href={`/genre/${encodeURIComponent(genre)}`}
+              genres.slice(0, 12).map((genre, index) => (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.1 }}
+                  key={genre}
                 >
-                  <span className="bg-dark-800/70 hover:bg-dark-800 transition-all duration-300 py-4 px-2 rounded-xl shadow-md border border-dark-700/50 hover:border-primary/20 flex items-center justify-center group cursor-pointer">
-                    <i className="fas fa-tag mr-2 text-primary/70 group-hover:text-primary transition-colors duration-300"></i>
-                    <span className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors duration-300">{genre}</span>
-                  </span>
-                </Link>
+                  <Link href={`/genre/${encodeURIComponent(genre)}`}>
+                    <span className="bg-dark-800/70 hover:bg-dark-800 transition-all duration-300 py-4 px-2 rounded-xl shadow-md border border-dark-700/50 hover:border-primary/20 flex items-center justify-center group cursor-pointer hover:scale-105">
+                      <i className="fas fa-tag mr-2 text-primary/70 group-hover:text-primary transition-colors duration-300"></i>
+                      <span className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors duration-300">{genre}</span>
+                    </span>
+                  </Link>
+                </motion.div>
               ))
             )}
           </div>
-        </section>
+        </motion.section>
       </div>
     </div>
   );
