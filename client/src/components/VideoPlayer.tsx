@@ -660,9 +660,9 @@ const VideoPlayer = ({
 
             {/* YouTube-style custom controls overlay */}
             <div className={cn(
-              "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent pt-16 z-10 transition-opacity duration-300",
+              "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent pt-8 z-10 transition-opacity duration-300",
               !showControls && "opacity-0 pointer-events-none",
-              isMobile && document.fullscreenElement ? "pb-[25%]" : "pb-6" // Significant bottom padding in fullscreen mobile
+              isMobile ? "pb-14" : "pb-6"
             )}>
               {/* Progress bar - YouTube style (thin line with hover effect) */}
               <div 
