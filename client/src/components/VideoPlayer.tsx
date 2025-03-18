@@ -192,43 +192,58 @@ const VideoPlayer = ({
     };
   }, []);
 
-  // Handle mobile rotation and fullscreen
+  // Add isLandscape helper function at the top of the component
+  const isLandscapeMode = () => {
+    const orientation = window.screen?.orientation;
+    return orientation?.type?.includes('landscape') ||
+           (window.orientation !== undefined && Math.abs(window.orientation as number) === 90);
+  };
+
+  // Update toggleFullScreen function
+  const toggleFullScreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        if (isMobile && !isLandscapeMode()) {
+          // Show a message to rotate device
+          setError('Please rotate your device to landscape mode for fullscreen view');
+          setTimeout(() => setError(null), 3000);
+          return;
+        }
+
+        if (playerContainerRef.current) {
+          await playerContainerRef.current.requestFullscreen();
+          setIsFullScreen(true);
+        }
+      } else {
+        await document.exitFullscreen();
+        setIsFullScreen(false);
+      }
+    } catch (err) {
+      console.error('Fullscreen error:', err);
+      setError('Unable to enter fullscreen mode');
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
+  // Update orientation change handler
   useEffect(() => {
     const handleOrientationChange = async () => {
       try {
         if (!playerContainerRef.current) return;
 
-        // Check if orientation API is supported
-        const orientation = window.screen?.orientation;
-        const isLandscape = orientation?.type?.includes('landscape') ||
-                          (window.orientation !== undefined && Math.abs(window.orientation as number) === 90);
+        const isLandscape = isLandscapeMode();
 
-        if (isLandscape) {
-          // Enter fullscreen when rotating to landscape
-          if (!document.fullscreenElement) {
-            await playerContainerRef.current.requestFullscreen();
-
-            // Only try to lock if the API is fully supported
-            if (orientation?.lock && typeof orientation.lock === 'function') {
-              try {
-                await orientation.lock('landscape');
-              } catch (lockError) {
-                console.log('Orientation lock not supported or denied:', lockError);
-              }
+        // Only allow fullscreen in landscape mode on mobile
+        if (isMobile) {
+          if (isLandscape) {
+            // Auto-enter fullscreen when rotating to landscape
+            if (!document.fullscreenElement) {
+              await playerContainerRef.current.requestFullscreen();
             }
-          }
-        } else {
-          // Exit fullscreen when rotating to portrait
-          if (document.fullscreenElement) {
-            await document.exitFullscreen();
-
-            // Only try to unlock if the API is fully supported
-            if (orientation?.unlock && typeof orientation.unlock === 'function') {
-              try {
-                await orientation.unlock();
-              } catch (unlockError) {
-                console.log('Orientation unlock not supported:', unlockError);
-              }
+          } else {
+            // Auto-exit fullscreen when rotating to portrait
+            if (document.fullscreenElement) {
+              await document.exitFullscreen();
             }
           }
         }
@@ -237,22 +252,13 @@ const VideoPlayer = ({
       }
     };
 
-    const handleFullscreenChange = async () => {
-      // When exiting fullscreen, ensure orientation is unlocked if supported
-      const orientation = window.screen?.orientation;
-
-      if (!document.fullscreenElement && orientation?.unlock && typeof orientation.unlock === 'function') {
-        try {
-          await orientation.unlock();
-        } catch (error) {
-          console.log('Orientation unlock not supported:', error);
-        }
-      }
+    const handleFullscreenChange = () => {
+      const isFullscreen = !!document.fullscreenElement;
+      setIsFullScreen(isFullscreen);
 
       // Show controls when entering fullscreen on mobile
-      if (document.fullscreenElement && isMobile) {
+      if (isFullscreen && isMobile) {
         setShowControls(true);
-        // Reset the timer for controls visibility
         if (controlsTimeoutRef.current) {
           clearTimeout(controlsTimeoutRef.current);
         }
@@ -283,14 +289,11 @@ const VideoPlayer = ({
       }
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
 
-      // Cleanup: try to unlock orientation if supported
-      const orientation = window.screen?.orientation;
-      if (orientation?.unlock && typeof orientation.unlock === 'function') {
-        try {
-          orientation.unlock();
-        } catch (error) {
-          console.log('Error unlocking orientation on cleanup:', error);
-        }
+      // Exit fullscreen if in portrait mode
+      if (document.fullscreenElement && isMobile && !isLandscapeMode()) {
+        document.exitFullscreen().catch(() => {
+          // Ignore errors during cleanup
+        });
       }
     };
   }, [isMobile, isHovering]);
@@ -415,21 +418,6 @@ const VideoPlayer = ({
     return () => clearTimeout(timeout);
   }, []);
 
-  const toggleFullScreen = async () => {
-    try {
-      if (!document.fullscreenElement) {
-        if (playerContainerRef.current) {
-          await playerContainerRef.current.requestFullscreen();
-          setIsFullScreen(true);
-        }
-      } else {
-        await document.exitFullscreen();
-        setIsFullScreen(false);
-      }
-    } catch (err) {
-      console.error('Fullscreen error:', err);
-    }
-  };
 
   const handleQualityChange = (quality: VideoQuality) => {
     setSelectedQuality(quality);
