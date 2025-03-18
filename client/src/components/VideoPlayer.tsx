@@ -200,6 +200,9 @@ const VideoPlayer = ({
         if (isLandscape && !document.fullscreenElement) {
           playerContainerRef.current.requestFullscreen?.();
           window.screen.orientation.lock?.('landscape').catch(() => {});
+        } else if (!isLandscape && document.fullscreenElement) {
+          document.exitFullscreen?.();
+          window.screen.orientation.unlock?.();
         }
       }
     };
