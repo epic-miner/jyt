@@ -8,6 +8,7 @@ import VideoPlayerPage from "./pages/VideoPlayerPage";
 import SearchResults from "./pages/SearchResults";
 import RecentlyWatched from "./pages/RecentlyWatched";
 import GenrePage from "./pages/GenrePage";
+import ManagePage from "./pages/ManagePage";
 import NotFound from "./pages/not-found";
 import ScrollToTop from "./components/ScrollToTop";
 import { PageTransition } from "./components/PageTransition";
@@ -35,6 +36,7 @@ function App() {
             <Route path="/search" component={SearchResults} />
             <Route path="/recently-watched" component={RecentlyWatched} />
             <Route path="/genre/:genre" component={GenrePage} />
+            <Route path="/manage" component={ManagePage} />
             <Route component={NotFound} />
           </Switch>
         </PageTransition>
