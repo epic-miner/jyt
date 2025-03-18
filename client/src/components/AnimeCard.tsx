@@ -33,7 +33,7 @@ const AnimeCard = ({
       )}>
         {/* Main Image Container with aspect ratio */}
         <div className={cn(
-          "rounded-lg overflow-hidden relative",
+          "rounded-xl overflow-hidden relative", // Changed from rounded-lg to rounded-xl
           isContinueWatching ? "aspect-[3/4]" : "aspect-[2/3]" // Different aspect ratio for continue watching
         )}>
           <img 
