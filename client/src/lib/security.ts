@@ -54,16 +54,52 @@ export const preventKeyboardShortcuts = () => {
       return false;
     }
 
-    // Only prevent copy/paste in video player
-    if (e.ctrlKey && (e.key === 'C' || e.key === 'c' || e.key === 'V' || e.key === 'v' || e.key === 'X' || e.key === 'x')) {
-      const isVideoPlayer = (e.target as HTMLElement)?.closest('.video-player-container');
-      if (isVideoPlayer) {
+    // Prevent Ctrl+S (Save page)
+    if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
+      e.preventDefault();
+      return false;
+    }
+
+    // Prevent copy/paste/cut operations globally
+    if (e.ctrlKey && (
+      e.key === 'C' || e.key === 'c' ||
+      e.key === 'V' || e.key === 'v' ||
+      e.key === 'X' || e.key === 'x'
+    )) {
+      const target = e.target as HTMLElement;
+      // Allow copy/paste in form elements only
+      if (!(target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
         e.preventDefault();
         return false;
       }
     }
 
     return true;
+  });
+
+  // Additional clipboard protection
+  document.addEventListener('copy', (e: ClipboardEvent) => {
+    const target = e.target as HTMLElement;
+    if (!(target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+      e.preventDefault();
+      return false;
+    }
+  });
+
+  document.addEventListener('cut', (e: ClipboardEvent) => {
+    const target = e.target as HTMLElement;
+    if (!(target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+      e.preventDefault();
+      return false;
+    }
+  });
+
+  document.addEventListener('paste', (e: ClipboardEvent) => {
+    const target = e.target as HTMLElement;
+    if (!(target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+      e.preventDefault();
+      return false;
+    }
   });
 };
 
