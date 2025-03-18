@@ -59,6 +59,7 @@ const VideoPlayer = ({
   const [showTitle, setShowTitle] = useState(true);
   const [bufferProgress, setBufferProgress] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const isMobile = useIsMobile();
 
 
   // Get available quality options
@@ -589,7 +590,7 @@ const VideoPlayer = ({
                   e.preventDefault();
                   const element = playerContainerRef.current;
                   if (!element) return;
-                  
+
                   if (!document.fullscreenElement) {
                     if (element.requestFullscreen) {
                       element.requestFullscreen();
