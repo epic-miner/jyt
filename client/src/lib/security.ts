@@ -240,29 +240,26 @@ export const preventIframeEmbedding = () => {
 
 // Initialize all security measures for video player
 export const initializeSecurity = (videoPlayerContainer: HTMLElement) => {
-  disableConsole();
-  preventKeyboardShortcuts();
-  preventRightClick(videoPlayerContainer);
-  preventTextSelection(videoPlayerContainer);
-  preventIframeEmbedding();
-
-  detectDevTools(() => {
-    // Handle DevTools detection
-    console.warn('Developer tools detected. Some features may be restricted.');
-  });
+  try {
+    preventTextSelection(videoPlayerContainer);
+    
+    videoPlayerContainer.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      return false;
+    });
+  } catch (error) {
+    console.warn('Some security features could not be initialized:', error);
+  }
 };
 
 // Initialize global security measures
 export const initializeGlobalSecurity = () => {
-  preventKeyboardShortcuts();
-  initializeGlobalRightClickPrevention();
-  preventIframeEmbedding();
-  disableConsole();
-
-  detectDevTools(() => {
-    // Redirect or show warning when DevTools are detected
-    console.warn('%cWarning!', 'color: red; font-size: 30px; font-weight: bold;');
-    console.warn('%cDeveloper tools detected. This action has been logged.', 'color: red; font-size: 16px;');
-    console.warn('%cPlease close DevTools to continue using the site.', 'color: red; font-size: 16px;');
-  });
+  try {
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      return false;
+    });
+  } catch (error) {
+    console.warn('Some security features could not be initialized:', error);
+  }
 };
