@@ -59,6 +59,7 @@ const VideoPlayer = ({
   const [showTitle, setShowTitle] = useState(true);
   const [bufferProgress, setBufferProgress] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [isHovering, setIsHovering] = useState(false);
   const isMobile = useIsMobile();
 
 
@@ -530,7 +531,13 @@ const VideoPlayer = ({
     const playerContainer = playerContainerRef.current;
     if (playerContainer) {
       playerContainer.addEventListener('mousemove', handleMouseMove);
-      playerContainer.addEventListener('mouseenter', () => setShowControls(true));
+      playerContainer.addEventListener('mouseenter', () => {
+        setShowControls(true);
+        setIsHovering(true);
+      });
+      playerContainer.addEventListener('mouseleave', () => {
+        setIsHovering(false);
+      });
     }
 
     return () => {
