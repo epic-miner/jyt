@@ -3,15 +3,15 @@ import { Episode, Anime } from '@shared/types';
 import { updateWatchHistory } from '../lib/cookies';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { cn } from '@/lib/utils';
-import { 
-  Play, 
-  Pause, 
-  SkipBack, 
-  SkipForward, 
-  Volume2, 
-  Volume1, 
-  VolumeX, 
-  Maximize, 
+import {
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  Volume1,
+  VolumeX,
+  Maximize,
   Minimize,
   Settings
 } from 'lucide-react';
@@ -30,13 +30,13 @@ interface VideoPlayerProps {
 
 type VideoQuality = '1080p' | '720p' | '480p' | '360p' | '240p' | '144p' | 'auto';
 
-const VideoPlayer = ({ 
-  anime, 
-  episode, 
-  onNextEpisode, 
-  onPreviousEpisode, 
-  hasNext, 
-  hasPrevious 
+const VideoPlayer = ({
+  anime,
+  episode,
+  onNextEpisode,
+  onPreviousEpisode,
+  hasNext,
+  hasPrevious
 }: VideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -196,29 +196,38 @@ const VideoPlayer = ({
   useEffect(() => {
     const handleOrientationChange = async () => {
       try {
-        if (window.screen.orientation && playerContainerRef.current) {
-          const isLandscape = window.screen.orientation.type.includes('landscape');
+        if (!playerContainerRef.current) return;
 
-          if (isLandscape) {
-            // Enter fullscreen when rotating to landscape
-            if (!document.fullscreenElement) {
-              await playerContainerRef.current.requestFullscreen();
+        // Check if orientation API is supported
+        const orientation = window.screen?.orientation;
+        const isLandscape = orientation?.type?.includes('landscape') ||
+                          (window.orientation !== undefined && Math.abs(window.orientation as number) === 90);
+
+        if (isLandscape) {
+          // Enter fullscreen when rotating to landscape
+          if (!document.fullscreenElement) {
+            await playerContainerRef.current.requestFullscreen();
+
+            // Only try to lock if the API is fully supported
+            if (orientation?.lock && typeof orientation.lock === 'function') {
               try {
-                await window.screen.orientation.lock('landscape');
+                await orientation.lock('landscape');
               } catch (lockError) {
-                console.log('Orientation lock not supported:', lockError);
-                // Continue without orientation lock
+                console.log('Orientation lock not supported or denied:', lockError);
               }
             }
-          } else {
-            // Exit fullscreen when rotating to portrait
-            if (document.fullscreenElement) {
-              await document.exitFullscreen();
+          }
+        } else {
+          // Exit fullscreen when rotating to portrait
+          if (document.fullscreenElement) {
+            await document.exitFullscreen();
+
+            // Only try to unlock if the API is fully supported
+            if (orientation?.unlock && typeof orientation.unlock === 'function') {
               try {
-                await window.screen.orientation.unlock();
+                await orientation.unlock();
               } catch (unlockError) {
                 console.log('Orientation unlock not supported:', unlockError);
-                // Continue without orientation unlock
               }
             }
           }
@@ -229,10 +238,12 @@ const VideoPlayer = ({
     };
 
     const handleFullscreenChange = async () => {
-      // When exiting fullscreen, ensure orientation is unlocked
-      if (!document.fullscreenElement && window.screen.orientation) {
+      // When exiting fullscreen, ensure orientation is unlocked if supported
+      const orientation = window.screen?.orientation;
+
+      if (!document.fullscreenElement && orientation?.unlock && typeof orientation.unlock === 'function') {
         try {
-          await window.screen.orientation.unlock();
+          await orientation.unlock();
         } catch (error) {
           console.log('Orientation unlock not supported:', error);
         }
@@ -253,7 +264,7 @@ const VideoPlayer = ({
       }
     };
 
-    // Add orientation change listener if supported
+    // Add orientation change listener with compatibility check
     if (window.screen?.orientation?.addEventListener) {
       window.screen.orientation.addEventListener('change', handleOrientationChange);
     } else {
@@ -264,7 +275,7 @@ const VideoPlayer = ({
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
     return () => {
-      // Cleanup listeners and ensure orientation is unlocked
+      // Cleanup listeners
       if (window.screen?.orientation?.removeEventListener) {
         window.screen.orientation.removeEventListener('change', handleOrientationChange);
       } else {
@@ -272,9 +283,10 @@ const VideoPlayer = ({
       }
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
 
-      // Unlock orientation when component unmounts
-      if (window.screen?.orientation?.unlock) {
-        window.screen.orientation.unlock().catch(error => {
+      // Cleanup: try to unlock orientation if supported
+      const orientation = window.screen?.orientation;
+      if (orientation?.unlock && typeof orientation.unlock === 'function') {
+        orientation.unlock().catch(error => {
           console.log('Error unlocking orientation on cleanup:', error);
         });
       }
@@ -321,7 +333,7 @@ const VideoPlayer = ({
           e.preventDefault();
           if (videoRef.current) {
             videoRef.current.currentTime = Math.min(
-              videoRef.current.duration || 0, 
+              videoRef.current.duration || 0,
               videoRef.current.currentTime + 5
             );
           }
@@ -441,9 +453,9 @@ const VideoPlayer = ({
   // Determine video URL to use based on selected quality
   const getVideoUrl = (): string => {
     if (selectedQuality === 'auto') {
-      return episode.video_url_max_quality || 
-             episode.video_url_1080p || 
-             episode.video_url_720p || 
+      return episode.video_url_max_quality ||
+             episode.video_url_1080p ||
+             episode.video_url_720p ||
              episode.video_url_480p || '';
     }
 
@@ -626,7 +638,7 @@ const VideoPlayer = ({
 
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      
+
       if (playerContainer) {
         if (!isMobile) {
           playerContainer.removeEventListener('mousemove', showControlsTemporarily);
@@ -648,7 +660,7 @@ const VideoPlayer = ({
   return (
     <div className="w-full flex flex-col bg-black">
       {/* Main video container with 16:9 aspect ratio */}
-      <div 
+      <div
         ref={playerContainerRef}
         className="relative w-full bg-black overflow-hidden"
       >
@@ -669,7 +681,7 @@ const VideoPlayer = ({
                   <i className="fas fa-exclamation-circle text-red-500 text-4xl mb-4"></i>
                   <h3 className="text-xl font-bold mb-2">Video Error</h3>
                   <p className="text-slate-300 mb-4">{error}</p>
-                  <button 
+                  <button
                     onClick={() => window.location.reload()}
                     className="bg-primary hover:bg-primary/90 transition px-4 py-2 rounded-lg"
                   >
@@ -708,7 +720,7 @@ const VideoPlayer = ({
               !showControls && "opacity-0 transition-opacity duration-300"
             )}>
               <div className="relative inline-block">
-                <button 
+                <button
                   className="bg-black/60 hover:bg-black/80 text-white p-2 rounded-full"
                   onClick={() => setShowSettingsMenu(!showSettingsMenu)}
                   aria-label="Settings"
@@ -718,7 +730,7 @@ const VideoPlayer = ({
 
                 {/* Use Device Type to decide which menu to render */}
                 {useIsMobile() ? (
-                  <VideoPlayerMobileMenu 
+                  <VideoPlayerMobileMenu
                     showSettingsMenu={showSettingsMenu}
                     setShowSettingsMenu={setShowSettingsMenu}
                     showQualitySubmenu={showQualitySubmenu}
@@ -732,7 +744,7 @@ const VideoPlayer = ({
                     handlePlaybackSpeedChange={handlePlaybackSpeedChange}
                   />
                 ) : (
-                  <VideoPlayerDesktopMenu 
+                  <VideoPlayerDesktopMenu
                     showQualityMenu={showSettingsMenu}
                     setShowQualityMenu={setShowSettingsMenu}
                     selectedQuality={selectedQuality}
@@ -752,8 +764,8 @@ const VideoPlayer = ({
               isMobile && isFullScreen ? "pb-24 pt-4" : "pb-6 pt-8"
             )}>
               {/* Progress bar - YouTube style (thin line with hover effect) */}
-              <div 
-                className="relative w-full h-10 px-4 cursor-pointer flex items-center group" 
+              <div
+                className="relative w-full h-10 px-4 cursor-pointer flex items-center group"
                 onMouseMove={(e) => {
                   if (!progressBarRef.current || !videoRef.current) return;
 
@@ -773,7 +785,7 @@ const VideoPlayer = ({
               >
                 {/* Time preview tooltip (YouTube style) */}
                 {timePreview && (
-                  <div 
+                  <div
                     className="absolute bottom-6 bg-black/90 px-2 py-1 rounded text-xs text-white font-medium z-10 whitespace-nowrap pointer-events-none transform -translate-x-1/2"
                     style={{ left: `${timePreview.position}%` }}
                   >
@@ -783,19 +795,19 @@ const VideoPlayer = ({
                 )}
 
                 {/* Progress bar track */}
-                <div 
+                <div
                   ref={progressBarRef}
                   className="w-full h-1 bg-gray-600/50 rounded-full relative group-hover:h-3 transition-all duration-150"
                   onClick={seekToPosition}
                 >
                   {/* Buffered progress */}
-                  <div 
+                  <div
                     className="absolute top-0 left-0 h-full bg-gray-500/70 rounded-full"
                     style={{ width: `${bufferProgress}%` }}
                   ></div>
 
                   {/* Played progress - red for YouTube */}
-                  <div 
+                  <div
                     className="absolute top-0 left-0 h-full bg-red-600 rounded-full"
                     style={{ width: `${(videoRef.current?.currentTime || 0) / (videoRef.current?.duration || 1) * 100}%` }}
                   >
@@ -810,8 +822,8 @@ const VideoPlayer = ({
                 {/* Left controls */}
                 <div className="flex items-center space-x-2">
                   {/* Play/Pause button */}
-                  <button 
-                    className="text-white p-2 hover:text-white/80 transition rounded-full" 
+                  <button
+                    className="text-white p-2 hover:text-white/80 transition rounded-full"
                     onClick={togglePlay}
                     aria-label={isPlaying ? 'Pause' : 'Play'}
                   >
@@ -819,8 +831,8 @@ const VideoPlayer = ({
                   </button>
 
                   {/* Previous/Next episode buttons */}
-                  <button 
-                    className="text-white p-2 hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:cursor-not-allowed" 
+                  <button
+                    className="text-white p-2 hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={onPreviousEpisode}
                     disabled={!hasPrevious}
                     aria-label="Previous episode"
@@ -828,8 +840,8 @@ const VideoPlayer = ({
                     <SkipBack size={22} />
                   </button>
 
-                  <button 
-                    className="text-white p-2 hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:cursor-not-allowed" 
+                  <button
+                    className="text-white p-2 hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={onNextEpisode}
                     disabled={!hasNext}
                     aria-label="Next episode"
@@ -839,8 +851,8 @@ const VideoPlayer = ({
 
                   {/* Volume control - YouTube style */}
                   <div className="relative flex items-center group">
-                    <button 
-                      className="text-white p-2 hover:text-white/80 transition rounded-full flex items-center" 
+                    <button
+                      className="text-white p-2 hover:text-white/80 transition rounded-full flex items-center"
                       onClick={toggleMute}
                       onMouseEnter={() => setShowVolumeSlider(true)}
                       aria-label={isMuted ? "Unmute" : "Mute"}
@@ -856,7 +868,7 @@ const VideoPlayer = ({
                       </div>
                     </button>
 
-                    <div 
+                    <div
                       className={cn(
                         "hidden group-hover:block absolute bottom-full left-0 pb-3",
                         showVolumeSlider && "block"
@@ -871,14 +883,14 @@ const VideoPlayer = ({
                         </div>
 
                         {/* Vertical slider container */}
-                        <div className="h-full w-full flex flex-col items-center justify-center relative" 
+                        <div className="h-full w-full flex flex-col items-center justify-center relative"
                           onClick={(e) => {
                             if (!videoRef.current) return;
                             const container = e.currentTarget;
                             const rect = container.getBoundingClientRect();
                             const height = rect.height;
                             const y = e.clientY - rect.top;
-                            // Calculate volume (0-1) based on click position, invert because 0 is bottom
+                                                        // Calculate volume (0-1) based on click position, invert because 0 is bottom
                             const newVolume = Math.min(Math.max(1 - (y / height), 0), 1);
                             videoRef.current.volume = newVolume;
                             setVolume(newVolume);
@@ -889,24 +901,24 @@ const VideoPlayer = ({
                           {/* Vertical slider track */}
                           <div className="h-full w-1.5 bg-gray-700 rounded-full relative">
                             {/* Filled portion */}
-                            <div 
+                            <div
                               className="w-full bg-white rounded-full absolute bottom-0"
                               style={{ height: `${(isMuted ? 0 : volume) * 100}%` }}
                             ></div>
 
                             {/* Slider thumb */}
-                            <div 
+                            <div
                               className="absolute w-3 h-3 bg-white rounded-full left-1/2 -translate-x-1/2 cursor-pointer"
                               style={{ bottom: `calc(${(isMuted ? 0 : volume) * 100}% - 6px)` }}
                             ></div>
                           </div>
 
                           {/* Hidden input for accessibility */}
-                          <input 
-                            type="range" 
-                            min="0" 
-                            max="1" 
-                            step="0.01" 
+                          <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.01"
                             value={isMuted ? 0 : volume}
                             onChange={handleVolumeChange}
                             className="sr-only"
@@ -936,8 +948,9 @@ const VideoPlayer = ({
                   </button>
 
                   {/* Fullscreen button */}
-                  <button 
-                    className="text-white p-2 hover:text-white/80 transition rounded-full"                    onClick={toggleFullScreen}
+                  <button
+                    className="text-white p-2 hover:text-white/80 transition rounded-full"
+                    onClick={toggleFullScreen}
                     aria-label={isFullScreen ? "Exit fullscreen" : "Enter fullscreen"}
                   >
                     {isFullScreen ? <Minimize size={22} /> : <Maximize size={22} />}
@@ -951,7 +964,7 @@ const VideoPlayer = ({
 
       {/* Episode navigation bar */}
       <div className="bg-black py-3 px-4 flex justify-between items-center border-t border-gray-800/30">
-        <button 
+        <button
           className="bg-gray-800/70 hover:bg-gray-700/70 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           onClick={onPreviousEpisode}
           disabled={!hasPrevious}
@@ -963,7 +976,7 @@ const VideoPlayer = ({
           Episode <span className="font-bold">{episode.episode_number}</span>
         </div>
 
-        <button 
+        <button
           className="bg-gray-800/70 hover:bg-gray-700/70 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           onClick={onNextEpisode}
           disabled={!hasNext}
