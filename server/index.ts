@@ -6,6 +6,20 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Security headers
+app.use((req, res, next) => {
+  // Prevent iframe embedding
+  res.setHeader('X-Frame-Options', 'DENY');
+  
+  // Content Security Policy
+  res.setHeader(
+    'Content-Security-Policy',
+    "frame-ancestors 'none';"
+  );
+  
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
