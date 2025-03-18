@@ -17,10 +17,10 @@ export const BackgroundParticles = () => {
 
   useEffect(() => {
     // Generate random particles with galaxy theme
-    const newParticles = Array.from({ length: 60 }, (_, i) => {
-      const type = Math.random() > 0.8 ? 'nebula' : Math.random() > 0.5 ? 'star' : 'dust';
+    const newParticles = Array.from({ length: 100 }, (_, i) => {
+      const type = Math.random() > 0.8 ? 'nebula' : Math.random() > 0.3 ? 'star' : 'dust';
       const size = type === 'nebula' ? Math.random() * 200 + 100 : 
-                  type === 'star' ? Math.random() * 3 + 1 :
+                  type === 'star' ? Math.random() * 4 + 2 :
                   Math.random() * 8 + 3;
 
       return {
@@ -45,7 +45,7 @@ export const BackgroundParticles = () => {
           key={particle.id}
           className={`absolute rounded-full ${
             particle.type === 'star' 
-              ? 'bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)]' 
+              ? 'bg-white shadow-[0_0_20px_rgba(255,255,255,0.9)]' 
               : particle.type === 'nebula'
               ? 'bg-gradient-to-br from-primary/30 to-primary/5 backdrop-blur-sm'
               : 'bg-gradient-to-br from-primary/20 to-transparent'
@@ -60,8 +60,8 @@ export const BackgroundParticles = () => {
             x: [0, Math.random() * 100 - 50],
             y: [0, Math.random() * 100 - 50],
             opacity: particle.type === 'star' 
-              ? [0.2, 1, 0.2] 
-              : [0, 0.4, 0],
+              ? [0.3, 1, 0.3] 
+              : [0, 0.5, 0],
             scale: particle.type === 'nebula'
               ? [1, 1.3, 1]
               : [0, 1, 0],
