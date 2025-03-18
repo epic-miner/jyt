@@ -77,9 +77,9 @@ const SearchBar = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        resultsRef.current && 
-        !resultsRef.current.contains(event.target as Node) && 
-        inputRef.current && 
+        resultsRef.current &&
+        !resultsRef.current.contains(event.target as Node) &&
+        inputRef.current &&
         !inputRef.current.contains(event.target as Node)
       ) {
         setShowResults(false);
@@ -115,14 +115,14 @@ const SearchBar = () => {
           isFocused && "ring-2 ring-primary/60 border-transparent"
         )}>
           <Search className="w-5 h-5 absolute left-4 text-muted-foreground" />
-          <input 
+          <input
             type="text"
             ref={inputRef}
             value={searchTerm}
             onChange={handleSearch}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            placeholder="Search anime by title, genre..." 
+            placeholder="Search anime by title, genre..."
             className={cn(
               "w-full bg-transparent",
               "py-3 pl-12 pr-4",
@@ -133,8 +133,8 @@ const SearchBar = () => {
             autoComplete="off"
           />
           {searchTerm && (
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={handleClear}
               className={cn(
                 "absolute right-3",
@@ -151,7 +151,7 @@ const SearchBar = () => {
       </form>
 
       {showResults && (
-        <div 
+        <div
           ref={resultsRef}
           className={cn(
             "absolute top-full left-0 right-0 mt-2",
@@ -189,7 +189,7 @@ const SearchBar = () => {
                   {searchResults.length} results for "{searchTerm}"
                 </span>
                 <Link href={`/search?q=${encodeURIComponent(searchTerm)}`}>
-                  <span 
+                  <span
                     className="text-sm text-primary hover:underline px-2 cursor-pointer"
                     onClick={handleItemClick}
                   >
@@ -200,7 +200,7 @@ const SearchBar = () => {
               <div className="divide-y divide-border/50">
                 {searchResults.slice(0, 5).map((result) => (
                   <Link href={`/anime/${result.id}`} key={result.id}>
-                    <div 
+                    <div
                       className={cn(
                         "flex items-center p-3",
                         "hover:bg-muted/30 active:bg-muted/50",
@@ -208,9 +208,9 @@ const SearchBar = () => {
                       )}
                       onClick={handleItemClick}
                     >
-                      <img 
-                        src={result.thumbnail_url} 
-                        alt={result.title} 
+                      <img
+                        src={result.thumbnail_url}
+                        alt={result.title}
                         className="w-16 h-16 object-cover rounded-lg mr-3"
                         onError={(e) => {
                           e.currentTarget.onerror = null;
@@ -228,7 +228,7 @@ const SearchBar = () => {
               {searchResults.length > 5 && (
                 <div className="p-4 bg-muted/30 text-center">
                   <Link href={`/search?q=${encodeURIComponent(searchTerm)}`}>
-                    <button 
+                    <button
                       className={cn(
                         "text-sm text-primary hover:text-primary/80",
                         "transition-colors duration-200"
