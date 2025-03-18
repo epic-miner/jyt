@@ -206,6 +206,19 @@ const VideoPlayer = ({
       if (!document.fullscreenElement && window.screen.orientation) {
         window.screen.orientation.unlock?.();
       }
+      // Show controls when entering fullscreen on mobile
+      if (document.fullscreenElement && isMobile) {
+        setShowControls(true);
+        // Reset the timer for controls visibility
+        if (controlsTimeoutRef.current) {
+          clearTimeout(controlsTimeoutRef.current);
+        }
+        controlsTimeoutRef.current = setTimeout(() => {
+          if (!isHovering) {
+            setShowControls(false);
+          }
+        }, 3000);
+      }
     };
 
     window.screen.orientation?.addEventListener('change', handleOrientationChange);
@@ -215,7 +228,7 @@ const VideoPlayer = ({
       window.screen.orientation?.removeEventListener('change', handleOrientationChange);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, []);
+  }, [isMobile, isHovering]);
 
   // YouTube-style keyboard controls
   useEffect(() => {
