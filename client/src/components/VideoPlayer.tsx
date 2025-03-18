@@ -585,26 +585,7 @@ const VideoPlayer = ({
               autoPlay
               playsInline
               preload="auto"
-              onClick={(e) => {
-                if (isMobile) {
-                  e.preventDefault();
-                  const element = playerContainerRef.current;
-                  if (!element) return;
-
-                  if (!document.fullscreenElement) {
-                    if (element.requestFullscreen) {
-                      element.requestFullscreen();
-                    } else if (element.webkitRequestFullscreen) {
-                      element.webkitRequestFullscreen();
-                    } else if (element.msRequestFullscreen) {
-                      element.msRequestFullscreen();
-                    }
-                    window.screen.orientation?.lock('landscape').catch(() => {});
-                  }
-                } else {
-                  togglePlay();
-                }
-              }}
+              onClick={togglePlay}
               controlsList="nodownload"
             >
               <source src={videoUrl} type="video/mp4" />
