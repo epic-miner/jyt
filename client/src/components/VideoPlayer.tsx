@@ -539,23 +539,18 @@ const VideoPlayer = ({
           resetControlsTimeout();
         });
       }
-      
+
       // Touch events for mobile
       playerContainer.addEventListener('touchstart', showControlsTemporarily);
       playerContainer.addEventListener('touchmove', showControlsTemporarily);
     }
 
-    return () => {
-      if (videoElement) {
-        videoElement.removeEventListener('durationchange', handleDurationChange);
-        videoElement.removeEventListener('play', handlePlay);
-        videoElement.removeEventListener('pause', handlePause);
-        videoElement.removeEventListener('volumechange', handleVolumeChange);
-        videoElement.removeEventListener('ratechange', () => {
-            setPlaybackSpeed(videoRef.current?.playbackRate || 1);
-        });
-      }
+    document.addEventListener('fullscreenchange', () => {
+      setIsFullScreen(!!document.fullscreenElement);
+      showControlsTemporarily();
+    });
 
+    return () => {
       if (playerContainer) {
         if (!isMobile) {
           playerContainer.removeEventListener('mousemove', showControlsTemporarily);
@@ -568,7 +563,7 @@ const VideoPlayer = ({
             resetControlsTimeout();
           });
         }
-        
+
         playerContainer.removeEventListener('touchstart', showControlsTemporarily);
         playerContainer.removeEventListener('touchmove', showControlsTemporarily);
       }
@@ -576,6 +571,11 @@ const VideoPlayer = ({
       if (timeout) {
         clearTimeout(timeout);
       }
+
+      document.removeEventListener('fullscreenchange', () => {
+        setIsFullScreen(!!document.fullscreenElement);
+        showControlsTemporarily();
+      });
     };
   }, [isPlaying, isMobile]);
 
@@ -873,8 +873,7 @@ const VideoPlayer = ({
 
                   {/* Fullscreen button */}
                   <button 
-                    className="text-white p-2 hover:text-white/80 transition rounded-full" 
-                    onClick={toggleFullScreen}
+                    className="text-white p-2 hover:text-white/80 transition rounded-full"                    onClick={toggleFullScreen}
                     aria-label={isFullScreen ? "Exit fullscreen" : "Enter fullscreen"}
                   >
                     {isFullScreen ? <Minimize size={22} /> : <Maximize size={22} />}
