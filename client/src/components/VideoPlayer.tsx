@@ -865,7 +865,8 @@ const VideoPlayer = ({
                   </button>
                 </div>
               </div>
-            </div          </div>
+            </div>
+          </div>
         </AspectRatio>
       </div>
 
