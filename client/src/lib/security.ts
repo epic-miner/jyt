@@ -78,9 +78,6 @@ export const preventRightClick = (element: HTMLElement) => {
 // Global right-click prevention
 export const initializeGlobalRightClickPrevention = () => {
   document.addEventListener('contextmenu', (e: MouseEvent) => {
-    // Allow right-click in development mode
-    if (import.meta.env.DEV) return true;
-
     // Allow right-click on form elements
     const target = e.target as HTMLElement;
     if (
@@ -91,8 +88,26 @@ export const initializeGlobalRightClickPrevention = () => {
       return true;
     }
 
+    // Prevent right-click on everything else
     e.preventDefault();
     return false;
+  });
+
+  // Additional mouse event prevention
+  document.addEventListener('mousedown', (e: MouseEvent) => {
+    if (e.button === 2) { // Right mouse button
+      e.preventDefault();
+      return false;
+    }
+  });
+
+  // Prevent dragging of elements
+  document.addEventListener('dragstart', (e: DragEvent) => {
+    const target = e.target as HTMLElement;
+    if (!target.matches('input, textarea')) {
+      e.preventDefault();
+      return false;
+    }
   });
 };
 
@@ -133,6 +148,7 @@ export const initializeGlobalSecurity = () => {
   preventKeyboardShortcuts();
   initializeGlobalRightClickPrevention();
   preventIframeEmbedding();
+  disableConsole();
 
   detectDevTools(() => {
     console.warn('Developer tools detected. Some features may be restricted.');
