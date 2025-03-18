@@ -1,6 +1,7 @@
 import { Link } from 'wouter';
 import { Anime } from '@shared/types';
 import { PlayCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface AnimeCardProps {
   anime: Anime;
@@ -22,15 +23,19 @@ const AnimeCard = ({
   onQuickPlay 
 }: AnimeCardProps) => {
   return (
-    <Link href={`/anime/${anime.id}`} className={className}>
-      <div className="relative group cursor-pointer glass-effect transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20">
-        {/* Main Image Container */}
+    <Link href={`/anime/${anime.id}`} className={cn("block h-full", className)}>
+      <div className="relative group cursor-pointer glass-effect transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20 h-full">
+        {/* Main Image Container with fixed aspect ratio */}
         <div className="aspect-[2/3] rounded-lg overflow-hidden relative">
           <img 
             src={anime.thumbnail_url} 
             alt={anime.title}
             className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
             loading="lazy"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = '/images/placeholder.jpg';
+            }}
           />
 
           {/* Overlay on hover */}
@@ -52,7 +57,7 @@ const AnimeCard = ({
 
           {/* Episode count badge */}
           {episodeCount !== undefined && (
-            <div className="absolute top-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded-full animate-float">
+            <div className="absolute top-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded-full">
               {episodeCount} {episodeCount === 1 ? 'Episode' : 'Episodes'}
             </div>
           )}
@@ -76,12 +81,12 @@ const AnimeCard = ({
           )}
         </div>
 
-        {/* Title and Genre */}
-        <div className="mt-2 p-2 transform transition-all duration-300 group-hover:translate-x-1">
+        {/* Title and Genre - Fixed height container */}
+        <div className="h-[4.5rem] p-2 transform transition-all duration-300 group-hover:translate-x-1">
           <h3 className="text-sm font-medium line-clamp-2 text-white/90 group-hover:text-white">
             {anime.title}
           </h3>
-          <p className="text-xs text-gray-400 mt-1 group-hover:text-gray-300">
+          <p className="text-xs text-gray-400 mt-1 truncate group-hover:text-gray-300">
             {anime.genre.split(',')[0]} {/* Show only the first genre to keep it clean */}
           </p>
         </div>
