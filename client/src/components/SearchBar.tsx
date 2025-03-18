@@ -15,7 +15,6 @@ const SearchBar = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  // Debounced search query
   const { data: searchResults, isLoading } = useQuery({
     queryKey: ['/api/search', searchTerm],
     queryFn: () => searchAnime(searchTerm),
@@ -87,9 +86,7 @@ const SearchBar = () => {
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -105,7 +102,7 @@ const SearchBar = () => {
   const hasResults = searchResults && searchResults.length > 0 && searchTerm.trim().length > 2;
 
   return (
-    <div className="relative w-full max-w-2xl mx-auto">
+    <div className="relative w-full">
       <form onSubmit={handleSubmit} className="relative w-full">
         <div className={cn(
           "relative flex items-center w-full transition-all duration-200",
@@ -125,7 +122,7 @@ const SearchBar = () => {
             placeholder="Search anime by title, genre..."
             className={cn(
               "w-full bg-transparent",
-              "py-3 pl-12 pr-4",
+              "py-2.5 pl-12 pr-4", // Changed py-3 to py-2.5
               "text-base placeholder:text-muted-foreground/70",
               "outline-none focus:outline-none",
               "transition-colors duration-200"
