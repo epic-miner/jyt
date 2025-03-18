@@ -18,6 +18,7 @@ import {
 import { useIsMobile } from '../hooks/use-mobile';
 import VideoPlayerDesktopMenu from './VideoPlayerDesktopMenu';
 import VideoPlayerMobileMenu from './VideoPlayerMobileMenu';
+import { initializeSecurity } from '../lib/security';
 
 interface VideoPlayerProps {
   anime: Anime;
@@ -418,6 +419,13 @@ const VideoPlayer = ({
     return () => clearTimeout(timeout);
   }, []);
 
+  // Initialize security measures
+  useEffect(() => {
+    if (playerContainerRef.current) {
+      initializeSecurity(playerContainerRef.current);
+    }
+  }, []);
+
 
   const handleQualityChange = (quality: VideoQuality) => {
     setSelectedQuality(quality);
@@ -652,7 +660,7 @@ const VideoPlayer = ({
       {/* Main video container with 16:9 aspect ratio */}
       <div
         ref={playerContainerRef}
-        className="relative w-full bg-black overflow-hidden"
+        className="relative w-full bg-black overflow-hidden video-player-container"
       >
         <AspectRatio ratio={16 / 9} className="w-full">
           <div className="w-full h-full relative">
@@ -802,7 +810,7 @@ const VideoPlayer = ({
                     style={{ width: `${(videoRef.current?.currentTime || 0) / (videoRef.current?.duration || 1) * 100}%` }}
                   >
                     {/* Thumb dot - larger on hover */}
-                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-0 h-0 bg-red-600 rounded-full group-hover:w-4 group-hover:h-4 transition-all duration-150"></div>
+                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-0 h-3 bg-red-600 rounded-full group-hover:w-4 group-hover:h-4 transition-all duration-150"></div>
                   </div>
                 </div>
               </div>
@@ -880,10 +888,11 @@ const VideoPlayer = ({
                             const rect = container.getBoundingClientRect();
                             const height = rect.height;
                             const y = e.clientY - rect.top;
-                                                        // Calculate volume (0-1) based on click position, invert because 0 is bottom                            const newVolume = Math.min(Math.max(1 - (y / height), 0), 1);
-                            videoRef.current.volume = newVolume;
-                            setVolume(newVolume);
-                            if (newVolume === 0) setIsMuted(true);
+                            // Calculate volume (0-1) based on click position, invert because 0 is bottom
+                            const newVolumeValue = Math.min(Math.max(1 - (y / height), 0), 1);
+                            videoRef.current.volume = newVolumeValue;
+                            setVolume(newVolumeValue);
+                            if (newVolumeValue === 0) setIsMuted(true);
                             else if (isMuted) setIsMuted(false);
                           }}
                         >

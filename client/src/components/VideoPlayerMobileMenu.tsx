@@ -10,6 +10,8 @@ interface VideoPlayerMobileMenuProps {
   backToMainMenu: () => void;
   openQualitySubmenu: () => void;
   availableQualities: { quality: VideoQuality; url: string | undefined }[];
+  playbackSpeed: number;
+  handlePlaybackSpeedChange: (speed: number) => void;
 }
 
 const VideoPlayerMobileMenu = ({
@@ -21,7 +23,9 @@ const VideoPlayerMobileMenu = ({
   handleQualityChange,
   backToMainMenu,
   openQualitySubmenu,
-  availableQualities
+  availableQualities,
+  playbackSpeed,
+  handlePlaybackSpeedChange,
 }: VideoPlayerMobileMenuProps) => {
   if (!showSettingsMenu) return null;
 
@@ -141,7 +145,7 @@ const VideoPlayerMobileMenu = ({
               </div>
               
               <div className="flex items-center text-gray-400">
-                <span className="mr-2">1x</span>
+                <span className="mr-2">{playbackSpeed}x</span>
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
                 </svg>

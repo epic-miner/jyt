@@ -8,6 +8,8 @@ interface VideoPlayerDesktopMenuProps {
   selectedQuality: VideoQuality;
   handleQualityChange: (quality: VideoQuality) => void;
   availableQualities: { quality: VideoQuality; url: string | undefined }[];
+  playbackSpeed: number;
+  handlePlaybackSpeedChange: (speed: number) => void;
 }
 
 const VideoPlayerDesktopMenu = ({
@@ -15,7 +17,9 @@ const VideoPlayerDesktopMenu = ({
   setShowQualityMenu,
   selectedQuality,
   handleQualityChange,
-  availableQualities
+  availableQualities,
+  playbackSpeed, // Added
+  handlePlaybackSpeedChange, // Added
 }: VideoPlayerDesktopMenuProps) => {
   if (!showQualityMenu) return null;
 
