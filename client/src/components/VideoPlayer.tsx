@@ -509,33 +509,40 @@ const VideoPlayer = ({
     let timeout: ReturnType<typeof setTimeout> | null = null;
 
     const hideControls = () => {
-      if (isPlaying && !isHovering && !showSettingsMenu) {
+      if (isPlaying && !showSettingsMenu && (!isHovering || isMobile)) {
         setShowControls(false);
       }
     };
 
-    const handleMouseMove = () => {
-      setShowControls(true);
-
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-
+    const resetControlsTimeout = () => {
+      if (timeout) clearTimeout(timeout);
       timeout = setTimeout(hideControls, 3000);
+    };
+
+    const showControlsTemporarily = () => {
+      setShowControls(true);
+      resetControlsTimeout();
     };
 
     const playerContainer = playerContainerRef.current;
     if (playerContainer) {
-      playerContainer.addEventListener('mousemove', handleMouseMove);
-      playerContainer.addEventListener('mouseenter', () => {
-        setShowControls(true);
-        setIsHovering(true);
-        if (timeout) clearTimeout(timeout);
-      });
-      playerContainer.addEventListener('mouseleave', () => {
-        setIsHovering(false);
-        timeout = setTimeout(hideControls, 3000);
-      });
+      // Mouse events for desktop
+      if (!isMobile) {
+        playerContainer.addEventListener('mousemove', showControlsTemporarily);
+        playerContainer.addEventListener('mouseenter', () => {
+          setShowControls(true);
+          setIsHovering(true);
+          if (timeout) clearTimeout(timeout);
+        });
+        playerContainer.addEventListener('mouseleave', () => {
+          setIsHovering(false);
+          resetControlsTimeout();
+        });
+      }
+      
+      // Touch events for mobile
+      playerContainer.addEventListener('touchstart', showControlsTemporarily);
+      playerContainer.addEventListener('touchmove', showControlsTemporarily);
     }
 
     return () => {
