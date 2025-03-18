@@ -11,8 +11,15 @@ import GenrePage from "./pages/GenrePage";
 import NotFound from "./pages/not-found";
 import ScrollToTop from "./components/ScrollToTop";
 import { PageTransition } from "./components/PageTransition";
+import { useEffect } from "react";
+import { initializeGlobalSecurity } from "./lib/security";
 
 function App() {
+  // Initialize global security measures
+  useEffect(() => {
+    initializeGlobalSecurity();
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-black via-dark-950 to-dark-900 text-slate-50 font-sans">
       <NavBar />

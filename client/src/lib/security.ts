@@ -67,9 +67,30 @@ export const preventKeyboardShortcuts = () => {
   });
 };
 
-// Right-click prevention
+// Right-click prevention for specific element
 export const preventRightClick = (element: HTMLElement) => {
   element.addEventListener('contextmenu', (e: MouseEvent) => {
+    e.preventDefault();
+    return false;
+  });
+};
+
+// Global right-click prevention
+export const initializeGlobalRightClickPrevention = () => {
+  document.addEventListener('contextmenu', (e: MouseEvent) => {
+    // Allow right-click in development mode
+    if (import.meta.env.DEV) return true;
+
+    // Allow right-click on form elements
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.isContentEditable
+    ) {
+      return true;
+    }
+
     e.preventDefault();
     return false;
   });
@@ -79,8 +100,6 @@ export const preventRightClick = (element: HTMLElement) => {
 export const preventTextSelection = (element: HTMLElement) => {
   element.style.userSelect = 'none';
   element.style.webkitUserSelect = 'none';
-  element.style.msUserSelect = 'none';
-  element.style.mozUserSelect = 'none';
 
   element.addEventListener('selectstart', (e: Event) => {
     e.preventDefault();
@@ -91,11 +110,11 @@ export const preventTextSelection = (element: HTMLElement) => {
 // Iframe protection
 export const preventIframeEmbedding = () => {
   if (window.self !== window.top) {
-    window.top.location.href = window.self.location.href;
+    window.top!.location.href = window.self.location.href;
   }
 };
 
-// Initialize all security measures
+// Initialize all security measures for video player
 export const initializeSecurity = (videoPlayerContainer: HTMLElement) => {
   disableConsole();
   preventKeyboardShortcuts();
@@ -105,6 +124,17 @@ export const initializeSecurity = (videoPlayerContainer: HTMLElement) => {
 
   detectDevTools(() => {
     // Handle DevTools detection
+    console.warn('Developer tools detected. Some features may be restricted.');
+  });
+};
+
+// Initialize global security measures
+export const initializeGlobalSecurity = () => {
+  preventKeyboardShortcuts();
+  initializeGlobalRightClickPrevention();
+  preventIframeEmbedding();
+
+  detectDevTools(() => {
     console.warn('Developer tools detected. Some features may be restricted.');
   });
 };
