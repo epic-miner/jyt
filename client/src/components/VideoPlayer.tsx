@@ -93,7 +93,7 @@ const VideoPlayer = ({
     }
 
     const handleTimeUpdate = () => {
-      if (!videoRef.current) return;
+      if (!videoRef.current || !anime?.id || !episode?.id) return;
 
       const currentVideoTime = videoRef.current.currentTime;
       const duration = videoRef.current.duration;
@@ -105,11 +105,11 @@ const VideoPlayer = ({
         // Save progress every 5 seconds
         if (Math.floor(currentVideoTime) % 5 === 0) {
           updateWatchHistory({
-            animeId: anime.id.toString(),
-            episodeId: episode.id.toString(),
-            title: episode.title,
+            animeId: String(anime.id),
+            episodeId: String(episode.id),
+            title: episode.title || '',
             episodeNumber: episode.episode_number,
-            animeThumbnail: anime.thumbnail_url,
+            animeThumbnail: anime.thumbnail_url || '',
             animeTitle: anime.title,
             progress: progressPercent,
             timestamp: new Date().getTime()
