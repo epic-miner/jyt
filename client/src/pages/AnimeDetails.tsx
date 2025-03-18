@@ -8,6 +8,7 @@ import GenrePill from '../components/GenrePill';
 import EpisodeCard from '../components/EpisodeCard';
 import { fetchAnimeById, fetchEpisodesByAnimeId } from '../lib/api';
 import { updateRecentlyWatchedAnime } from '../lib/cookies';
+import { BackgroundParticles } from '../components/BackgroundParticles';
 
 const AnimeDetails = () => {
   const [, params] = useRoute('/anime/:id');
@@ -76,25 +77,26 @@ const AnimeDetails = () => {
   const genres = anime.genre.split(',').map(g => g.trim());
 
   // Get first episode thumbnail for banner
-  const bannerImage = episodes && episodes.length > 0 
-    ? episodes[0].thumbnail_url 
+  const bannerImage = episodes && episodes.length > 0
+    ? episodes[0].thumbnail_url
     : anime.thumbnail_url;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-dark-950 to-dark-800">
+      <BackgroundParticles />
       {/* Hero section with episode banner */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
         className="relative h-[300px] md:h-[400px] overflow-hidden"
       >
-        <motion.img 
+        <motion.img
           initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
           transition={{ duration: 20, repeat: Infinity, repeatType: "reverse" }}
-          src={bannerImage} 
-          alt={anime.title} 
+          src={bannerImage}
+          alt={anime.title}
           className="w-full h-full object-cover opacity-40"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/80 to-transparent">
@@ -111,36 +113,36 @@ const AnimeDetails = () => {
 
       {/* Anime info section */}
       <div className="container mx-auto px-4 -mt-32 relative z-10">
-        <motion.div 
+        <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
           className="flex flex-col md:flex-row gap-6"
         >
           {/* Anime poster */}
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
             className="w-40 md:w-60 mx-auto md:mx-0 rounded-lg overflow-hidden shadow-lg ring-1 ring-white/10 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)] transition-all duration-300 group"
           >
-            <img 
-              src={anime.thumbnail_url} 
-              alt={anime.title} 
+            <img
+              src={anime.thumbnail_url}
+              alt={anime.title}
               className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
             />
           </motion.div>
 
           {/* Anime details */}
           <div className="flex-1 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="text-2xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-white to-primary bg-clip-text text-transparent"
             >
               {anime.title}
             </motion.h1>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
@@ -157,7 +159,7 @@ const AnimeDetails = () => {
                 </motion.div>
               ))}
             </motion.div>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
@@ -184,7 +186,7 @@ const AnimeDetails = () => {
         </motion.div>
 
         {/* Episodes section */}
-        <motion.div 
+        <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -218,7 +220,7 @@ const AnimeDetails = () => {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   key={episode.id}
                 >
-                  <EpisodeCard 
+                  <EpisodeCard
                     episode={episode}
                     animeId={anime.id.toString()}
                   />
