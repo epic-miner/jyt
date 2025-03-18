@@ -28,8 +28,8 @@ export const BackgroundParticles = () => {
         x: Math.random() * 100,
         y: Math.random() * 100,
         size,
-        duration: Math.random() * 30 + (type === 'nebula' ? 50 : 20),
-        delay: Math.random() * 8,
+        duration: Math.random() * 40 + (type === 'nebula' ? 60 : 30),
+        delay: Math.random() * 5,
         color: type === 'nebula' ? 'primary' : 'white',
         type
       };
@@ -60,16 +60,16 @@ export const BackgroundParticles = () => {
             y: [0, Math.random() * 100 - 50],
             opacity: particle.type === 'star' 
               ? [0.3, 1, 0.3] 
-              : [0, 0.5, 0],
+              : [0, 0.6, 0],
             scale: particle.type === 'nebula'
-              ? [1, 1.3, 1]
+              ? [1, 1.2, 1]
               : [0, 1, 0],
           }}
           transition={{
             duration: particle.duration,
             repeat: Infinity,
             delay: particle.delay,
-            ease: "linear",
+            ease: "easeInOut",
           }}
         />
       ))}
@@ -86,13 +86,13 @@ export const BackgroundParticles = () => {
             }}
             animate={{
               x: ["-100%", "200%"],
-              opacity: [0, 0.8, 0],
+              opacity: [0, 0.6, 0],
             }}
             transition={{
-              duration: 12 + i * 2,
+              duration: 15 + i * 2,
               repeat: Infinity,
-              delay: i * 2,
-              ease: "linear",
+              delay: i * 1.5,
+              ease: "easeInOut",
             }}
           />
         ))}
@@ -100,8 +100,8 @@ export const BackgroundParticles = () => {
 
       {/* Enhanced nebula effects */}
       <div className="absolute inset-0 opacity-50">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-primary/30 animate-pulse" />
-        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-primary/20 to-transparent animate-pulse delay-1000" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-primary/30 animate-[pulse_4s_ease-in-out_infinite]" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-primary/20 to-transparent animate-[pulse_5s_ease-in-out_infinite_1s]" />
       </div>
     </div>
   );
