@@ -4,6 +4,8 @@ import { useDebouncedCallback } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query';
 import { searchAnime } from '../lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Search, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const SearchBar = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,10 +20,9 @@ const SearchBar = () => {
     queryKey: ['/api/search', searchTerm],
     queryFn: () => searchAnime(searchTerm),
     enabled: searchTerm.trim().length > 2,
-    staleTime: 30000, // 30 seconds
+    staleTime: 30000,
   });
 
-  // Debounce navigation to avoid excessive navigation
   const debouncedNavigation = useDebouncedCallback((value: string) => {
     if (value.trim().length > 0) {
       setLocation(`/search?q=${encodeURIComponent(value.trim())}`);
@@ -55,7 +56,6 @@ const SearchBar = () => {
   };
 
   const handleBlur = () => {
-    // Delay hiding results to allow for clicks on the results
     setTimeout(() => {
       setIsFocused(false);
       setShowResults(false);
@@ -74,7 +74,6 @@ const SearchBar = () => {
     setShowResults(false);
   };
 
-  // Click outside listener
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -94,7 +93,6 @@ const SearchBar = () => {
   }, []);
 
   useEffect(() => {
-    // Extract search query from URL if on search page
     if (window.location.pathname === '/search') {
       const searchParams = new URLSearchParams(window.location.search);
       const query = searchParams.get('q');
@@ -107,14 +105,16 @@ const SearchBar = () => {
   const hasResults = searchResults && searchResults.length > 0 && searchTerm.trim().length > 2;
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full max-w-2xl mx-auto">
       <form onSubmit={handleSubmit} className="relative w-full">
-        <div className={`
-          relative flex items-center w-full transition-all duration-200
-          ${isFocused ? 'bg-dark-800 ring-2 ring-primary/60' : 'bg-dark-800/70'}
-          rounded-full overflow-hidden shadow-inner
-        `}>
-          <i className="fas fa-search text-sm absolute left-3.5 text-gray-400"></i>
+        <div className={cn(
+          "relative flex items-center w-full transition-all duration-200",
+          "bg-background/10 backdrop-blur-lg",
+          "rounded-2xl overflow-hidden shadow-lg",
+          "border border-border/50",
+          isFocused && "ring-2 ring-primary/60 border-transparent"
+        )}>
+          <Search className="w-5 h-5 absolute left-4 text-muted-foreground" />
           <input 
             type="text"
             ref={inputRef}
@@ -123,96 +123,116 @@ const SearchBar = () => {
             onFocus={handleFocus}
             onBlur={handleBlur}
             placeholder="Search anime by title, genre..." 
-            className="w-full bg-transparent py-2.5 pl-10 pr-4 outline-none text-sm placeholder:text-gray-500" 
+            className={cn(
+              "w-full bg-transparent",
+              "py-3 pl-12 pr-4",
+              "text-base placeholder:text-muted-foreground/70",
+              "outline-none focus:outline-none",
+              "transition-colors duration-200"
+            )}
             autoComplete="off"
           />
           {searchTerm && (
             <button 
               type="button" 
               onClick={handleClear}
-              className="absolute right-3 text-gray-400 hover:text-white"
+              className={cn(
+                "absolute right-3",
+                "p-1.5 rounded-full",
+                "text-muted-foreground hover:text-foreground",
+                "bg-muted/50 hover:bg-muted",
+                "transition-colors duration-200"
+              )}
             >
-              <i className="fas fa-times text-xs"></i>
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
       </form>
 
-      {/* Search results dropdown */}
       {showResults && (
         <div 
           ref={resultsRef}
-          className="absolute top-full left-0 right-0 mt-2 bg-dark-800 rounded-lg shadow-lg border border-dark-700/50 max-h-[70vh] overflow-y-auto z-50"
+          className={cn(
+            "absolute top-full left-0 right-0 mt-2",
+            "bg-background/95 backdrop-blur-lg",
+            "rounded-xl shadow-xl",
+            "border border-border/50",
+            "max-h-[70vh] overflow-y-auto z-50",
+            "animate-in fade-in-0 slide-in-from-top-2 duration-200"
+          )}
         >
           {isLoading ? (
-            <div className="p-3">
-              <div className="flex items-center space-x-3 mb-3">
-                <Skeleton className="h-12 w-12 rounded" />
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="h-4 w-4/5" />
-                  <Skeleton className="h-3 w-3/5" />
+            <div className="p-4 space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-center space-x-3">
+                  <Skeleton className="h-16 w-16 rounded-lg" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-4/5" />
+                    <Skeleton className="h-3 w-3/5" />
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center space-x-3 mb-3">
-                <Skeleton className="h-12 w-12 rounded" />
-                <div className="space-y-2 flex-1">
-                  <Skeleton className="h-4 w-4/5" />
-                  <Skeleton className="h-3 w-3/5" />
-                </div>
-              </div>
+              ))}
             </div>
           ) : !hasResults ? (
-            <div className="p-4 text-center">
+            <div className="p-6 text-center">
               {searchTerm.trim().length > 2 ? (
-                <p className="text-slate-400">No results found for "{searchTerm}"</p>
+                <p className="text-muted-foreground">No results found for "{searchTerm}"</p>
               ) : (
-                <p className="text-slate-400">Type at least 3 characters to search</p>
+                <p className="text-muted-foreground">Type at least 3 characters to search</p>
               )}
             </div>
           ) : (
             <div>
-              <div className="p-2 bg-dark-900/50 flex justify-between items-center">
-                <span className="text-xs text-slate-400 px-2">
+              <div className="p-3 bg-muted/30 flex justify-between items-center">
+                <span className="text-sm text-muted-foreground px-2">
                   {searchResults.length} results for "{searchTerm}"
                 </span>
                 <Link href={`/search?q=${encodeURIComponent(searchTerm)}`}>
                   <span 
-                    className="text-xs text-primary hover:underline px-2 cursor-pointer"
+                    className="text-sm text-primary hover:underline px-2 cursor-pointer"
                     onClick={handleItemClick}
                   >
-                    View all results
+                    View all
                   </span>
                 </Link>
               </div>
-              <div className="divide-y divide-dark-700/30">
+              <div className="divide-y divide-border/50">
                 {searchResults.slice(0, 5).map((result) => (
                   <Link href={`/anime/${result.id}`} key={result.id}>
                     <div 
-                      className="flex items-center p-2 hover:bg-dark-700/30 transition-colors cursor-pointer"
+                      className={cn(
+                        "flex items-center p-3",
+                        "hover:bg-muted/30 active:bg-muted/50",
+                        "transition-colors duration-200 cursor-pointer"
+                      )}
                       onClick={handleItemClick}
                     >
                       <img 
                         src={result.thumbnail_url} 
                         alt={result.title} 
-                        className="w-12 h-12 object-cover rounded mr-3"
+                        className="w-16 h-16 object-cover rounded-lg mr-3"
                         onError={(e) => {
                           e.currentTarget.onerror = null;
-                          e.currentTarget.src = 'https://via.placeholder.com/48?text=No+Image';
+                          e.currentTarget.src = '/images/placeholder.jpg';
                         }}
                       />
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-medium truncate">{result.title}</h4>
-                        <p className="text-xs text-slate-400 truncate">{result.genre}</p>
+                        <h4 className="text-base font-medium truncate mb-1">{result.title}</h4>
+                        <p className="text-sm text-muted-foreground truncate">{result.genre}</p>
                       </div>
                     </div>
                   </Link>
                 ))}
               </div>
               {searchResults.length > 5 && (
-                <div className="p-3 bg-dark-900/50 text-center">
+                <div className="p-4 bg-muted/30 text-center">
                   <Link href={`/search?q=${encodeURIComponent(searchTerm)}`}>
                     <button 
-                      className="text-sm text-primary hover:underline"
+                      className={cn(
+                        "text-sm text-primary hover:text-primary/80",
+                        "transition-colors duration-200"
+                      )}
                       onClick={handleItemClick}
                     >
                       See all {searchResults.length} results
