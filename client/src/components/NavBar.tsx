@@ -44,7 +44,7 @@ const NavBar = () => {
               <div className="relative flex items-center">
                 <span className="text-xl md:text-2xl font-bold">
                   <span className="text-primary">9</span>
-                  <span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">anime</span>
+                  <span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">Anime</span>
                 </span>
                 <div className="absolute -top-0.5 -right-2 w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
               </div>
