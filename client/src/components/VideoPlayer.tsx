@@ -545,25 +545,45 @@ const VideoPlayer = ({
       playerContainer.addEventListener('touchmove', showControlsTemporarily);
     }
 
-    document.addEventListener('fullscreenchange', () => {
-      setIsFullScreen(!!document.fullscreenElement);
-      showControlsTemporarily();
-    });
+    const handleFullscreenChange = () => {
+      const isFullscreen = !!document.fullscreenElement;
+      setIsFullScreen(isFullscreen);
+      if (isFullscreen) {
+        showControlsTemporarily();
+      }
+    };
+
+    const handleMouseEnter = () => {
+      setShowControls(true);
+      setIsHovering(true);
+    };
+
+    const handleMouseLeave = () => {
+      setIsHovering(false);
+      resetControlsTimeout();
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+    if (playerContainer) {
+      if (!isMobile) {
+        playerContainer.addEventListener('mousemove', showControlsTemporarily);
+        playerContainer.addEventListener('mouseenter', handleMouseEnter);
+        playerContainer.addEventListener('mouseleave', handleMouseLeave);
+      }
+      playerContainer.addEventListener('touchstart', showControlsTemporarily);
+      playerContainer.addEventListener('touchmove', showControlsTemporarily);
+    }
 
     return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      
       if (playerContainer) {
         if (!isMobile) {
           playerContainer.removeEventListener('mousemove', showControlsTemporarily);
-          playerContainer.removeEventListener('mouseenter', () => {
-            setShowControls(true);
-            setIsHovering(true);
-          });
-          playerContainer.removeEventListener('mouseleave', () => {
-            setIsHovering(false);
-            resetControlsTimeout();
-          });
+          playerContainer.removeEventListener('mouseenter', handleMouseEnter);
+          playerContainer.removeEventListener('mouseleave', handleMouseLeave);
         }
-
         playerContainer.removeEventListener('touchstart', showControlsTemporarily);
         playerContainer.removeEventListener('touchmove', showControlsTemporarily);
       }
@@ -571,11 +591,6 @@ const VideoPlayer = ({
       if (timeout) {
         clearTimeout(timeout);
       }
-
-      document.removeEventListener('fullscreenchange', () => {
-        setIsFullScreen(!!document.fullscreenElement);
-        showControlsTemporarily();
-      });
     };
   }, [isPlaying, isMobile]);
 
