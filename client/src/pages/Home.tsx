@@ -167,14 +167,14 @@ const Home = () => {
         </section>
 
         {continueWatching.length > 0 && (
-          <section className="mb-12">
+          <section className="mb-8 md:mb-12">
             <SectionTitle 
               icon="history" 
               title="Continue Watching" 
               viewAllLink="/recently-watched" 
             />
 
-            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-3 gap-y-6">
+            <div className="grid grid-cols-3 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 xs:gap-3 md:gap-4">
               {continueWatching.slice(0, 6).map((item) => (
                 <AnimeCard
                   key={`${item.animeId}-${item.episodeId}`}
@@ -188,6 +188,7 @@ const Home = () => {
                   showProgress={true}
                   progress={item.progress}
                   onQuickPlay={() => setLocation(`/watch/${item.animeId}/${item.episodeId}`)}
+                  className="mobile-card"
                 />
               ))}
             </div>

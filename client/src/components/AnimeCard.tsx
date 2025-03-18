@@ -23,8 +23,8 @@ const AnimeCard = ({
   onQuickPlay 
 }: AnimeCardProps) => {
   return (
-    <Link href={`/anime/${anime.id}`} className={cn("block h-full", className)}>
-      <div className="relative group cursor-pointer glass-effect transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20 h-full">
+    <Link href={`/anime/${anime.id}`} className={cn("block", className)}>
+      <div className="relative group cursor-pointer glass-effect transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20">
         {/* Main Image Container with fixed aspect ratio */}
         <div className="aspect-[2/3] rounded-lg overflow-hidden relative">
           <img 
@@ -47,9 +47,9 @@ const AnimeCard = ({
                     e.preventDefault();
                     onQuickPlay();
                   }}
-                  className="bg-primary/90 hover:bg-primary text-white p-3 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:scale-110 button-hover"
+                  className="bg-primary/90 hover:bg-primary text-white p-2.5 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:scale-110"
                 >
-                  <PlayCircle className="w-6 h-6" />
+                  <PlayCircle className="w-5 h-5 md:w-6 md:h-6" />
                 </button>
               </div>
             )}
@@ -57,14 +57,14 @@ const AnimeCard = ({
 
           {/* Episode count badge */}
           {episodeCount !== undefined && (
-            <div className="absolute top-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded-full">
-              {episodeCount} {episodeCount === 1 ? 'Episode' : 'Episodes'}
+            <div className="absolute top-2 right-2 bg-black/80 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-full">
+              {episodeCount} {episodeCount === 1 ? 'EP' : 'EPS'}
             </div>
           )}
 
           {/* Rating badge */}
           {rating && (
-            <div className="absolute top-2 left-2 bg-primary/80 text-white text-xs px-2 py-1 rounded-full flex items-center group-hover:bg-primary transition-colors duration-300">
+            <div className="absolute top-2 left-2 bg-primary/80 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-full flex items-center">
               <i className="fas fa-star mr-1 text-yellow-400"></i>
               {rating.toFixed(1)}
             </div>
@@ -81,12 +81,12 @@ const AnimeCard = ({
           )}
         </div>
 
-        {/* Title and Genre - Fixed height container */}
-        <div className="h-[4.5rem] p-2 transform transition-all duration-300 group-hover:translate-x-1">
-          <h3 className="text-sm font-medium line-clamp-2 text-white/90 group-hover:text-white">
+        {/* Title and Genre - Compact for mobile */}
+        <div className="h-[2.5rem] md:h-[4.5rem] p-1.5 md:p-2 transform transition-all duration-300 group-hover:translate-x-1">
+          <h3 className="text-xs md:text-sm font-medium line-clamp-1 md:line-clamp-2 text-white/90 group-hover:text-white">
             {anime.title}
           </h3>
-          <p className="text-xs text-gray-400 mt-1 truncate group-hover:text-gray-300">
+          <p className="text-[10px] md:text-xs text-gray-400 mt-0.5 md:mt-1 truncate group-hover:text-gray-300">
             {anime.genre.split(',')[0]} {/* Show only the first genre to keep it clean */}
           </p>
         </div>
