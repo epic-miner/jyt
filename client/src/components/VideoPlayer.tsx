@@ -286,9 +286,11 @@ const VideoPlayer = ({
       // Cleanup: try to unlock orientation if supported
       const orientation = window.screen?.orientation;
       if (orientation?.unlock && typeof orientation.unlock === 'function') {
-        orientation.unlock().catch(error => {
+        try {
+          orientation.unlock();
+        } catch (error) {
           console.log('Error unlocking orientation on cleanup:', error);
-        });
+        }
       }
     };
   }, [isMobile, isHovering]);
@@ -890,8 +892,7 @@ const VideoPlayer = ({
                             const rect = container.getBoundingClientRect();
                             const height = rect.height;
                             const y = e.clientY - rect.top;
-                                                        // Calculate volume (0-1) based on click position, invert because 0 is bottom
-                            const newVolume = Math.min(Math.max(1 - (y / height), 0), 1);
+                                                        // Calculate volume (0-1) based on click position, invert because 0 is bottom                            const newVolume = Math.min(Math.max(1 - (y / height), 0), 1);
                             videoRef.current.volume = newVolume;
                             setVolume(newVolume);
                             if (newVolume === 0) setIsMuted(true);
