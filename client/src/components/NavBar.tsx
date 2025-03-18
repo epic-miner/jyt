@@ -25,26 +25,23 @@ const NavBar = () => {
   }, [location]);
 
   return (
-    <header 
-      className={cn(
-        "sticky top-0 z-40",
-        "bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-        "border-b border-border/50",
-        scrolled && "shadow-sm"
-      )}
-    >
+    <header className={cn(
+      "sticky top-0 z-40",
+      "bg-background/90 backdrop-blur-md",
+      "border-b border-border/50",
+      scrolled && "shadow-sm"
+    )}>
       <div className="container mx-auto px-4">
+        {/* Main Navigation Bar */}
         <div className="flex items-center h-14">
           {/* Logo */}
           <Link href="/">
-            <a className="flex items-center flex-shrink-0">
-              <div className="relative flex items-center">
-                <span className="text-xl font-bold">
-                  <span className="text-primary">9</span>
-                  <span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">anime</span>
-                </span>
-                <div className="absolute -top-0.5 -right-2 w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-              </div>
+            <a className="flex items-center">
+              <span className="text-xl font-bold">
+                <span className="text-primary">9</span>
+                <span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">anime</span>
+              </span>
+              <div className="absolute -top-0.5 -right-2 w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
             </a>
           </Link>
 
@@ -54,11 +51,13 @@ const NavBar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden md:flex items-center space-x-8 ml-auto">
             <Link href="/">
               <a className={cn(
                 "flex items-center gap-2 transition-colors",
-                location === "/" ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+                location === "/" 
+                  ? "text-foreground font-medium" 
+                  : "text-muted-foreground hover:text-foreground"
               )}>
                 <i className="fas fa-home text-sm text-primary"></i>
                 <span>Home</span>
@@ -67,7 +66,9 @@ const NavBar = () => {
             <Link href="/genres">
               <a className={cn(
                 "flex items-center gap-2 transition-colors",
-                location === "/genres" ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+                location === "/genres" 
+                  ? "text-foreground font-medium" 
+                  : "text-muted-foreground hover:text-foreground"
               )}>
                 <i className="fas fa-tags text-sm text-primary"></i>
                 <span>Genres</span>
@@ -76,7 +77,9 @@ const NavBar = () => {
             <Link href="/recently-watched">
               <a className={cn(
                 "flex items-center gap-2 transition-colors",
-                location === "/recently-watched" ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+                location === "/recently-watched" 
+                  ? "text-foreground font-medium" 
+                  : "text-muted-foreground hover:text-foreground"
               )}>
                 <i className="fas fa-history text-sm text-primary"></i>
                 <span>Recent</span>
@@ -84,21 +87,17 @@ const NavBar = () => {
             </Link>
           </nav>
 
-          {/* Mobile Navigation */}
+          {/* Mobile Navigation Controls */}
           <div className="flex items-center gap-2 ml-auto md:hidden">
             <button
-              className="p-2 text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setSearchVisible(!searchVisible)}
+              className="p-2 text-muted-foreground hover:text-foreground transition-colors"
             >
-              {searchVisible ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Search className="w-5 h-5" />
-              )}
+              {searchVisible ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
             </button>
             <button
-              className="p-2 -mr-2 text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 -mr-2 text-muted-foreground hover:text-foreground transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -107,57 +106,66 @@ const NavBar = () => {
 
         {/* Mobile Search Bar */}
         <div className={cn(
-          "md:hidden overflow-hidden transition-all duration-200",
-          searchVisible ? "max-h-16 py-2" : "max-h-0"
+          "md:hidden overflow-hidden transition-all duration-300",
+          searchVisible ? "max-h-16 opacity-100" : "max-h-0 opacity-0"
         )}>
-          <SearchBar autoFocus={searchVisible} />
+          <div className="py-2">
+            <SearchBar autoFocus={searchVisible} />
+          </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Overlay */}
       <div className={cn(
-        "md:hidden fixed inset-y-0 right-0 w-64 bg-background/95 backdrop-blur-lg border-l border-border/50",
-        "transform transition-transform duration-200 ease-in-out z-50",
-        mobileMenuOpen ? "translate-x-0" : "translate-x-full"
+        "fixed inset-0 bg-background/80 backdrop-blur-sm z-50 transition-all duration-300",
+        "md:hidden",
+        mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       )}>
-        <div className="flex flex-col p-4">
+        {/* Close button */}
+        <button
+          onClick={() => setMobileMenuOpen(false)}
+          className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <X className="w-6 h-6" />
+        </button>
+
+        {/* Mobile Menu Items */}
+        <nav className="flex flex-col items-center justify-center h-full space-y-8">
           <Link href="/">
-            <a className={cn(
-              "flex items-center gap-3 py-3 transition-colors",
-              location === "/" ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+            <a onClick={() => setMobileMenuOpen(false)} className={cn(
+              "flex items-center gap-3 text-lg transition-colors",
+              location === "/" 
+                ? "text-foreground font-medium" 
+                : "text-muted-foreground hover:text-foreground"
             )}>
-              <i className="fas fa-home text-sm text-primary"></i>
+              <i className="fas fa-home text-primary"></i>
               <span>Home</span>
             </a>
           </Link>
           <Link href="/genres">
-            <a className={cn(
-              "flex items-center gap-3 py-3 transition-colors",
-              location === "/genres" ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+            <a onClick={() => setMobileMenuOpen(false)} className={cn(
+              "flex items-center gap-3 text-lg transition-colors",
+              location === "/genres" 
+                ? "text-foreground font-medium" 
+                : "text-muted-foreground hover:text-foreground"
             )}>
-              <i className="fas fa-tags text-sm text-primary"></i>
+              <i className="fas fa-tags text-primary"></i>
               <span>Genres</span>
             </a>
           </Link>
           <Link href="/recently-watched">
-            <a className={cn(
-              "flex items-center gap-3 py-3 transition-colors",
-              location === "/recently-watched" ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+            <a onClick={() => setMobileMenuOpen(false)} className={cn(
+              "flex items-center gap-3 text-lg transition-colors",
+              location === "/recently-watched" 
+                ? "text-foreground font-medium" 
+                : "text-muted-foreground hover:text-foreground"
             )}>
-              <i className="fas fa-history text-sm text-primary"></i>
+              <i className="fas fa-history text-primary"></i>
               <span>Recent</span>
             </a>
           </Link>
-        </div>
+        </nav>
       </div>
-
-      {/* Mobile Menu Backdrop */}
-      {mobileMenuOpen && (
-        <div
-          className="md:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
     </header>
   );
 };
