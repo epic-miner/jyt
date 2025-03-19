@@ -49,7 +49,7 @@ function App() {
           <Toaster />
         </div>
       </QueryClientProvider>
-    </HelmetProvider> {/* Closed HelmetProvider */}
+    </HelmetProvider>
   );
 }
 
