@@ -61,7 +61,7 @@ const VideoPlayerPage = () => {
         title: currentEpisode.title,
         episodeNumber: currentEpisode.episode_number,
         animeThumbnail: anime.thumbnail_url,
-        animeTitle: anime.title,
+        animeTitle: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, ''), // Remove tags from title
         progress: 0, // Initial progress, will be updated by the video player
         timestamp: new Date().getTime()
       });
@@ -69,7 +69,7 @@ const VideoPlayerPage = () => {
       // Update recently watched anime
       updateRecentlyWatchedAnime({
         id: anime.id.toString(),
-        title: anime.title,
+        title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, ''), // Remove tags from title
         thumbnail_url: anime.thumbnail_url,
         genre: anime.genre,
         timestamp: new Date().getTime()
@@ -163,7 +163,7 @@ const VideoPlayerPage = () => {
         <div className="p-4 space-y-4 md:space-y-6 rounded-t-xl backdrop-blur-sm bg-black/40 border-t border-white/5">
           {/* Episode Info */}
           <div className="glass-effect p-4 rounded-lg border border-white/10 transition-all duration-300 hover:scale-[1.02] hover:border-white/20">
-            <h2 className="text-2xl font-bold mb-2">{anime.title}</h2>
+            <h2 className="text-2xl font-bold mb-2">{anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')}</h2>
             <p className="text-gray-400">Episode {currentEpisode.episode_number}: {currentEpisode.title}</p>
           </div>
 

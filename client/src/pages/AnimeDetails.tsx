@@ -33,7 +33,7 @@ const AnimeDetails = () => {
     if (anime) {
       updateRecentlyWatchedAnime({
         id: anime.id.toString(),
-        title: anime.title,
+        title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, ''), // Remove tags from title
         thumbnail_url: anime.thumbnail_url,
         genre: anime.genre,
         timestamp: new Date().getTime()
@@ -142,7 +142,7 @@ const AnimeDetails = () => {
               animate={{ opacity: 1, x: 0 }}
               className="text-2xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-white to-primary bg-clip-text text-transparent hover:scale-[1.01] transition-transform duration-300"
             >
-              {anime.title}
+              {anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')}
             </motion.h1>
             <motion.div
               initial={{ opacity: 0 }}
