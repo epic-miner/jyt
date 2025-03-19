@@ -802,6 +802,24 @@ const VideoPlayer = ({
                   ref={progressBarRef}
                   className="w-full h-1 bg-gray-600/50 rounded-full relative group-hover:h-3 transition-all duration-150"
                   onClick={seekToPosition}
+                  onMouseDown={(e) => {
+                    const handleDrag = (e: MouseEvent) => {
+                      if (!videoRef.current || !progressBarRef.current) return;
+                      const bounds = progressBarRef.current.getBoundingClientRect();
+                      const x = Math.max(0, Math.min(e.clientX - bounds.left, bounds.width));
+                      const percentage = x / bounds.width;
+                      videoRef.current.currentTime = percentage * videoRef.current.duration;
+                    };
+                    
+                    const handleDragEnd = () => {
+                      window.removeEventListener('mousemove', handleDrag);
+                      window.removeEventListener('mouseup', handleDragEnd);
+                    };
+                    
+                    window.addEventListener('mousemove', handleDrag);
+                    window.addEventListener('mouseup', handleDragEnd);
+                    handleDrag(e.nativeEvent);
+                  }}
                 >
                   {/* Buffered progress */}
                   <div
