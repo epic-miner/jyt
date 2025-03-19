@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'wouter';
 import { motion } from 'framer-motion';
@@ -109,7 +109,27 @@ const Home = () => {
   };
 
   const genres = extractGenres();
-  const popularAnime = animeList || [];
+  
+  // Filter anime based on tags in titles
+  const trendingAnime = useMemo(() => {
+    if (!animeList) return [];
+    return animeList.filter(anime => anime.title.includes('(T)'));
+  }, [animeList]);
+  
+  const latestReleasedAnime = useMemo(() => {
+    if (!animeList) return [];
+    return animeList.filter(anime => anime.title.includes('(LR)'));
+  }, [animeList]);
+  
+  const popularAnime = useMemo(() => {
+    if (!animeList) return [];
+    return animeList.filter(anime => anime.title.includes('(P)'));
+  }, [animeList]);
+  
+  // Fallback to all anime if any section is empty
+  const finalTrendingAnime = trendingAnime.length > 0 ? trendingAnime : (animeList || []);
+  const finalLatestReleasedAnime = latestReleasedAnime.length > 0 ? latestReleasedAnime : (animeList || []);
+  const finalPopularAnime = popularAnime.length > 0 ? popularAnime : (animeList || []);
 
   const handleQuickPlay = (animeId: string) => {
     const anime = animeList?.find(a => a.id.toString() === animeId);
@@ -170,6 +190,103 @@ const Home = () => {
           </motion.section>
         )}
 
+        {/* Trending Section */}
+        <motion.section 
+          initial="hidden"
+          animate="visible"
+          variants={sectionVariants}
+          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5"
+        >
+          <SectionTitle 
+            icon="chart-line" 
+            title="Trending" 
+            viewAllLink="/search?sort=trending" 
+          />
+
+          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+            {isLoadingAnime ? (
+              Array(6).fill(0).map((_, i) => (
+                <div key={i} className="rounded-xl overflow-hidden bg-dark-800/60 shadow-md border border-dark-700/30">
+                  <Skeleton className="aspect-[2/3] w-full rounded-t-xl" />
+                  <div className="p-3">
+                    <Skeleton className="h-4 w-3/4 mb-2 rounded-md" />
+                    <Skeleton className="h-3 w-1/2 rounded-md" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              finalTrendingAnime.slice(0, 6).map((anime, index) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  key={anime.id}
+                >
+                  <AnimeCard 
+                    anime={{
+                      ...anime,
+                      title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '') // Remove tags for display
+                    }}
+                    rating={4.8} 
+                    episodeCount={episodeCounts?.[anime.id] || undefined}
+                    onQuickPlay={() => handleQuickPlay(anime.id.toString())}
+                    className="hover:scale-105 transition-transform duration-300"
+                  />
+                </motion.div>
+              ))
+            )}
+          </div>
+        </motion.section>
+        
+        {/* Latest Released Section */}
+        <motion.section 
+          initial="hidden"
+          animate="visible"
+          variants={sectionVariants}
+          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5"
+        >
+          <SectionTitle 
+            icon="clock" 
+            title="Latest Released" 
+            viewAllLink="/search?sort=latest" 
+          />
+
+          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+            {isLoadingAnime ? (
+              Array(6).fill(0).map((_, i) => (
+                <div key={i} className="rounded-xl overflow-hidden bg-dark-800/60 shadow-md border border-dark-700/30">
+                  <Skeleton className="aspect-[2/3] w-full rounded-t-xl" />
+                  <div className="p-3">
+                    <Skeleton className="h-4 w-3/4 mb-2 rounded-md" />
+                    <Skeleton className="h-3 w-1/2 rounded-md" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              finalLatestReleasedAnime.slice(0, 6).map((anime, index) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  key={anime.id}
+                >
+                  <AnimeCard 
+                    anime={{
+                      ...anime,
+                      title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '') // Remove tags for display
+                    }}
+                    rating={4.6} 
+                    episodeCount={episodeCounts?.[anime.id] || undefined}
+                    onQuickPlay={() => handleQuickPlay(anime.id.toString())}
+                    className="hover:scale-105 transition-transform duration-300"
+                  />
+                </motion.div>
+              ))
+            )}
+          </div>
+        </motion.section>
+        
+        {/* Popular Section */}
         <motion.section 
           initial="hidden"
           animate="visible"
@@ -184,7 +301,7 @@ const Home = () => {
 
           <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {isLoadingAnime ? (
-              Array(12).fill(0).map((_, i) => (
+              Array(6).fill(0).map((_, i) => (
                 <div key={i} className="rounded-xl overflow-hidden bg-dark-800/60 shadow-md border border-dark-700/30">
                   <Skeleton className="aspect-[2/3] w-full rounded-t-xl" />
                   <div className="p-3">
@@ -194,7 +311,7 @@ const Home = () => {
                 </div>
               ))
             ) : (
-              popularAnime.slice(0, 12).map((anime, index) => (
+              finalPopularAnime.slice(0, 6).map((anime, index) => (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -202,7 +319,10 @@ const Home = () => {
                   key={anime.id}
                 >
                   <AnimeCard 
-                    anime={anime}
+                    anime={{
+                      ...anime,
+                      title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '') // Remove tags for display
+                    }}
                     rating={4.5} 
                     episodeCount={episodeCounts?.[anime.id] || undefined}
                     onQuickPlay={() => handleQuickPlay(anime.id.toString())}
