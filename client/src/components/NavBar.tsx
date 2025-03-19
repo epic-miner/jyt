@@ -41,7 +41,8 @@ const NavBar = () => {
           <div className="flex items-center h-14">
             {/* Logo */}
             <Link href="/" className="flex items-center flex-shrink-0">
-              <div className="relative flex items-center">
+              <div className="relative flex items-center gap-2">
+                <img src="/images/logo.png" alt="9Anime Logo" className="h-8 w-8" />
                 <span className="text-xl md:text-2xl font-bold">
                   <span className="text-primary">9</span>
                   <span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">Anime</span>
