@@ -126,21 +126,17 @@ const Home = () => {
     return animeList.filter(anime => anime.title.includes('(P)'));
   }, [animeList]);
   
-  // Get "All Anime" that don't have any special tags
-  const allOtherAnime = useMemo(() => {
+  // All Anime section should contain all anime
+  const allAnime = useMemo(() => {
     if (!animeList) return [];
-    return animeList.filter(anime => 
-      !anime.title.includes('(T)') && 
-      !anime.title.includes('(LR)') && 
-      !anime.title.includes('(P)')
-    );
+    return animeList; // No filtering, show all anime
   }, [animeList]);
   
   // Use the filtered anime for each section
   const finalTrendingAnime = trendingAnime;
   const finalLatestReleasedAnime = latestReleasedAnime;
   const finalPopularAnime = popularAnime;
-  const finalAllAnime = allOtherAnime;
+  const finalAllAnime = allAnime;
 
   const handleQuickPlay = (animeId: string) => {
     const anime = animeList?.find(a => a.id.toString() === animeId);
@@ -370,7 +366,7 @@ const Home = () => {
                 </div>
               ))
             ) : (
-              finalAllAnime.slice(0, 6).map((anime, index) => (
+              finalAllAnime.slice(0, 6).map((anime: Anime, index: number) => (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -378,7 +374,10 @@ const Home = () => {
                   key={anime.id}
                 >
                   <AnimeCard 
-                    anime={anime}
+                    anime={{
+                      ...anime,
+                      title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '') // Remove tags for display
+                    }}
                     rating={4.2} 
                     episodeCount={episodeCounts?.[anime.id] || undefined}
                     onQuickPlay={() => handleQuickPlay(anime.id.toString())}
