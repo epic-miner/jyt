@@ -479,15 +479,19 @@ const VideoPlayer = ({
   };
 
   // Additional player functions
-  const togglePlay = () => {
+  const togglePlay = async () => {
     if (!videoRef.current) return;
-
-    if (videoRef.current.paused) {
-      videoRef.current.play();
-      setIsPlaying(true);
-    } else {
-      videoRef.current.pause();
-      setIsPlaying(false);
+    try {
+      if (isPlaying) {
+        await videoRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        await videoRef.current.play();
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      // Handle any play/pause errors gracefully
+      console.warn('Video playback state change failed:', error);
     }
   };
 
@@ -810,12 +814,12 @@ const VideoPlayer = ({
                       const percentage = x / bounds.width;
                       videoRef.current.currentTime = percentage * videoRef.current.duration;
                     };
-                    
+
                     const handleDragEnd = () => {
                       window.removeEventListener('mousemove', handleDrag);
                       window.removeEventListener('mouseup', handleDragEnd);
                     };
-                    
+
                     window.addEventListener('mousemove', handleDrag);
                     window.addEventListener('mouseup', handleDragEnd);
                     handleDrag(e.nativeEvent);
@@ -832,7 +836,7 @@ const VideoPlayer = ({
                       e.preventDefault();
                       const now = performance.now();
                       const touch = e.touches[0];
-                      
+
                       if (!isDragging) {
                         isDragging = true;
                         lastX = touch.clientX;
@@ -843,7 +847,7 @@ const VideoPlayer = ({
                       const deltaX = touch.clientX - lastX;
                       const deltaTime = Math.max(1, now - lastTimestamp);
                       velocity = deltaX / deltaTime;
-                      
+
                       cancelAnimationFrame(rafId);
                       rafId = requestAnimationFrame(() => {
                         if (!videoRef.current || !progressBarRef.current) return;
@@ -853,20 +857,20 @@ const VideoPlayer = ({
                         const percentage = x / bounds.width;
                         const duration = videoRef.current.duration || 0;
                         previewTime = percentage * duration;
-                        
+
                         // Ensure all values are finite
                         if (isFinite(previewTime) && isFinite(velocity) && isFinite(duration)) {
                           const velocityFactor = Math.min(0.2, Math.abs(velocity) * 0.1);
                           const smoothedTime = previewTime + (velocity > 0 ? velocityFactor : -velocityFactor);
                           const finalTime = Math.max(0, Math.min(smoothedTime, duration));
-                          
+
                           videoRef.current.currentTime = finalTime;
                           lastX = touch.clientX;
                           lastTimestamp = now;
                         }
                       });
                     };
-                    
+
                     const handleTouchEnd = () => {
                       cancelAnimationFrame(rafId);
                       if (isDragging && videoRef.current) {
@@ -878,11 +882,11 @@ const VideoPlayer = ({
                           safePreviewTime + finalVelocity,
                           duration
                         ));
-                        
+
                         if (isFinite(finalTime)) {
                           videoRef.current.currentTime = finalTime;
                         }
-                        
+
                         if (isPlaying) {
                           setTimeout(() => videoRef.current?.play(), 50);
                         }
@@ -890,7 +894,7 @@ const VideoPlayer = ({
                       window.removeEventListener('touchmove', handleTouchDrag, { passive: false });
                       window.removeEventListener('touchend', handleTouchEnd);
                     };
-                    
+
                     window.addEventListener('touchmove', handleTouchDrag, { passive: false });
                     window.addEventListener('touchend', handleTouchEnd);
                     handleTouchDrag(e.nativeEvent);
@@ -907,7 +911,7 @@ const VideoPlayer = ({
                     className="absolute top-0 left-0 h-full bg-red-600 rounded-full"
                     style={{ width: `${(videoRef.current?.currentTime || 0) / (videoRef.current?.duration || 1) * 100}%` }}
                   >
-                    {/* Thumb dot - larger on hover */}
+                                        {/* Thumb dot - larger on hover */}
                     <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-0 h-3 bg-red-600 rounded-full group-hover:w-4 group-hover:h-4 transition-all duration-150"></div>
                   </div>
                 </div>
