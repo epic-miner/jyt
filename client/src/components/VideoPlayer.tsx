@@ -823,14 +823,26 @@ const VideoPlayer = ({
                   onTouchStart={(e) => {
                     let rafId: number;
                     let isDragging = false;
-                    let currentTime = videoRef.current?.currentTime || 0;
+                    let lastX = 0;
+                    let velocity = 0;
+                    let lastTimestamp = 0;
+                    let previewTime = videoRef.current?.currentTime || 0;
 
                     const handleTouchDrag = (e: TouchEvent) => {
                       e.preventDefault();
+                      const now = performance.now();
+                      const touch = e.touches[0];
+                      
                       if (!isDragging) {
                         isDragging = true;
+                        lastX = touch.clientX;
+                        lastTimestamp = now;
                         if (videoRef.current) videoRef.current.pause();
                       }
+
+                      const deltaX = touch.clientX - lastX;
+                      const deltaTime = now - lastTimestamp;
+                      velocity = deltaX / deltaTime;
                       
                       cancelAnimationFrame(rafId);
                       rafId = requestAnimationFrame(() => {
@@ -839,15 +851,33 @@ const VideoPlayer = ({
                         const bounds = progressBarRef.current.getBoundingClientRect();
                         const x = Math.max(0, Math.min(touch.clientX - bounds.left, bounds.width));
                         const percentage = x / bounds.width;
-                        currentTime = percentage * (videoRef.current.duration || 0);
-                        videoRef.current.currentTime = currentTime;
+                        previewTime = percentage * (videoRef.current.duration || 0);
+                        
+                        // Apply velocity-based seeking for smoother movement
+                        const velocityFactor = Math.abs(velocity) * 0.2;
+                        const smoothedTime = previewTime + (velocity > 0 ? velocityFactor : -velocityFactor);
+                        const finalTime = Math.max(0, Math.min(smoothedTime, videoRef.current.duration));
+                        
+                        videoRef.current.currentTime = finalTime;
+                        lastX = touch.clientX;
+                        lastTimestamp = now;
                       });
                     };
                     
                     const handleTouchEnd = () => {
                       cancelAnimationFrame(rafId);
-                      if (isDragging && videoRef.current && isPlaying) {
-                        videoRef.current.play();
+                      if (isDragging && videoRef.current) {
+                        // Smooth end animation
+                        const finalVelocity = velocity * 0.5;
+                        const finalTime = Math.max(0, Math.min(
+                          previewTime + finalVelocity,
+                          videoRef.current.duration
+                        ));
+                        videoRef.current.currentTime = finalTime;
+                        
+                        if (isPlaying) {
+                          setTimeout(() => videoRef.current?.play(), 50);
+                        }
                       }
                       window.removeEventListener('touchmove', handleTouchDrag, { passive: false });
                       window.removeEventListener('touchend', handleTouchEnd);
