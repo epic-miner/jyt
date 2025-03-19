@@ -867,13 +867,18 @@ const VideoPlayer = ({
                     const handleTouchEnd = () => {
                       cancelAnimationFrame(rafId);
                       if (isDragging && videoRef.current) {
-                        // Smooth end animation
-                        const finalVelocity = velocity * 0.5;
+                        // Ensure we have valid numbers
+                        const finalVelocity = isFinite(velocity) ? velocity * 0.5 : 0;
+                        const duration = videoRef.current.duration || 0;
+                        const safePreviewTime = isFinite(previewTime) ? previewTime : 0;
                         const finalTime = Math.max(0, Math.min(
-                          previewTime + finalVelocity,
-                          videoRef.current.duration
+                          safePreviewTime + finalVelocity,
+                          duration
                         ));
-                        videoRef.current.currentTime = finalTime;
+                        
+                        if (isFinite(finalTime)) {
+                          videoRef.current.currentTime = finalTime;
+                        }
                         
                         if (isPlaying) {
                           setTimeout(() => videoRef.current?.play(), 50);
