@@ -21,9 +21,16 @@ const NavItem = memo(({ href, icon, label, isActive }: NavItemProps) => {
     [isActive]
   );
 
+  const handleClick = (e: React.MouseEvent) => {
+    if (href.startsWith('https://')) {
+      e.preventDefault();
+      window.open(href, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <Link href={href}>
-      <a className={className}>
+      <a className={className} onClick={handleClick}>
         {icon}
         <span className="text-[10px] font-medium">{label}</span>
       </a>

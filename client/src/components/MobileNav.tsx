@@ -7,17 +7,19 @@ interface NavItemProps {
   icon: string;
   label: string;
   isActive: boolean;
+  className?: string; // Added className prop
 }
 
 // Memoized NavItem component to prevent unnecessary re-renders
-const NavItem = memo(({ href, icon, label, isActive }: NavItemProps) => {
+const NavItem = memo(({ href, icon, label, isActive, className }: NavItemProps) => {
   // Memoize class strings to prevent recalculation on every render
   const iconContainerClass = useMemo(() => 
     cn(
       "w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-200",
-      isActive ? "bg-primary text-white shadow-md" : "text-slate-400"
+      isActive ? "bg-primary text-white shadow-md" : "text-slate-400",
+      className // Added className
     ), 
-    [isActive]
+    [isActive, className] // Added className to dependencies
   );
 
   const iconClass = useMemo(() => 
@@ -37,12 +39,17 @@ const NavItem = memo(({ href, icon, label, isActive }: NavItemProps) => {
     [isActive]
   );
 
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => { // Added type for e
+    if (href.startsWith('https://')) {
+      e.preventDefault();
+      window.open(href, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <Link href={href}>
-      <div className="flex flex-col items-center w-16">
-        <div className={iconContainerClass}>
-          <i className={iconClass}></i>
-        </div>
+      <div className={iconContainerClass} onClick={handleClick}> {/* Applied className and added onClick */}
+        <i className={iconClass}></i>
         <span className={labelClass}>{label}</span>
       </div>
     </Link>
@@ -69,7 +76,7 @@ const MobileNav = memo(() => {
     ),
     []
   );
-  
+
   return (
     <nav className={navClass}>
       <div className="container mx-auto flex justify-around px-2">
