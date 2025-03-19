@@ -969,7 +969,8 @@ const VideoPlayer = ({
                       window.addEventListener('touchmove', handleTouchDrag, { passive: false });
                       window.addEventListener('touchend', handleTouchEnd);
                       handleTouchDrag(e.nativeEvent);
-                    }}
+                    }
+                  }
                 >
                   {/* Buffered progress */}
                   <div
