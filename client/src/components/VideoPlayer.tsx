@@ -820,6 +820,25 @@ const VideoPlayer = ({
                     window.addEventListener('mouseup', handleDragEnd);
                     handleDrag(e.nativeEvent);
                   }}
+                  onTouchStart={(e) => {
+                    const handleTouchDrag = (e: TouchEvent) => {
+                      if (!videoRef.current || !progressBarRef.current) return;
+                      const touch = e.touches[0];
+                      const bounds = progressBarRef.current.getBoundingClientRect();
+                      const x = Math.max(0, Math.min(touch.clientX - bounds.left, bounds.width));
+                      const percentage = x / bounds.width;
+                      videoRef.current.currentTime = percentage * videoRef.current.duration;
+                    };
+                    
+                    const handleTouchEnd = () => {
+                      window.removeEventListener('touchmove', handleTouchDrag);
+                      window.removeEventListener('touchend', handleTouchEnd);
+                    };
+                    
+                    window.addEventListener('touchmove', handleTouchDrag);
+                    window.addEventListener('touchend', handleTouchEnd);
+                    handleTouchDrag(e.nativeEvent);
+                  }}
                 >
                   {/* Buffered progress */}
                   <div
