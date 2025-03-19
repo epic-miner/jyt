@@ -822,13 +822,15 @@ const VideoPlayer = ({
                   }}
                   onTouchStart={(e) => {
                     let rafId: number;
-                    let lastUpdate = 0;
-                    const minUpdateInterval = 16; // ~60fps
+                    let isDragging = false;
+                    let currentTime = videoRef.current?.currentTime || 0;
 
                     const handleTouchDrag = (e: TouchEvent) => {
                       e.preventDefault();
-                      const now = performance.now();
-                      if (now - lastUpdate < minUpdateInterval) return;
+                      if (!isDragging) {
+                        isDragging = true;
+                        if (videoRef.current) videoRef.current.pause();
+                      }
                       
                       cancelAnimationFrame(rafId);
                       rafId = requestAnimationFrame(() => {
@@ -837,13 +839,16 @@ const VideoPlayer = ({
                         const bounds = progressBarRef.current.getBoundingClientRect();
                         const x = Math.max(0, Math.min(touch.clientX - bounds.left, bounds.width));
                         const percentage = x / bounds.width;
-                        videoRef.current.currentTime = percentage * videoRef.current.duration;
-                        lastUpdate = now;
+                        currentTime = percentage * (videoRef.current.duration || 0);
+                        videoRef.current.currentTime = currentTime;
                       });
                     };
                     
                     const handleTouchEnd = () => {
                       cancelAnimationFrame(rafId);
+                      if (isDragging && videoRef.current && isPlaying) {
+                        videoRef.current.play();
+                      }
                       window.removeEventListener('touchmove', handleTouchDrag, { passive: false });
                       window.removeEventListener('touchend', handleTouchEnd);
                     };
