@@ -42,6 +42,7 @@ const VideoPlayer = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const seekDebounceRef = useRef<NodeJS.Timeout | null>(null); // Added seekDebounceRef
 
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -664,6 +665,33 @@ const VideoPlayer = ({
 
   const videoUrl = getVideoUrl();
 
+  const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!videoRef.current || !progressBarRef.current) return;
+
+    const rect = progressBarRef.current.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    const newTime = pos * videoRef.current.duration;
+
+    // Clear any pending seek operations
+    if (seekDebounceRef.current) {
+      clearTimeout(seekDebounceRef.current);
+    }
+
+    // Debounce seeking to prevent rapid consecutive seeks
+    seekDebounceRef.current = setTimeout(() => {
+      if (videoRef.current) {
+        const wasPlaying = !videoRef.current.paused;
+        videoRef.current.currentTime = newTime;
+
+        // Force immediate buffering
+        if (wasPlaying) {
+          videoRef.current.play().catch(() => {});
+        }
+      }
+    }, 50);
+  };
+
+
   return (
     <div className="w-full flex flex-col bg-black">
       {/* Main video container with 16:9 aspect ratio */}
@@ -707,6 +735,8 @@ const VideoPlayer = ({
               preload="auto"
               onClick={togglePlay}
               controlsList="nodownload"
+              onLoadedData={() => setIsLoading(false)}
+              onCanPlayThrough={() => setIsLoading(false)} // Added optimization attributes
             >
               <source src={videoUrl} type="video/mp4" />
               Your browser does not support the video tag.
@@ -805,7 +835,7 @@ const VideoPlayer = ({
                 <div
                   ref={progressBarRef}
                   className="w-full h-1 bg-gray-600/50 rounded-full relative group-hover:h-3 transition-all duration-150"
-                  onClick={seekToPosition}
+                  onClick={handleProgressBarClick} // Changed to handleProgressBarClick
                   onMouseDown={(e) => {
                     const handleDrag = (e: MouseEvent) => {
                       if (!videoRef.current || !progressBarRef.current) return;
@@ -880,7 +910,7 @@ const VideoPlayer = ({
                     const handleTouchEnd = async () => {
                       cancelAnimationFrame(rafId);
                       if (isDragging && videoRef.current) {
-                        // Ensure we have valid numbers
+                        //                        // Ensure we have valid numbers
                         const finalVelocity = isFinite(velocity) ? velocity * 0.5 : 0;
                         const duration = videoRef.current.duration || 0;
                         const safePreviewTime = isFinite(previewTime) ? previewTime : 0;
