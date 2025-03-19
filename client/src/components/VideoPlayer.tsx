@@ -832,7 +832,7 @@ const VideoPlayer = ({
                     let lastTimestamp = 0;
                     let previewTime = videoRef.current?.currentTime || 0;
 
-                    const handleTouchDrag = (e: TouchEvent) => {
+                    const handleTouchDrag = async (e: TouchEvent) => {
                       e.preventDefault();
                       const now = performance.now();
                       const touch = e.touches[0];
@@ -841,7 +841,13 @@ const VideoPlayer = ({
                         isDragging = true;
                         lastX = touch.clientX;
                         lastTimestamp = now;
-                        if (videoRef.current) videoRef.current.pause();
+                        if (videoRef.current && !videoRef.current.paused) {
+                          try {
+                            await videoRef.current.pause();
+                          } catch (err) {
+                            // Ignore interruption errors
+                          }
+                        }
                       }
 
                       const deltaX = touch.clientX - lastX;
@@ -887,8 +893,12 @@ const VideoPlayer = ({
                           videoRef.current.currentTime = finalTime;
                         }
 
-                        if (isPlaying) {
-                          setTimeout(() => videoRef.current?.play(), 50);
+                        if (isPlaying && videoRef.current) {
+                          try {
+                            await videoRef.current.play();
+                          } catch (err) {
+                            // Ignore play interruption errors
+                          }
                         }
                       }
                       window.removeEventListener('touchmove', handleTouchDrag, { passive: false });
