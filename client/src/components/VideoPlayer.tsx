@@ -905,7 +905,7 @@ const VideoPlayer = ({
                         lastTimestamp = now;
                         if (videoRef.current && !videoRef.current.paused) {
                           try {
-                            await videoRef.current.pause();
+                            await videoRef.current.current.pause();
                           } catch (err) {
                             // Ignore interruption errors
                           }
