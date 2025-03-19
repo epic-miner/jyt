@@ -81,6 +81,12 @@ export const MobileNavBar = memo(() => {
           label="History" 
           isActive={isHistoryActive} 
         />
+        <NavItem 
+          href="https://t.me/nineanimeofchat"
+          icon={<MessageCircle size={20} strokeWidth={2} />}
+          label="Contact"
+          isActive={false}
+        />
       </div>
     </nav>
   );

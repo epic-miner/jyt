@@ -97,6 +97,12 @@ const MobileNav = memo(() => {
           label="Recent" 
           isActive={isRecentActive}
         />
+        <NavItem 
+          href="https://t.me/nineanimeofchat" 
+          icon="paper-plane" 
+          label="Contact" 
+          isActive={false}
+        />
       </div>
     </nav>
   );
