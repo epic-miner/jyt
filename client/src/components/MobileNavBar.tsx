@@ -1,6 +1,7 @@
 import { Home, Search, Library, History, MessageCircle } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { memo, useMemo } from "react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface NavItemProps {
@@ -13,8 +14,8 @@ interface NavItemProps {
 const NavItem = memo(({ href, icon, label, isActive }: NavItemProps) => {
   const className = useMemo(() => 
     cn(
-      "flex flex-col items-center space-y-1 px-2 py-1.5 transition-all duration-200",
-      isActive ? "text-primary scale-110" : "text-muted-foreground hover:text-primary/80 active:scale-95"
+      "flex flex-col items-center space-y-1 px-2 py-1.5",
+      isActive ? "text-primary" : "text-muted-foreground hover:text-primary/80"
     ), 
     [isActive]
   );
@@ -28,10 +29,37 @@ const NavItem = memo(({ href, icon, label, isActive }: NavItemProps) => {
 
   return (
     <Link href={href}>
-      <a className={className} onClick={handleClick}>
-        {icon}
-        <span className="text-[10px] font-medium tracking-tight">{label}</span>
-      </a>
+      <motion.a 
+        className={className} 
+        onClick={handleClick}
+        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.1 }}
+      >
+        <motion.div
+          initial={{ scale: 1 }}
+          animate={isActive ? {
+            scale: [1, 1.2, 1],
+            rotate: [0, -10, 10, 0],
+          } : {}}
+          transition={{ 
+            duration: 0.4,
+            ease: "easeInOut"
+          }}
+        >
+          {icon}
+        </motion.div>
+        <motion.span 
+          className="text-[10px] font-medium tracking-tight"
+          animate={isActive ? { y: [-2, 2, -2] } : {}}
+          transition={{ 
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          {label}
+        </motion.span>
+      </motion.a>
     </Link>
   );
 });
