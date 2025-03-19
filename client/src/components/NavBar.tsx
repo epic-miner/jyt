@@ -33,12 +33,21 @@ const NavLink = memo(({ href, icon, label, isActive, isMobile = false }: NavLink
   );
 
   return (
-    <Link href={href}>
-      <div className={className}>
-        <i className={iconClass}></i>
-        <span>{label}</span>
-      </div>
-    </Link>
+    href.startsWith('https://t.me') ? (
+          <a href={href} target="_blank" rel="noopener noreferrer">
+            <div className={className}>
+              <i className={iconClass}></i>
+              <span>{label}</span>
+            </div>
+          </a>
+        ) : (
+          <Link href={href}>
+            <div className={className}>
+              <i className={iconClass}></i>
+              <span>{label}</span>
+            </div>
+          </Link>
+        )
   );
 });
 
@@ -61,7 +70,7 @@ const MobileSearchOverlay = memo(({
     ),
     [isOpen]
   );
-  
+
   return (
     <div className={overlayClasses}>
       <div className="sticky top-0 border-b border-border/50">
@@ -145,6 +154,13 @@ const NavBar = memo(() => {
     [mobileMenuOpen]
   );
 
+  const navigation = [
+    { href: '/', icon: 'home', label: 'Home' },
+    { href: '/genre/all', icon: 'tags', label: 'Genres' },
+    { href: '/recently-watched', icon: 'history', label: 'Recently Watched' },
+    { href: 'https://t.me/nineanimeofchat', icon: 'paper-plane', label: 'Contact' },
+  ];
+
   return (
     <>
       <header className={headerClasses}>
@@ -186,24 +202,15 @@ const NavBar = memo(() => {
 
               {/* Desktop Navigation */}
               <nav className="hidden md:flex items-center space-x-8">
-                <NavLink 
-                  href="/" 
-                  icon="home" 
-                  label="Home" 
-                  isActive={isHomeActive} 
-                />
-                <NavLink 
-                  href="/genre/all" 
-                  icon="tags" 
-                  label="Genres" 
-                  isActive={isGenreActive} 
-                />
-                <NavLink 
-                  href="/recently-watched" 
-                  icon="history" 
-                  label="Recently Watched" 
-                  isActive={isRecentlyWatchedActive} 
-                />
+                {navigation.map((item) => (
+                  <NavLink 
+                    key={item.href}
+                    href={item.href} 
+                    icon={item.icon} 
+                    label={item.label} 
+                    isActive={item.href === location}
+                  />
+                ))}
               </nav>
 
               {/* Mobile Menu Button */}
@@ -220,27 +227,16 @@ const NavBar = memo(() => {
           {/* Mobile Navigation Menu */}
           <div className={mobileMenuClasses}>
             <nav className="flex flex-col space-y-3">
-              <NavLink 
-                href="/" 
-                icon="home" 
-                label="Home" 
-                isActive={isHomeActive} 
-                isMobile 
-              />
-              <NavLink 
-                href="/genre/all" 
-                icon="tags" 
-                label="Genres" 
-                isActive={isGenreActive} 
-                isMobile 
-              />
-              <NavLink 
-                href="/recently-watched" 
-                icon="history" 
-                label="Recently Watched" 
-                isActive={isRecentlyWatchedActive} 
-                isMobile 
-              />
+              {navigation.map((item) => (
+                <NavLink 
+                  key={item.href}
+                  href={item.href} 
+                  icon={item.icon} 
+                  label={item.label} 
+                  isActive={item.href === location}
+                  isMobile
+                />
+              ))}
             </nav>
           </div>
         </div>
