@@ -212,7 +212,7 @@ const SearchBar = ({ autoFocus = false }: SearchBarProps) => {
                     >
                       <img
                         src={result.thumbnail_url}
-                        alt={result.title}
+                        alt={result.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')}
                         className="w-16 h-16 object-cover rounded-lg mr-3"
                         onError={(e) => {
                           e.currentTarget.onerror = null;
@@ -220,7 +220,7 @@ const SearchBar = ({ autoFocus = false }: SearchBarProps) => {
                         }}
                       />
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-base font-medium truncate mb-1">{result.title}</h4>
+                        <h4 className="text-base font-medium truncate mb-1">{result.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')}</h4>
                         <p className="text-sm text-muted-foreground truncate">{result.genre}</p>
                       </div>
                     </div>

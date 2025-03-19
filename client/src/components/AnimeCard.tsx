@@ -38,7 +38,7 @@ const AnimeCard = ({
         )}>
           <img 
             src={anime.thumbnail_url} 
-            alt={anime.title}
+            alt={anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')}
             className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
             loading="lazy"
             onError={(e) => {
@@ -118,7 +118,7 @@ const AnimeCard = ({
             "font-medium line-clamp-1 text-white/90 group-hover:text-white",
             isContinueWatching ? "text-[10px] md:text-xs" : "text-xs md:text-sm md:line-clamp-2"
           )}>
-            {anime.title}
+            {anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')}
           </h3>
           {!isContinueWatching && (
             <p className="text-[10px] md:text-xs text-gray-400 mt-0.5 md:mt-1 truncate group-hover:text-gray-300">
