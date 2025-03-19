@@ -154,9 +154,9 @@ const NavBar = memo(() => {
             <Link href="/" className="flex items-center flex-shrink-0">
               <div className="relative flex items-center gap-2">
                 <img 
-                  src="/images/logo.png" 
+                  src="/images/logo.svg" 
                   alt="9Anime Logo" 
-                  className="h-8 w-8 rounded-full overflow-hidden"
+                  className="h-8 w-8"
                   width="32"
                   height="32"
                   loading="eager"
