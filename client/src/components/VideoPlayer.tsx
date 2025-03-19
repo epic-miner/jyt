@@ -709,7 +709,7 @@ const VideoPlayer = ({
               !showControls && "opacity-0"
             )}>
               <h2 className="text-base font-semibold">{episode.title || `Episode ${episode.episode_number}`}</h2>
-              <p className="text-sm text-gray-300">{anime.title}</p>
+              <p className="text-sm text-gray-300">{anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')}</p>
             </div>
 
             {/* Settings gear for quality selection (YouTube style) */}

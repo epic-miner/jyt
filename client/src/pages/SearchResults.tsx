@@ -54,9 +54,12 @@ const SearchResults = () => {
           {searchResults.map((anime) => (
             <AnimeCard 
               key={anime.id} 
-              anime={anime}
-              rating={4.5} //this line is added
-              episodeCount={anime.episode_count} //this line is added
+              anime={{
+                ...anime,
+                title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '') // Remove tags from title
+              }}
+              rating={4.5}
+              episodeCount={anime.episode_count}
             />
           ))}
         </div>
