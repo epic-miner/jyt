@@ -19,7 +19,7 @@ const EpisodeCard = ({ episode, animeId }: EpisodeCardProps) => {
           <AspectRatio ratio={16 / 9}>
             <img 
               src={episode.thumbnail_url} 
-              alt={`Episode ${episode.episode_number}: ${episode.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')}`} 
+              alt={`Episode ${episode.episode_number}: ${episode.title}`} 
               className="w-full h-full object-cover transform transition-all duration-700 ease-out group-hover:scale-105 group-hover:filter group-hover:brightness-110"
               loading="lazy"
             />
@@ -61,7 +61,7 @@ const EpisodeCard = ({ episode, animeId }: EpisodeCardProps) => {
         {/* Episode info with enhanced hover effects */}
         <div className="p-4 backdrop-blur-sm">
           <h3 className="font-medium text-sm mb-1 line-clamp-1 group-hover:text-primary transition-colors duration-300 group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-white group-hover:bg-clip-text group-hover:text-transparent">
-            {episode.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')}
+            {episode.title}
           </h3>
           <p className="text-xs text-slate-400 line-clamp-2 group-hover:text-slate-300 transition-colors duration-300">
             {episode.description || `Episode ${episode.episode_number} of the anime series`}
