@@ -126,10 +126,21 @@ const Home = () => {
     return animeList.filter(anime => anime.title.includes('(P)'));
   }, [animeList]);
   
-  // Fallback to all anime if any section is empty
-  const finalTrendingAnime = trendingAnime.length > 0 ? trendingAnime : (animeList || []);
-  const finalLatestReleasedAnime = latestReleasedAnime.length > 0 ? latestReleasedAnime : (animeList || []);
-  const finalPopularAnime = popularAnime.length > 0 ? popularAnime : (animeList || []);
+  // Get "All Anime" that don't have any special tags
+  const allOtherAnime = useMemo(() => {
+    if (!animeList) return [];
+    return animeList.filter(anime => 
+      !anime.title.includes('(T)') && 
+      !anime.title.includes('(LR)') && 
+      !anime.title.includes('(P)')
+    );
+  }, [animeList]);
+  
+  // Use the filtered anime for each section
+  const finalTrendingAnime = trendingAnime;
+  const finalLatestReleasedAnime = latestReleasedAnime;
+  const finalPopularAnime = popularAnime;
+  const finalAllAnime = allOtherAnime;
 
   const handleQuickPlay = (animeId: string) => {
     const anime = animeList?.find(a => a.id.toString() === animeId);
@@ -334,6 +345,52 @@ const Home = () => {
           </div>
         </motion.section>
 
+        {/* All Anime Section */}
+        <motion.section 
+          initial="hidden"
+          animate="visible"
+          variants={sectionVariants}
+          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5"
+        >
+          <SectionTitle 
+            icon="film" 
+            title="All Anime" 
+            viewAllLink="/search?sort=all" 
+          />
+
+          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+            {isLoadingAnime ? (
+              Array(6).fill(0).map((_, i) => (
+                <div key={i} className="rounded-xl overflow-hidden bg-dark-800/60 shadow-md border border-dark-700/30">
+                  <Skeleton className="aspect-[2/3] w-full rounded-t-xl" />
+                  <div className="p-3">
+                    <Skeleton className="h-4 w-3/4 mb-2 rounded-md" />
+                    <Skeleton className="h-3 w-1/2 rounded-md" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              finalAllAnime.slice(0, 6).map((anime, index) => (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  key={anime.id}
+                >
+                  <AnimeCard 
+                    anime={anime}
+                    rating={4.2} 
+                    episodeCount={episodeCounts?.[anime.id] || undefined}
+                    onQuickPlay={() => handleQuickPlay(anime.id.toString())}
+                    className="hover:scale-105 transition-transform duration-300"
+                  />
+                </motion.div>
+              ))
+            )}
+          </div>
+        </motion.section>
+
+        {/* Browse by Genre Section */}
         <motion.section 
           initial="hidden"
           animate="visible"
