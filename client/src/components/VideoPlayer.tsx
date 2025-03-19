@@ -918,11 +918,11 @@ const VideoPlayer = ({
 
                   {/* Played progress - red for YouTube */}
                   <div
-                    className="absolute top-0 left0 left-0 hfull bg-red-600 rounded-full"
+                    className="absolute top-0 left-0 h-full bg-red-60 rounded-full transition-all duration-150 group-hover:bg-red-500"
                     style={{ width: `${(videoRef.current?.currentTime || 0) / (videoRef.current?.duration || 1) * 100}%` }}
                   >
-                                        {/* Thumb dot - larger on hover */}
-                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-0 h-3 bg-red-600 rounded-full group-hover:w-4 group-hover:h-4 transition-all duration-150"></div>
+                    {/* Thumb dot - larger on hover */}
+                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-0 h-3 bg-red-600 rounded-full group-hover:w-4 group-hover:h-4 group-hover:bg-red-500 group-hover:shadow-md transition-all duration-150"></div>
                   </div>
                 </div>
               </div>
