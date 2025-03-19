@@ -746,6 +746,15 @@ const VideoPlayer = ({
               </div>
             )}
 
+            {/* Center play/pause button */}
+            <button
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/50 p-4 rounded-full hover:bg-black/70 transition-all duration-200 z-20"
+              onClick={togglePlay}
+              aria-label={isPlaying ? 'Pause' : 'Play'}
+            >
+              {isPlaying ? <Pause size={32} /> : <Play size={32} />}
+            </button>
+
             {/* Video element */}
             <video
               ref={videoRef}
@@ -901,67 +910,66 @@ const VideoPlayer = ({
                             // Ignore interruption errors
                           }
                         }
-                      }
 
-                      const deltaX = touch.clientX - lastX;
-                      const deltaTime = Math.max(1, now - lastTimestamp);
-                      velocity = deltaX / deltaTime;
+                        const deltaX = touch.clientX - lastX;
+                        const deltaTime = Math.max(1, now - lastTimestamp);
+                        velocity = deltaX / deltaTime;
 
-                      cancelAnimationFrame(rafId);
-                      rafId = requestAnimationFrame(() => {
-                        if (!videoRef.current || !progressBarRef.current) return;
-                        const touch = e.touches[0];
-                        const bounds = progressBarRef.current.getBoundingClientRect();
-                        const x = Math.max(0, Math.min(touch.clientX - bounds.left, bounds.width));
-                        const percentage = x / bounds.width;
-                        const duration = videoRef.current.duration || 0;
-                        previewTime = percentage * duration;
+                        cancelAnimationFrame(rafId);
+                        rafId = requestAnimationFrame(() => {
+                          if (!videoRef.current || !progressBarRef.current) return;
+                          const touch = e.touches[0];
+                          const bounds = progressBarRef.current.getBoundingClientRect();
+                          const x = Math.max(0, Math.min(touch.clientX - bounds.left, bounds.width));
+                          const percentage = x / bounds.width;
+                          const duration = videoRef.current.duration || 0;
+                          previewTime = percentage * duration;
 
-                        // Ensure all values are finite
-                        if (isFinite(previewTime) && isFinite(velocity) && isFinite(duration)) {
-                          const velocityFactor = Math.min(0.2, Math.abs(velocity) * 0.1);
-                          const smoothedTime = previewTime + (velocity > 0 ? velocityFactor : -velocityFactor);
-                          const finalTime = Math.max(0, Math.min(smoothedTime, duration));
+                          // Ensure all values are finite
+                          if (isFinite(previewTime) && isFinite(velocity) && isFinite(duration)) {
+                            const velocityFactor = Math.min(0.2, Math.abs(velocity) * 0.1);
+                            const smoothedTime = previewTime + (velocity > 0 ? velocityFactor : -velocityFactor);
+                            const finalTime = Math.max(0, Math.min(smoothedTime, duration));
 
-                          videoRef.current.currentTime = finalTime;
-                          lastX = touch.clientX;
-                          lastTimestamp = now;
-                        }
-                      });
-                    };
+                            videoRef.current.currentTime = finalTime;
+                            lastX = touch.clientX;
+                            lastTimestamp = now;
+                          }
+                        });
+                      };
 
-                    const handleTouchEnd = async () => {
-                      cancelAnimationFrame(rafId);
-                      if (isDragging && videoRef.current) {
-                        //                        // Ensure we have valid numbers
-                        const finalVelocity = isFinite(velocity) ? velocity * 0.5 : 0;
-                        const duration = videoRef.current.duration || 0;
-                        const safePreviewTime = isFinite(previewTime) ? previewTime : 0;
-                        const finalTime = Math.max(0, Math.min(
-                          safePreviewTime + finalVelocity,
-                          duration
-                        ));
+                      const handleTouchEnd = async () => {
+                        cancelAnimationFrame(rafId);
+                        if (isDragging && videoRef.current) {
+                          //                        // Ensure we have valid numbers
+                          const finalVelocity = isFinite(velocity) ? velocity * 0.5 : 0;
+                          const duration = videoRef.current.duration || 0;
+                          const safePreviewTime = isFinite(previewTime) ? previewTime : 0;
+                          const finalTime = Math.max(0, Math.min(
+                            safePreviewTime + finalVelocity,
+                            duration
+                          ));
 
-                        if (isFinite(finalTime)) {
-                          videoRef.current.currentTime = finalTime;
-                        }
+                          if (isFinite(finalTime)) {
+                            videoRef.current.currentTime = finalTime;
+                          }
 
-                        if (isPlaying && videoRef.current) {
-                          try {
-                            await videoRef.current.play();
-                          } catch (err) {
-                            // Ignore play interruption errors
+                          if (isPlaying && videoRef.current) {
+                            try {
+                              await videoRef.current.play();
+                            } catch (err) {
+                              // Ignore play interruption errors
+                            }
                           }
                         }
-                      }
-                      window.removeEventListener('touchmove', handleTouchDrag, { passive: false });
-                      window.removeEventListener('touchend', handleTouchEnd);
-                    };
+                        window.removeEventListener('touchmove', handleTouchDrag, { passive: false });
+                        window.removeEventListener('touchend', handleTouchEnd);
+                      };
 
-                    window.addEventListener('touchmove', handleTouchDrag, { passive: false });
-                    window.addEventListener('touchend', handleTouchEnd);
-                    handleTouchDrag(e.nativeEvent);
-                  }}
+                      window.addEventListener('touchmove', handleTouchDrag, { passive: false });
+                      window.addEventListener('touchend', handleTouchEnd);
+                      handleTouchDrag(e.nativeEvent);
+                    }}
                 >
                   {/* Buffered progress */}
                   <div
