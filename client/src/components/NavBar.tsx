@@ -156,7 +156,7 @@ const NavBar = memo(() => {
                 <img 
                   src="/images/logo.png" 
                   alt="9Anime Logo" 
-                  className="h-8 w-8"
+                  className="h-8 w-8 rounded-full overflow-hidden"
                   width="32"
                   height="32"
                   loading="eager"
