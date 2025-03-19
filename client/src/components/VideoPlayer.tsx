@@ -404,7 +404,12 @@ const VideoPlayer = ({
       if (videoRef.current) {
         videoRef.current.currentTime = currentPlaybackTime;
         if (wasPlaying) {
-          videoRef.current.play().catch(e => console.error('Error playing video after quality change:', e));
+          videoRef.current.play().catch(e => {
+            // Ignore abort errors from pause interruptions
+            if (e.name !== 'AbortError') {
+              console.error('Error playing video after quality change:', e);
+            }
+          });
         }
       }
     };
@@ -889,7 +894,7 @@ const VideoPlayer = ({
                             const height = rect.height;
                             const y = e.clientY - rect.top;
                             // Calculate volume (0-1) based on click position, invert because 0 is bottom
-                            const newVolumeValue = Math.min(Math.max(1 - (y / height), 0), 1);
+                            const newVolumeValue = Math.min(Math.max(1 - (y /height), 0), 1);
                             videoRef.current.volume = newVolumeValue;
                             setVolume(newVolumeValue);
                             if (newVolumeValue === 0) setIsMuted(true);
