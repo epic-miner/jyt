@@ -918,7 +918,7 @@ const VideoPlayer = ({
 
                   {/* Played progress - red for YouTube */}
                   <div
-                    className="absolute top-0 left-0 h-full bg-red-60 rounded-full transition-all duration-150 group-hover:bg-red-500"
+                    className="absolute top-00 left-0 h-full bg-red-60 rounded-full transition-all duration-150 group-hover:bg-red-500"
                     style={{ width: `${(videoRef.current?.currentTime || 0) / (videoRef.current?.duration || 1) * 100}%` }}
                   >
                     {/* Thumb dot - larger on hover */}
