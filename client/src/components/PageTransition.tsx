@@ -83,16 +83,6 @@ export const PageTransition = memo(({
     []
   );
   
-  // Memoize styles to avoid object recreation on each render
-  const motionStyles = useMemo(() => ({ 
-    willChange: 'transform, opacity',
-    backfaceVisibility: 'hidden',
-    // Reduce composite layers on mobile
-    transform: 'translateZ(0)',
-    // Hardware acceleration hint
-    WebkitFontSmoothing: 'antialiased'
-  }), []);
-
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -102,8 +92,7 @@ export const PageTransition = memo(({
         exit="exit"
         variants={variants}
         transition={transition}
-        className="w-full"
-        style={motionStyles}
+        className="w-full will-change-[transform,opacity]"
         // Improve performance by letting the browser know this element will animate
         layoutId={transitionKey?.toString()}
         // Improve browser paint performance  
