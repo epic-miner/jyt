@@ -594,19 +594,23 @@ const VideoPlayer = ({
     let timeout: ReturnType<typeof setTimeout> | null = null;
 
     const hideControls = () => {
-      if (isPlaying && !showSettingsMenu && (!isHovering || isMobile)) {
+      if (!showSettingsMenu && (!isHovering || isMobile) && !isBuffering) {
         setShowControls(false);
       }
     };
 
     const resetControlsTimeout = () => {
       if (timeout) clearTimeout(timeout);
-      timeout = setTimeout(hideControls, 3000);
+      // Show controls for shorter duration when playing
+      const hideDelay = isPlaying ? 2000 : 3500;
+      timeout = setTimeout(hideControls, hideDelay);
     };
 
-    const showControlsTemporarily = () => {
-      setShowControls(true);
-      resetControlsTimeout();
+    const showControlsTemporarily = (force = false) => {
+      if (force || !showControls) {
+        setShowControls(true);
+        resetControlsTimeout();
+      }
     };
 
     const playerContainer = playerContainerRef.current;
