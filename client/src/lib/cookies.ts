@@ -25,8 +25,15 @@ export const updateWatchHistory = (item: WatchHistoryItem): void => {
       historyItem => !(historyItem.animeId === item.animeId && historyItem.episodeId === item.episodeId)
     );
     
+    // Clean the title before saving
+    const cleanedItem = {
+      ...item,
+      title: item.title.replace(/\(T\)|\(LR\)|\(P\)/g, ''),
+      animeTitle: item.animeTitle.replace(/\(T\)|\(LR\)|\(P\)/g, '')
+    };
+    
     // Add new entry at the beginning
-    const updatedHistory = [item, ...filteredHistory].slice(0, 20); // Keep only last 20 items
+    const updatedHistory = [cleanedItem, ...filteredHistory].slice(0, 20); // Keep only last 20 items
     
     Cookies.set(WATCH_HISTORY_COOKIE, JSON.stringify(updatedHistory), { 
       expires: COOKIE_EXPIRATION,
@@ -65,8 +72,14 @@ export const updateRecentlyWatchedAnime = (anime: RecentlyWatchedAnime): void =>
       item => item.id !== anime.id
     );
     
+    // Clean the title before saving
+    const cleanedAnime = {
+      ...anime,
+      title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')
+    };
+    
     // Add new entry at the beginning
-    const updatedRecent = [anime, ...filteredRecent].slice(0, 10); // Keep only last 10 items
+    const updatedRecent = [cleanedAnime, ...filteredRecent].slice(0, 10); // Keep only last 10 items
     
     Cookies.set(RECENTLY_WATCHED_COOKIE, JSON.stringify(updatedRecent), { 
       expires: COOKIE_EXPIRATION,

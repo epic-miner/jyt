@@ -52,7 +52,7 @@ const RecentlyWatched = () => {
                   <div className="relative h-40">
                     <img 
                       src={item.animeThumbnail} 
-                      alt={item.animeTitle} 
+                      alt={item.animeTitle.replace(/\(T\)|\(LR\)|\(P\)/g, '')} 
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
@@ -68,7 +68,7 @@ const RecentlyWatched = () => {
                     </div>
                   </div>
                   <div className="p-2">
-                    <h3 className="font-medium text-sm">{item.animeTitle}</h3>
+                    <h3 className="font-medium text-sm">{item.animeTitle.replace(/\(T\)|\(LR\)|\(P\)/g, '')}</h3>
                     <p className="text-xs text-slate-400">Episode {item.episodeNumber}</p>
                   </div>
                 </div>
@@ -90,7 +90,7 @@ const RecentlyWatched = () => {
                 key={anime.id} 
                 anime={{
                   id: parseInt(anime.id),
-                  title: anime.title,
+                  title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, ''),
                   thumbnail_url: anime.thumbnail_url,
                   genre: anime.genre,
                   description: ''
