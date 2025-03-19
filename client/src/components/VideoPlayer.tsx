@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo, useCallback } from 'react';
 import { Episode, Anime } from '@shared/types';
 import { updateWatchHistory } from '../lib/cookies';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -881,10 +881,11 @@ const VideoPlayer = ({
                     let lastTimestamp = 0;
                     let previewTime = videoRef.current?.currentTime || 0;
 
-                    const handleTouchDrag = async (e: TouchEvent) => {
+                    const handleTouchDrag = (e: Event) => {
                       e.preventDefault();
+                      const touchEvent = e as TouchEvent;
                       const now = performance.now();
-                      const touch = e.touches[0];
+                      const touch = touchEvent.touches[0];
 
                       if (!isDragging) {
                         isDragging = true;
@@ -892,7 +893,7 @@ const VideoPlayer = ({
                         lastTimestamp = now;
                         if (videoRef.current && !videoRef.current.paused) {
                           try {
-                            await videoRef.current.pause();
+                            videoRef.current.pause();
                           } catch (err) {
                             // Ignore interruption errors
                           }
@@ -906,9 +907,10 @@ const VideoPlayer = ({
                       cancelAnimationFrame(rafId);
                       rafId = requestAnimationFrame(() => {
                         if (!videoRef.current || !progressBarRef.current) return;
-                        const touch = e.touches[0];
+                        // Store touch data to use inside RAF
+                        const storedTouch = touchEvent.touches[0];
                         const bounds = progressBarRef.current.getBoundingClientRect();
-                        const x = Math.max(0, Math.min(touch.clientX - bounds.left, bounds.width));
+                        const x = Math.max(0, Math.min(storedTouch.clientX - bounds.left, bounds.width));
                         const percentage = x / bounds.width;
                         const duration = videoRef.current.duration || 0;
                         previewTime = percentage * duration;
@@ -920,7 +922,7 @@ const VideoPlayer = ({
                           const finalTime = Math.max(0, Math.min(smoothedTime, duration));
 
                           videoRef.current.currentTime = finalTime;
-                          lastX = touch.clientX;
+                          lastX = storedTouch.clientX;
                           lastTimestamp = now;
                         }
                       });
@@ -950,11 +952,11 @@ const VideoPlayer = ({
                           }
                         }
                       }
-                      window.removeEventListener('touchmove', handleTouchDrag, { passive: false });
+                      window.removeEventListener('touchmove', handleTouchDrag);
                       window.removeEventListener('touchend', handleTouchEnd);
                     };
 
-                    window.addEventListener('touchmove', handleTouchDrag, { passive: false });
+                    window.addEventListener('touchmove', handleTouchDrag);
                     window.addEventListener('touchend', handleTouchEnd);
                     handleTouchDrag(e.nativeEvent);
                   }}
@@ -1147,4 +1149,5 @@ const VideoPlayer = ({
   );
 };
 
-export default VideoPlayer;
+// Optimize with memo to prevent unnecessary re-renders
+export default memo(VideoPlayer);

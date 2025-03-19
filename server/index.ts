@@ -56,7 +56,7 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  const port = 5000;
+  const port = 5000; // Using port 5000 to match workflow expectations
   server.listen({
     port,
     host: "0.0.0.0",
