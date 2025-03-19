@@ -841,7 +841,7 @@ const VideoPlayer = ({
                       }
 
                       const deltaX = touch.clientX - lastX;
-                      const deltaTime = now - lastTimestamp;
+                      const deltaTime = Math.max(1, now - lastTimestamp);
                       velocity = deltaX / deltaTime;
                       
                       cancelAnimationFrame(rafId);
@@ -851,16 +851,19 @@ const VideoPlayer = ({
                         const bounds = progressBarRef.current.getBoundingClientRect();
                         const x = Math.max(0, Math.min(touch.clientX - bounds.left, bounds.width));
                         const percentage = x / bounds.width;
-                        previewTime = percentage * (videoRef.current.duration || 0);
+                        const duration = videoRef.current.duration || 0;
+                        previewTime = percentage * duration;
                         
-                        // Apply velocity-based seeking for smoother movement
-                        const velocityFactor = Math.abs(velocity) * 0.2;
-                        const smoothedTime = previewTime + (velocity > 0 ? velocityFactor : -velocityFactor);
-                        const finalTime = Math.max(0, Math.min(smoothedTime, videoRef.current.duration));
-                        
-                        videoRef.current.currentTime = finalTime;
-                        lastX = touch.clientX;
-                        lastTimestamp = now;
+                        // Ensure all values are finite
+                        if (isFinite(previewTime) && isFinite(velocity) && isFinite(duration)) {
+                          const velocityFactor = Math.min(0.2, Math.abs(velocity) * 0.1);
+                          const smoothedTime = previewTime + (velocity > 0 ? velocityFactor : -velocityFactor);
+                          const finalTime = Math.max(0, Math.min(smoothedTime, duration));
+                          
+                          videoRef.current.currentTime = finalTime;
+                          lastX = touch.clientX;
+                          lastTimestamp = now;
+                        }
                       });
                     };
                     
