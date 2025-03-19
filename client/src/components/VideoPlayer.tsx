@@ -42,7 +42,8 @@ const VideoPlayer = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
-  const seekDebounceRef = useRef<NodeJS.Timeout | null>(null); // Added seekDebounceRef
+  const seekDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const bufferingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -62,6 +63,7 @@ const VideoPlayer = ({
   const [bufferProgress, setBufferProgress] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [isHovering, setIsHovering] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false); // Added isBuffering state
   const isMobile = useIsMobile();
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -148,11 +150,23 @@ const VideoPlayer = ({
       }
     };
 
+    const handleWaiting = () => {
+      setIsBuffering(true);
+      if (bufferingTimeoutRef.current) clearTimeout(bufferingTimeoutRef.current);
+      bufferingTimeoutRef.current = setTimeout(() => setIsBuffering(false), 1000); // Hide buffering after 1 second
+    };
+
+    const handlePlaying = () => {
+      setIsBuffering(false);
+    };
+
     const videoElement = videoRef.current;
     videoElement.addEventListener('timeupdate', handleTimeUpdate);
     videoElement.addEventListener('loadeddata', handleVideoLoad);
     videoElement.addEventListener('error', handleVideoError);
     videoElement.addEventListener('progress', handleProgress);
+    videoElement.addEventListener('waiting', handleWaiting); // Add waiting event listener
+    videoElement.addEventListener('playing', handlePlaying); // Add playing event listener
 
     return () => {
       if (videoElement) {
@@ -160,6 +174,8 @@ const VideoPlayer = ({
         videoElement.removeEventListener('loadeddata', handleVideoLoad);
         videoElement.removeEventListener('error', handleVideoError);
         videoElement.removeEventListener('progress', handleProgress);
+        videoElement.removeEventListener('waiting', handleWaiting); // Remove waiting event listener
+        videoElement.removeEventListener('playing', handlePlaying); // Remove playing event listener
       }
     };
   }, [anime, episode]);
@@ -736,7 +752,10 @@ const VideoPlayer = ({
               onClick={togglePlay}
               controlsList="nodownload"
               onLoadedData={() => setIsLoading(false)}
-              onCanPlayThrough={() => setIsLoading(false)} // Added optimization attributes
+              onCanPlayThrough={() => setIsLoading(false)}
+              x-webkit-airplay="allow"
+              data-fast-seek
+              crossOrigin="anonymous"
             >
               <source src={videoUrl} type="video/mp4" />
               Your browser does not support the video tag.
@@ -835,7 +854,7 @@ const VideoPlayer = ({
                 <div
                   ref={progressBarRef}
                   className="w-full h-1 bg-gray-600/50 rounded-full relative group-hover:h-3 transition-all duration-150"
-                  onClick={handleProgressBarClick} // Changed to handleProgressBarClick
+                  onClick={handleProgressBarClick}
                   onMouseDown={(e) => {
                     const handleDrag = (e: MouseEvent) => {
                       if (!videoRef.current || !progressBarRef.current) return;
