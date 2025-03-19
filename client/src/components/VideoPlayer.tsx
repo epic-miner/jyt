@@ -821,21 +821,34 @@ const VideoPlayer = ({
                     handleDrag(e.nativeEvent);
                   }}
                   onTouchStart={(e) => {
+                    let rafId: number;
+                    let lastUpdate = 0;
+                    const minUpdateInterval = 16; // ~60fps
+
                     const handleTouchDrag = (e: TouchEvent) => {
-                      if (!videoRef.current || !progressBarRef.current) return;
-                      const touch = e.touches[0];
-                      const bounds = progressBarRef.current.getBoundingClientRect();
-                      const x = Math.max(0, Math.min(touch.clientX - bounds.left, bounds.width));
-                      const percentage = x / bounds.width;
-                      videoRef.current.currentTime = percentage * videoRef.current.duration;
+                      e.preventDefault();
+                      const now = performance.now();
+                      if (now - lastUpdate < minUpdateInterval) return;
+                      
+                      cancelAnimationFrame(rafId);
+                      rafId = requestAnimationFrame(() => {
+                        if (!videoRef.current || !progressBarRef.current) return;
+                        const touch = e.touches[0];
+                        const bounds = progressBarRef.current.getBoundingClientRect();
+                        const x = Math.max(0, Math.min(touch.clientX - bounds.left, bounds.width));
+                        const percentage = x / bounds.width;
+                        videoRef.current.currentTime = percentage * videoRef.current.duration;
+                        lastUpdate = now;
+                      });
                     };
                     
                     const handleTouchEnd = () => {
-                      window.removeEventListener('touchmove', handleTouchDrag);
+                      cancelAnimationFrame(rafId);
+                      window.removeEventListener('touchmove', handleTouchDrag, { passive: false });
                       window.removeEventListener('touchend', handleTouchEnd);
                     };
                     
-                    window.addEventListener('touchmove', handleTouchDrag);
+                    window.addEventListener('touchmove', handleTouchDrag, { passive: false });
                     window.addEventListener('touchend', handleTouchEnd);
                     handleTouchDrag(e.nativeEvent);
                   }}
