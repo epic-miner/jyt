@@ -817,7 +817,7 @@ const VideoPlayer = ({
             <div className={cn(
               "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent z-10 transition-opacity duration-300",
               !showControls && "opacity-0 pointer-events-none",
-              isMobile && isFullScreen ? "pb-24 pt-4" : "pb-6 pt-8"
+              isMobile && isFullScreen ? "pb-32 pt-4" : isMobile ? "pb-14 pt-6" : "pb-6 pt-8"
             )}>
               {/* Progress bar - YouTube style (thin line with hover effect) */}
               <div
