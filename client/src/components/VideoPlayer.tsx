@@ -979,7 +979,7 @@ const VideoPlayer = ({
         data-fullscreen={isFullScreen ? "true" : "false"}
       >
         <AspectRatio ratio={16 / 9} className="w-full h-full aspect-ratio">
-          <div className="w-full h-full relative flex justify-center items-center overflow-hidden video-content"> {/* Centered video with overflow hidden */}
+          <div className="w-full h-full relative flex justify-center items-center overflow-hidden video-content bg-black"> {/* Centered video with overflow hidden */}
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
                 <div className="flex flex-col items-center">
