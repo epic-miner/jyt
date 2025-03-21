@@ -976,6 +976,7 @@ const VideoPlayer = ({
           "relative w-full bg-black overflow-hidden video-player-container",
           isFullScreen ? "fixed inset-0 z-50 fullscreen" : ""
         )}
+        data-fullscreen={isFullScreen ? "true" : "false"}
       >
         <AspectRatio ratio={16 / 9} className="w-full">
           <div className="w-full h-full relative flex justify-center items-center"> {/* Centered video */}
@@ -1082,7 +1083,7 @@ const VideoPlayer = ({
             {/* Video element */}
             <video
               ref={videoRef}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain video-element"
               autoPlay
               playsInline
               preload="auto"
