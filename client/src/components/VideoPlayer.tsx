@@ -260,7 +260,16 @@ const VideoPlayer = ({
         const screenOrientation = window.screen.orientation as any;
         // Try to lock to landscape orientation using the Screen Orientation API
         if (typeof screenOrientation.lock === 'function') {
-          await screenOrientation.lock('landscape');
+          // Try both primary landscape orientations in case one fails
+          try {
+            await screenOrientation.lock('landscape-primary');
+          } catch (e) {
+            try {
+              await screenOrientation.lock('landscape');
+            } catch (e2) {
+              console.warn('Both landscape lock attempts failed');
+            }
+          }
           return true;
         }
       }
@@ -275,20 +284,42 @@ const VideoPlayer = ({
   const toggleFullScreen = async () => {
     try {
       if (!document.fullscreenElement) {
-        // On mobile, try to lock to landscape first if not already in landscape
-        if (isMobile && !isLandscapeMode()) {
-          await requestOrientationLock();
-        }
-
         // Request fullscreen
         if (playerContainerRef.current) {
+          // On mobile devices, force landscape orientation when entering fullscreen
+          if (isMobile) {
+            // First, add the landscape-fullscreen class to prepare for orientation change
+            playerContainerRef.current.classList.add('landscape-fullscreen');
+            
+            // Try to lock orientation to landscape
+            await requestOrientationLock();
+          }
+          
+          // Enter fullscreen
           await playerContainerRef.current.requestFullscreen();
           setIsFullScreen(true);
+          
+          // After entering fullscreen on mobile, force a reflow to apply proper sizing
+          if (isMobile && playerContainerRef.current) {
+            setTimeout(() => {
+              if (playerContainerRef.current) {
+                // Force a reflow
+                playerContainerRef.current.style.display = 'none';
+                void playerContainerRef.current.offsetHeight; // trigger reflow
+                playerContainerRef.current.style.display = '';
+              }
+            }, 300);
+          }
         }
       } else {
         // Exit fullscreen
         await document.exitFullscreen();
         setIsFullScreen(false);
+        
+        // Remove landscape-fullscreen class after exiting fullscreen
+        if (playerContainerRef.current) {
+          playerContainerRef.current.classList.remove('landscape-fullscreen');
+        }
 
         // On mobile, try to unlock orientation if we're exiting fullscreen
         if (isMobile && 
@@ -339,6 +370,32 @@ const VideoPlayer = ({
     const handleFullscreenChange = () => {
       const isFullscreen = !!document.fullscreenElement;
       setIsFullScreen(isFullscreen);
+
+      // Handle class changes on fullscreen change
+      if (playerContainerRef.current) {
+        if (isFullscreen) {
+          playerContainerRef.current.classList.add('landscape-fullscreen');
+          // Force screen to landscape on mobile when entering fullscreen
+          if (isMobile && !isLandscapeMode()) {
+            requestOrientationLock().catch(err => {
+              console.warn('Failed to lock orientation on fullscreen change:', err);
+            });
+          }
+        } else {
+          playerContainerRef.current.classList.remove('landscape-fullscreen');
+          // Unlock orientation when exiting fullscreen
+          if (isMobile && 
+              'orientation' in window.screen && 
+              window.screen.orientation &&
+              typeof window.screen.orientation.unlock === 'function') {
+            try {
+              window.screen.orientation.unlock();
+            } catch (err) {
+              console.warn('Failed to unlock orientation:', err);
+            }
+          }
+        }
+      }
 
       // Show controls when entering fullscreen on mobile
       if (isFullscreen && isMobile) {
