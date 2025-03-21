@@ -517,14 +517,73 @@
     width: 100% !important;
     display: flex !important;
     flex-direction: column !important;
-    padding: 8px !important;
-    background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0)) !important;
+    padding: 8px 8px 12px 8px !important;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0)) !important;
     z-index: 20 !important;
+    touch-action: none !important; /* Prevent unwanted scrolling during seek */
   }
   
   /* Create a proper container for seek bar */
   .progress-container {
     width: 100% !important;
+    height: 44px !important; /* Increase touch target area */
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 !important;
+    margin-bottom: 4px !important;
+    position: relative !important;
+  }
+  
+  /* Make the progress bar more visible and easier to interact with on mobile */
+  .progress-container > div {
+    height: 4px !important; /* Slightly taller by default on mobile */
+    border-radius: 4px !important;
+    width: 100% !important;
+  }
+  
+  /* Make controls more accessible on mobile */
+  .controls-row {
+    padding: 4px 0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+  
+  /* Better spacing for buttons on mobile */
+  .video-player-container button {
+    margin: 0 4px !important;
+    padding: 8px !important;
+    border-radius: 50% !important;
+  }
+  
+  /* Improve touch targets */
+  .video-player-container .controls-left button,
+  .video-player-container .controls-right button {
+    min-width: 40px !important;
+    min-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Make the progress bar thumb bigger for easier touch */
+  .video-player-container .progress-container .absolute.right-0 {
+    width: 16px !important;
+    height: 16px !important;
+    margin-top: -6px !important;
+    background-color: #ff0000 !important;
+    border: 2px solid white !important;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.5) !important;
+  }
+  
+  /* Auto-hide controls after a delay on mobile to maximize viewing space */
+  @media (orientation: landscape) {
+    /* Further optimize for landscape mode on mobile */
+    .video-controls {
+      padding: 4px 12px 8px 12px !important;
+    }
+  }
     margin-bottom: 8px !important;
     position: relative !important;
   }
