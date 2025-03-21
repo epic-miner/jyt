@@ -1083,7 +1083,7 @@ const VideoPlayer = ({
             {/* Video element */}
             <video
               ref={videoRef}
-              className="w-full h-full object-contain video-element"
+              className="w-full h-full object-contain max-w-full max-h-full video-element"
               autoPlay
               playsInline
               preload="auto"

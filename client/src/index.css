@@ -289,6 +289,37 @@
   }
 }
 
+/* Mobile Styles */
+@media (max-width: 767px) {
+  /* Normal mobile view */
+  .video-player-container .aspect-ratio {
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+  
+  .video-player-container video {
+    width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+  
+  /* Mobile fullscreen */
+  :fullscreen .aspect-ratio {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  :fullscreen video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    max-height: 100vh !important;
+  }
+}
+
 /* Landscape Orientation */
 @media (orientation: landscape) {
   :fullscreen .aspect-ratio {
