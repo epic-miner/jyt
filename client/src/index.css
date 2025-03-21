@@ -295,17 +295,24 @@
   .video-player-container .aspect-ratio {
     width: 100% !important;
     margin: 0 auto !important;
+    max-height: 100vw !important;
   }
   
   .video-player-container video {
     width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important; /* Changed to cover to fill the space */
+    height: auto !important;
+    object-fit: contain !important; /* Changed to contain to maintain aspect ratio */
+    max-width: 100% !important;
   }
   
   /* Adjust controls positioning for mobile */
   .video-player-container .video-controls {
-    margin-bottom: 10px !important;
+    position: absolute !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    margin-bottom: 0 !important;
+    padding: 8px 4px !important;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0)) !important;
   }
   
   /* Mobile fullscreen */
@@ -332,6 +339,7 @@
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
+    position: relative !important;
   }
 }
 
