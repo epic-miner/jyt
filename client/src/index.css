@@ -135,6 +135,59 @@
   height: 100% !important;
   object-fit: contain !important;
   background-color: #000 !important;
+
+/* YouTube-like Settings Menu Styles */
+.video-settings-menu-enter {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.video-settings-menu-enter-active {
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform 300ms, opacity 300ms;
+}
+
+.video-settings-menu-exit {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.video-settings-menu-exit-active {
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 300ms, opacity 300ms;
+}
+
+/* Make settings menu work well across different screen sizes */
+@media (min-width: 768px) {
+  .video-settings-menu-enter {
+    transform: translateY(20px);
+  }
+  .video-settings-menu-exit-active {
+    transform: translateY(20px);
+  }
+}
+
+/* Custom scrollbar for settings menu */
+.settings-menu-scrollable {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+.settings-menu-scrollable::-webkit-scrollbar {
+  width: 4px;
+}
+
+.settings-menu-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.settings-menu-scrollable::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
 }
 
 .landscape-fullscreen .aspect-ratio {
