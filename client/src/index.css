@@ -62,22 +62,29 @@
 @layer utilities {
   /* Gradient backgrounds */
   .gradient-dark {
-    @apply bg-gradient-to-b from-black via-dark-950 to-dark-900;
+    background: linear-gradient(to bottom, rgba(17, 24, 39, 1), rgba(17, 24, 39, 0.8));
   }
 
-  .gradient-glow {
-    @apply relative;
+  /* Video player in fullscreen */
+  .video-fullscreen-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .gradient-glow::after {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none;
+  .video-fullscreen {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
-
-  /* Text gradients */
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-500;
-  }
+}
 
   /* Animations */
   @keyframes shimmer {
@@ -150,7 +157,7 @@
     align-items: center !important;
     justify-content: center !important;
   }
-  
+
   .landscape-fullscreen:fullscreen video {
     width: 100% !important;
     height: auto !important;
@@ -158,7 +165,7 @@
     aspect-ratio: 16/9 !important;
     transform: none !important;
   }
-  
+
   .landscape-fullscreen:fullscreen .aspect-ratio {
     aspect-ratio: 16/9 !important;
     width: auto !important;
@@ -178,7 +185,7 @@
     object-fit: contain !important;
     margin: 0 auto !important;
   }
-  
+
   /* This ensures the video takes full width in landscape mode */
   :fullscreen .aspect-ratio {
     width: 100% !important;
