@@ -1197,12 +1197,17 @@ const VideoPlayer = ({
                   </div>
                 )}
 
+                {/* Expanded touch area for mobile - invisible but improves touch target */}
+                {isMobile && (
+                  <div className="absolute inset-x-0 -top-3 -bottom-3 cursor-pointer z-0" />
+                )}
+                
                 {/* Progress bar track */}
                 <div
                   ref={progressBarRef}
                   className={cn(
-                    "w-full bg-gray-600/50 rounded-full relative transition-all duration-150",
-                    isMobile ? "h-1.5" : "h-full group-hover:h-3" // Taller default height on mobile
+                    "w-full bg-gray-600/50 rounded-full relative transition-all duration-150 z-10",
+                    isMobile ? "h-2.5 my-1" : "h-full group-hover:h-3" // Taller height and margin for mobile touch targets
                   )}
                   onClick={handleProgressBarClick}
                   onMouseDown={(e) => {
@@ -1327,10 +1332,10 @@ const VideoPlayer = ({
                   >
                     {/* Thumb dot - larger on hover or mobile */}
                     <div className={cn(
-                      "absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 bg-red-600 rounded-full transition-all duration-150",
+                      "absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 rounded-full transition-all duration-150",
                       isMobile 
-                        ? "w-3 h-3 bg-red-500 shadow-md" // Always visible on mobile
-                        : "w-0 h-3 group-hover:w-4 group-hover:h-4 group-hover:bg-red-500 group-hover:shadow-md" // Show on hover on desktop
+                        ? "w-4 h-4 bg-red-500 shadow-lg" // Larger and always visible on mobile
+                        : "w-0 h-3 bg-red-600 group-hover:w-4 group-hover:h-4 group-hover:bg-red-500 group-hover:shadow-md" // Show on hover on desktop
                     )}></div>
                   </div>
                 </div>
@@ -1338,8 +1343,8 @@ const VideoPlayer = ({
 
               {/* Control buttons row */}
               <div className={cn(
-                "flex justify-between items-center px-4 text-white",
-                isMobile && "mb-2" // Add margin on mobile
+                "flex justify-between items-center text-white",
+                isMobile ? "px-2 py-1.5 mb-1" : "px-4 mb-2" // Compact spacing on mobile
               )}>
                 {/* Left controls */}
                 <div className={cn(
@@ -1468,8 +1473,8 @@ const VideoPlayer = ({
 
                   {/* Time display */}
                   <div className={cn(
-                    "text-white font-medium ml-1",
-                    isMobile ? "text-[10px]" : "text-xs" // Smaller text on mobile
+                    "text-white font-medium ml-2",
+                    isMobile ? "text-xs bg-black/40 px-1.5 py-0.5 rounded-full" : "text-xs" // Better visibility on mobile
                   )}>
                     <span className="tabular-nums">{formatTime(videoRef.current?.currentTime || 0)}</span>
                     <span className="mx-0.5 text-white/70">/</span>
@@ -1479,7 +1484,7 @@ const VideoPlayer = ({
 
                 <div className={cn(
                   "flex items-center",
-                  isMobile ? "space-x-1" : "space-x-1" // Tighter spacing on mobile
+                  isMobile ? "space-x-2" : "space-x-2" // Consistent spacing
                 )}>
                   {/* YouTube styled buttons */}
                   <button
