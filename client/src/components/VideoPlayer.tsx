@@ -1344,7 +1344,7 @@ const VideoPlayer = ({
               {/* Control buttons row */}
               <div className={cn(
                 "flex justify-between items-center text-white",
-                isMobile ? "px-2 py-1.5 mb-1" : "px-4 mb-2" // Compact spacing on mobile
+                isMobile ? "px-2 py-1 mb-0.5" : "px-4 mb-2" // More compact spacing on mobile for better alignment
               )}>
                 {/* Left controls */}
                 <div className={cn(
