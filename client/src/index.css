@@ -303,6 +303,11 @@
     object-fit: cover !important; /* Changed to cover to fill the space */
   }
   
+  /* Adjust controls positioning for mobile */
+  .video-player-container .video-controls {
+    margin-bottom: 10px !important;
+  }
+  
   /* Mobile fullscreen */
   :fullscreen .aspect-ratio {
     width: 100vw !important;
