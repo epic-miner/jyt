@@ -299,17 +299,19 @@
   
   .video-player-container video {
     width: 100% !important;
-    height: auto !important;
-    object-fit: contain !important;
+    height: 100% !important;
+    object-fit: cover !important; /* Changed to cover to fill the space */
   }
   
   /* Mobile fullscreen */
   :fullscreen .aspect-ratio {
-    width: 100% !important;
-    height: 100% !important;
+    width: 100vw !important;
+    height: 100vh !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
   
   :fullscreen video {
@@ -317,6 +319,14 @@
     height: 100% !important;
     object-fit: contain !important;
     max-height: 100vh !important;
+  }
+  
+  /* Force video to fill available space in mobile */
+  .video-player-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 }
 
