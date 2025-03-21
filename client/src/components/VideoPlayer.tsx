@@ -20,16 +20,12 @@ import VideoPlayerDesktopMenu from './VideoPlayerDesktopMenu';
 import VideoPlayerMobileMenu from './VideoPlayerMobileMenu';
 import { initializeSecurity } from '../lib/security';
 
-// Wake Lock and Screen Orientation API types
+// Type definitions for Web APIs that TypeScript doesn't fully recognize
 interface WakeLockSentinel extends EventTarget {
   released: boolean;
   type: 'screen';
   release(): Promise<void>;
 }
-
-type OrientationLockType = 'any' | 'natural' | 'landscape' | 'portrait' | 
-                          'portrait-primary' | 'portrait-secondary' | 
-                          'landscape-primary' | 'landscape-secondary';
 
 interface VideoPlayerProps {
   anime: Anime;
@@ -715,16 +711,17 @@ const VideoPlayer = ({
     // Only request wake lock when the video is playing
     const requestWakeLock = async () => {
       try {
-        // Check if the Wake Lock API is supported
-        if ('wakeLock' in navigator) {
+        // Check if the Wake Lock API is supported with proper type guards
+        if ('wakeLock' in navigator && navigator.wakeLock) {
           // Release any existing wake lock first
           if (wakeLockRef.current) {
             await wakeLockRef.current.release();
             wakeLockRef.current = null;
           }
           
-          // Request a screen wake lock
-          wakeLockRef.current = await navigator.wakeLock.request('screen');
+          // Request a screen wake lock using type assertion for TS compatibility
+          const navWakeLock = navigator.wakeLock as any;
+          wakeLockRef.current = await navWakeLock.request('screen');
           console.log('Wake Lock is active');
           
           // Add a listener to handle case when wake lock is released
