@@ -177,6 +177,85 @@
   z-index: 9999 !important;
 }
 
+
+/* Additional Video Control Styles */
+/* These are general styles that apply to all screen sizes, then get overridden by specific media queries */
+
+.video-controls {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  z-index: 20;
+  transition: opacity 0.3s ease;
+}
+
+.progress-container {
+  width: 100%;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.controls-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.controls-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.controls-button:active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Ensure time display is properly sized */
+.time-display {
+  font-size: 0.75rem;
+  white-space: nowrap;
+  margin: 0 8px;
+}
+
+/* Make controls more touch-friendly on smaller screens */
+@media (max-width: 640px) {
+  .controls-button {
+    padding: 8px;
+  }
+  
+  .video-controls {
+    padding: 10px;
+  }
+  
+  .progress-bar {
+    height: 4px !important; /* Slightly larger for mobile touch */
+  }
+  
+  /* Adjust time display font size for very small screens */
+  @media (max-width: 360px) {
+    .time-display {
+      font-size: 0.7rem;
+    }
+    
+    .controls-buttons {
+      gap: 4px;
+    }
+  }
+}
+
+/* iPad/tablet specific adjustments */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .video-controls {
+    padding: 12px;
+  }
+  
+  .progress-container {
+    margin-bottom: 10px;
+  }
+}
+
 .landscape-fullscreen video {
   width: 100% !important;
   height: 100% !important;
@@ -428,6 +507,59 @@
     padding: 0 !important;
     margin: 0 !important;
   }
+  
+  /* Improve mobile controls */
+  .video-controls {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 8px !important;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0)) !important;
+    z-index: 20 !important;
+  }
+  
+  /* Create a proper container for seek bar */
+  .progress-container {
+    width: 100% !important;
+    margin-bottom: 8px !important;
+    position: relative !important;
+  }
+  
+  /* Ensure seek bar spans full width */
+  .progress-bar {
+    width: 100% !important;
+    height: 4px !important;
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    border-radius: 2px !important;
+    cursor: pointer !important;
+    position: relative !important;
+  }
+  
+  /* Style buttons container */
+  .controls-buttons {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+  
+  /* Group left controls */
+  .left-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  
+  /* Group right controls */
+  .right-controls {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
 }
 
 /* Landscape Orientation */
@@ -452,6 +584,26 @@
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+  }
+  
+  /* Landscape controls adjustments */
+  :fullscreen .video-controls {
+    bottom: 0 !important;
+    padding: 12px 16px !important;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent) !important;
+  }
+  
+  :fullscreen .progress-container {
+    margin-bottom: 10px !important;
+  }
+  
+  :fullscreen .progress-bar {
+    height: 5px !important;
+  }
+  
+  /* Add more padding in landscape for better touch targets */
+  :fullscreen .controls-button {
+    padding: 8px !important;
   }
 }
 

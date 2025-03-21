@@ -966,6 +966,10 @@ const VideoPlayer = ({
     }, 50);
   };
 
+  const progress = (videoRef.current?.currentTime || 0) / (videoRef.current?.duration || 1* 100);
+  const loadedPercentage = bufferProgress;
+
+
   return (
     <div className="w-full flex flex-col bg-black">
       {/* Main video container with 16:9 aspect ratio */}
@@ -1311,7 +1315,7 @@ const VideoPlayer = ({
                   {/* Played progress - red for YouTube */}
                   <div
                     className="absolute top-00 left-0 h-full bg-red-60 rounded-full transition-all duration-150 group-hover:bg-red-500"
-                    style={{ width: `${(videoRef.current?.currentTime || 0) / (videoRef.current?.duration || 1) * 100}%` }}
+                    style={{ width: `${progress}%` }}
                   >
                     {/* Thumb dot - larger on hover */}
                     <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-0 h-3 bg-red-600 rounded-full group-hover:w-4 group-hover:h-4 group-hover:bg-red-500 group-hover:shadow-md transition-all duration-150"></div>
