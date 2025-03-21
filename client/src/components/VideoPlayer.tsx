@@ -67,7 +67,16 @@ const VideoPlayer = ({
   const [isBuffering, setIsBuffering] = useState(false);
   
   // YouTube-like features
-  const [autoplayEnabled, setAutoplayEnabled] = useState(true);
+  const [autoplayEnabled, setAutoplayEnabled] = useState(() => {
+    try {
+      // Default to true, but check localStorage for saved preference
+      const savedAutoplay = localStorage.getItem('videoAutoplay');
+      return savedAutoplay === null ? true : savedAutoplay === 'true';
+    } catch (err) {
+      // If localStorage access fails, default to true
+      return true;
+    }
+  });
   const [thumbnailPreview, setThumbnailPreview] = useState<{src: string; position: number} | null>(null);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [miniPlayerMode, setMiniPlayerMode] = useState(false);
@@ -464,6 +473,59 @@ const VideoPlayer = ({
       initializeSecurity(playerContainerRef.current);
     }
   }, []);
+  
+  // State for autoplay countdown
+  const [showAutoplayCountdown, setShowAutoplayCountdown] = useState(false);
+  const [autoplayCountdown, setAutoplayCountdown] = useState(5);
+  const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Handle video end for autoplay feature
+  useEffect(() => {
+    if (!videoRef.current) return;
+    
+    const handleVideoEnd = () => {
+      // If autoplay is enabled and there's a next episode available, go to it
+      if (autoplayEnabled && hasNext) {
+        // Show autoplay countdown UI
+        setShowControls(true);
+        setShowAutoplayCountdown(true);
+        setAutoplayCountdown(5);
+        
+        // Create countdown timer
+        let countdown = 5;
+        const countdownInterval = setInterval(() => {
+          countdown -= 1;
+          setAutoplayCountdown(countdown);
+          
+          if (countdown <= 0) {
+            clearInterval(countdownInterval);
+          }
+        }, 1000);
+        
+        // Set a timeout to navigate to the next episode
+        autoplayTimerRef.current = setTimeout(() => {
+          onNextEpisode();
+          clearInterval(countdownInterval);
+          setShowAutoplayCountdown(false);
+        }, 5000); // 5 second delay before autoplay, like YouTube
+        
+        return () => {
+          clearTimeout(autoplayTimerRef.current!);
+          clearInterval(countdownInterval);
+        };
+      }
+    };
+    
+    const videoElement = videoRef.current;
+    videoElement.addEventListener('ended', handleVideoEnd);
+    
+    return () => {
+      if (autoplayTimerRef.current) {
+        clearTimeout(autoplayTimerRef.current);
+      }
+      videoElement.removeEventListener('ended', handleVideoEnd);
+    };
+  }, [autoplayEnabled, hasNext, onNextEpisode]);
 
 
   const handleQualityChange = (quality: VideoQuality) => {
@@ -479,11 +541,21 @@ const VideoPlayer = ({
   
   // Toggle autoplay feature
   const toggleAutoplay = () => {
-    setAutoplayEnabled(prev => !prev);
+    const newValue = !autoplayEnabled;
+    setAutoplayEnabled(newValue);
+    
+    // If turning off autoplay and countdown is active, cancel it
+    if (!newValue && showAutoplayCountdown) {
+      setShowAutoplayCountdown(false);
+      if (autoplayTimerRef.current) {
+        clearTimeout(autoplayTimerRef.current);
+        autoplayTimerRef.current = null;
+      }
+    }
     
     // Save autoplay preference to local storage
     try {
-      localStorage.setItem('videoAutoplay', (!autoplayEnabled).toString());
+      localStorage.setItem('videoAutoplay', newValue.toString());
     } catch (err) {
       console.error('Could not save autoplay preference:', err);
     }
@@ -767,6 +839,81 @@ const VideoPlayer = ({
                   >
                     Retry
                   </button>
+                </div>
+              </div>
+            )}
+            
+            {/* YouTube-style autoplay countdown UI */}
+            {showAutoplayCountdown && (
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 flex flex-col items-center">
+                <div className="bg-black/90 rounded-lg p-6 flex flex-col items-center w-80">
+                  <div className="flex items-center mb-4">
+                    <div className="relative mr-4">
+                      {/* Circular countdown animation */}
+                      <svg className="w-12 h-12" viewBox="0 0 48 48">
+                        <circle 
+                          cx="24" 
+                          cy="24" 
+                          r="20" 
+                          fill="transparent" 
+                          stroke="#666" 
+                          strokeWidth="4"
+                        />
+                        <circle 
+                          cx="24" 
+                          cy="24" 
+                          r="20" 
+                          fill="transparent" 
+                          stroke="#f00" 
+                          strokeWidth="4"
+                          strokeDasharray="126"
+                          strokeDashoffset={126 - (126 * autoplayCountdown / 5)}
+                          transform="rotate(-90 24 24)"
+                          style={{ transition: 'stroke-dashoffset 1s linear' }}
+                        />
+                        <text 
+                          x="24" 
+                          y="28" 
+                          fill="white" 
+                          fontSize="16" 
+                          textAnchor="middle"
+                        >
+                          {autoplayCountdown}
+                        </text>
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-white text-sm font-medium">Up next</p>
+                      <p className="text-gray-400 text-xs">
+                        {hasNext ? `Episode ${episode.episode_number + 1}` : 'Playlist ended'}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex w-full justify-between">
+                    <button 
+                      className="bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded text-sm"
+                      onClick={() => {
+                        setShowAutoplayCountdown(false);
+                        if (autoplayTimerRef.current) {
+                          clearTimeout(autoplayTimerRef.current);
+                        }
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded text-sm"
+                      onClick={() => {
+                        if (autoplayTimerRef.current) {
+                          clearTimeout(autoplayTimerRef.current);
+                        }
+                        onNextEpisode();
+                      }}
+                    >
+                      Play Now
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
