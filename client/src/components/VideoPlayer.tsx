@@ -20,21 +20,16 @@ import VideoPlayerDesktopMenu from './VideoPlayerDesktopMenu';
 import VideoPlayerMobileMenu from './VideoPlayerMobileMenu';
 import { initializeSecurity } from '../lib/security';
 
-// Define the WakeLockSentinel interface for TypeScript
+// Wake Lock and Screen Orientation API types
 interface WakeLockSentinel extends EventTarget {
   released: boolean;
   type: 'screen';
   release(): Promise<void>;
 }
 
-// Extend Navigator interface to include Wake Lock API
-declare global {
-  interface Navigator {
-    wakeLock?: {
-      request(type: 'screen'): Promise<WakeLockSentinel>;
-    };
-  }
-}
+type OrientationLockType = 'any' | 'natural' | 'landscape' | 'portrait' | 
+                          'portrait-primary' | 'portrait-secondary' | 
+                          'landscape-primary' | 'landscape-secondary';
 
 interface VideoPlayerProps {
   anime: Anime;
@@ -259,28 +254,61 @@ const VideoPlayer = ({
            (window.orientation !== undefined && Math.abs(window.orientation as number) === 90);
   };
 
-  // Update toggleFullScreen function
+  // Handle screen orientation lock for fullscreen on mobile
+  const requestOrientationLock = async () => {
+    try {
+      // Check if the Screen Orientation API is available with type guards
+      if (isMobile && 
+          'orientation' in window.screen && 
+          window.screen.orientation) {
+        const screenOrientation = window.screen.orientation as any;
+        // Try to lock to landscape orientation using the Screen Orientation API
+        if (typeof screenOrientation.lock === 'function') {
+          await screenOrientation.lock('landscape');
+          return true;
+        }
+      }
+    } catch (err) {
+      console.warn('Orientation lock failed:', err);
+      // Continue anyway even if orientation lock fails
+    }
+    return false;
+  };
+
+  // Improved toggleFullScreen function that works on mobile regardless of orientation
   const toggleFullScreen = async () => {
     try {
       if (!document.fullscreenElement) {
+        // On mobile, try to lock to landscape first if not already in landscape
         if (isMobile && !isLandscapeMode()) {
-          // Show a message to rotate device
-          setError('Please rotate your device to landscape mode for fullscreen view');
-          setTimeout(() => setError(null), 3000);
-          return;
+          await requestOrientationLock();
         }
 
+        // Request fullscreen
         if (playerContainerRef.current) {
           await playerContainerRef.current.requestFullscreen();
           setIsFullScreen(true);
         }
       } else {
+        // Exit fullscreen
         await document.exitFullscreen();
         setIsFullScreen(false);
+        
+        // On mobile, try to unlock orientation if we're exiting fullscreen
+        if (isMobile && 
+            'orientation' in window.screen && 
+            window.screen.orientation && 
+            typeof window.screen.orientation.unlock === 'function') {
+          try {
+            window.screen.orientation.unlock();
+          } catch (err) {
+            console.warn('Failed to unlock orientation:', err);
+          }
+        }
       }
     } catch (err) {
       console.error('Fullscreen error:', err);
-      setError('Unable to enter fullscreen mode');
+      setError('Unable to enter fullscreen mode. Try rotating your device manually.');
       setTimeout(() => setError(null), 3000);
     }
   };
