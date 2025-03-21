@@ -166,17 +166,27 @@ const NavBar = memo(() => {
       <header className={headerClasses}>
         <div className="container mx-auto px-4">
           <div className="flex items-center h-14">
-            {/* Logo */}
+            {/* Logo - Optimized for performance with responsive images */}
             <Link href="/" className="flex items-center flex-shrink-0">
               <div className="relative flex items-center gap-2">
-                <img 
-                  src="/images/logo.png" 
-                  alt="9Anime Logo" 
-                  className="h-8 w-8"
-                  width="32"
-                  height="32"
-                  loading="eager"
-                />
+                <picture>
+                  {/* WebP format for modern browsers */}
+                  <source srcSet="/images/logo.webp" type="image/webp" />
+                  {/* PNG format fallback with responsive sizes */}
+                  <source srcSet="/images/icons/logo-64x64.png" media="(max-width: 768px)" />
+                  <source srcSet="/images/logo.png" media="(min-width: 769px)" />
+                  {/* Fallback image with optimized loading attributes */}
+                  <img 
+                    src="/images/logo.png" 
+                    alt="9Anime Logo" 
+                    className="h-8 w-8"
+                    width="32"
+                    height="32"
+                    loading="eager"
+                    decoding="async"
+                    fetchpriority="high"
+                  />
+                </picture>
                 <span className="text-xl md:text-2xl font-bold">
                   <span className="text-primary">9</span>
                   <span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">Anime</span>
