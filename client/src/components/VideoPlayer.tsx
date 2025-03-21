@@ -968,7 +968,7 @@ const VideoPlayer = ({
 
 
   return (
-    <div className="wfull flex flex-col bg-black">
+    <div className="w-full flex flex-col bg-black">
       {/* Main video container with 16:9 aspect ratio */}
       <div
         ref={playerContainerRef}
@@ -979,7 +979,7 @@ const VideoPlayer = ({
         data-fullscreen={isFullScreen ? "true" : "false"}
       >
         <AspectRatio ratio={16 / 9} className="w-full h-full aspect-ratio">
-          <div className="w-full h-full relative flex justify-center items-center overflow-hidden video-content bg-black"> {/* Centered video with overflow hidden */}
+          <div className="w-full h-full relative flex justify-center items-center overflow-hidden"> {/* Centered video with overflow hidden */}
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
                 <div className="flex flex-col items-center">
@@ -1157,13 +1157,13 @@ const VideoPlayer = ({
 
             {/* YouTube-style custom controls overlay */}
             <div className={cn(
-              "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent z-10 transition-opacity duration-300 controls-container",
+              "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent z-10 transition-opacity duration-300",
               !showControls && "opacity-0 pointer-events-none",
-              isMobile && isFullScreen ? "pb-28 pt-4" : isMobile ? "pb-10 pt-6" : "pb-6 pt-8"
+              isMobile && isFullScreen ? "pb-28 pt-4" : isMobile ? "pb-12 pt-6" : "pb-6 pt-8"
             )}>
               {/* Progress bar - YouTube style (thin line with hover effect) */}
-              <div 
-                className="progress-container relative w-full h-2 px-4 cursor-pointer flex items-center group"
+              <div
+                className="relative w-full h-2 px-4 cursor-pointer flex items-center group"
                 onMouseMove={(e) => {
                   if (!progressBarRef.current || !videoRef.current) return;
 
