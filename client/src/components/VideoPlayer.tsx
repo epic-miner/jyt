@@ -958,7 +958,7 @@ const VideoPlayer = ({
         const wasPlaying = !videoRef.current.paused;
         videoRef.current.currentTime = newTime;
 
-        // Force immediate buffering
+                // Force immediate buffering
         if (wasPlaying) {
           videoRef.current.play().catch(() => {});
         }
@@ -978,7 +978,7 @@ const VideoPlayer = ({
         )}
       >
         <AspectRatio ratio={16 / 9} className="w-full">
-          <div className="w-full h-full relative">
+          <div className="w-full h-full relative flex justify-center items-center"> {/* Centered video */}
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
                 <div className="flex flex-col items-center">
@@ -1162,7 +1162,7 @@ const VideoPlayer = ({
             )}>
               {/* Progress bar - YouTube style (thin line with hover effect) */}
               <div
-                className="relative w-full h-10 px-4 cursor-pointer flex items-center group"
+                className="relative w-full h-2 px-4 cursor-pointer flex items-center group"
                 onMouseMove={(e) => {
                   if (!progressBarRef.current || !videoRef.current) return;
 
@@ -1194,7 +1194,7 @@ const VideoPlayer = ({
                 {/* Progress bar track */}
                 <div
                   ref={progressBarRef}
-                  className="w-full h-1 bg-gray-600/50 rounded-full relative group-hover:h-3 transition-all duration-150"
+                  className="w-full h-full bg-gray-600/50 rounded-full relative group-hover:h-3 transition-all duration-150"
                   onClick={handleProgressBarClick}
                   onMouseDown={(e) => {
                     const handleDrag = (e: MouseEvent) => {
