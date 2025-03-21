@@ -184,7 +184,6 @@ const NavBar = memo(() => {
                     height="32"
                     loading="eager"
                     decoding="async"
-                    fetchpriority="high"
                   />
                 </picture>
                 <span className="text-xl md:text-2xl font-bold">
