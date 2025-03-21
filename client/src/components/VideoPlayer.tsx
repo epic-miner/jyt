@@ -782,10 +782,12 @@ const VideoPlayer = ({
           console.log('Wake Lock is active');
 
           // Add a listener to handle case when wake lock is released
-          wakeLockRef.current.addEventListener('release', () => {
-            console.log('Wake Lock was released');
-            wakeLockRef.current = null;
-          });
+          if (wakeLockRef.current) {
+            wakeLockRef.current.addEventListener('release', () => {
+              console.log('Wake Lock was released');
+              wakeLockRef.current = null;
+            });
+          }
         } else {
           console.log('Wake Lock API not supported');
         }
@@ -1159,11 +1161,14 @@ const VideoPlayer = ({
             <div className={cn(
               "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent z-10 transition-opacity duration-300",
               !showControls && "opacity-0 pointer-events-none",
-              isMobile && isFullScreen ? "pb-24 pt-4" : "pb-6 pt-8"
+              isMobile && isFullScreen ? "pb-16 pt-4" : "pb-6 pt-8"
             )}>
               {/* Progress bar - YouTube style (thin line with hover effect) */}
               <div
-                className="relative w-full h-2 px-4 cursor-pointer flex items-center group"
+                className={cn(
+                  "relative w-full h-2 px-4 cursor-pointer flex items-center group",
+                  isMobile && "mb-2" // Add bottom margin on mobile
+                )}
                 onMouseMove={(e) => {
                   if (!progressBarRef.current || !videoRef.current) return;
 
@@ -1321,52 +1326,70 @@ const VideoPlayer = ({
               </div>
 
               {/* Control buttons row */}
-              <div className="flex justify-between items-center px-4 text-white">
+              <div className={cn(
+                "flex justify-between items-center px-4 text-white",
+                isMobile && "mb-2" // Add margin on mobile
+              )}>
                 {/* Left controls */}
-                <div className="flex items-center space-x-2">
+                <div className={cn(
+                  "flex items-center",
+                  isMobile ? "space-x-1" : "space-x-2" // Tighter spacing on mobile
+                )}>
                   {/* Play/Pause button */}
                   <button
-                    className="text-white p-2 hover:text-white/80 transition rounded-full"
+                    className={cn(
+                      "text-white hover:text-white/80 transition rounded-full",
+                      isMobile ? "p-1.5" : "p-2" // Smaller padding on mobile
+                    )}
                     onClick={togglePlay}
                     aria-label={isPlaying ? 'Pause' : 'Play'}
                   >
-                    {isPlaying ? <Pause size={22} /> : <Play size={22} />}
+                    {isPlaying ? <Pause size={isMobile ? 20 : 22} /> : <Play size={isMobile ? 20 : 22} />}
                   </button>
 
                   {/* Previous/Next episode buttons */}
                   <button
-                    className="text-white p-2 hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={cn(
+                      "text-white hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:cursor-not-allowed",
+                      isMobile ? "p-1.5" : "p-2" // Smaller padding on mobile
+                    )}
                     onClick={onPreviousEpisode}
                     disabled={!hasPrevious}
                     aria-label="Previous episode"
                   >
-                    <SkipBack size={22} />
+                    <SkipBack size={isMobile ? 20 : 22} />
                   </button>
 
                   <button
-                    className="text-white p-2 hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={cn(
+                      "text-white hover:text-white/80 transition rounded-full disabled:opacity-50 disabled:cursor-not-allowed",
+                      isMobile ? "p-1.5" : "p-2" // Smaller padding on mobile
+                    )}
                     onClick={onNextEpisode}
                     disabled={!hasNext}
                     aria-label="Next episode"
                   >
-                    <SkipForward size={22} />
+                    <SkipForward size={isMobile ? 20 : 22} />
                   </button>
 
                   {/* Volume control - YouTube style */}
                   <div className="relative flex items-center group">
                     <button
-                      className="text-white p-2 hover:text-white/80 transition rounded-full flex items-center"
+                      className={cn(
+                        "text-white hover:text-white/80 transition rounded-full flex items-center",
+                        isMobile ? "p-1.5" : "p-2" // Smaller padding on mobile
+                      )}
                       onClick={toggleMute}
                       onMouseEnter={() => setShowVolumeSlider(true)}
                       aria-label={isMuted ? "Unmute" : "Mute"}
                     >
                       <div className="flex items-center justify-center w-6 h-6">
                         {isMuted || volume === 0 ? (
-                          <VolumeX size={22} />
+                          <VolumeX size={isMobile ? 20 : 22} />
                         ) : volume < 0.5 ? (
-                          <Volume1 size={22} />
+                          <Volume1 size={isMobile ? 20 : 22} />
                         ) : (
-                          <Volume2 size={22} />
+                          <Volume2 size={isMobile ? 20 : 22} />
                         )}
                       </div>
                     </button>
@@ -1433,30 +1456,42 @@ const VideoPlayer = ({
                   </div>
 
                   {/* Time display */}
-                  <div className="text-white text-xs font-medium ml-1">
+                  <div className={cn(
+                    "text-white font-medium ml-1",
+                    isMobile ? "text-[10px]" : "text-xs" // Smaller text on mobile
+                  )}>
                     <span className="tabular-nums">{formatTime(videoRef.current?.currentTime || 0)}</span>
-                    <span className="mx-1 text-white/70">/</span>
+                    <span className="mx-0.5 text-white/70">/</span>
                     <span className="tabular-nums text-white/70">{formatTime(duration)}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-1">
+                <div className={cn(
+                  "flex items-center",
+                  isMobile ? "space-x-1" : "space-x-1" // Tighter spacing on mobile
+                )}>
                   {/* YouTube styled buttons */}
                   <button
-                    className="text-white p-2 hover:text-white/80 transition rounded-full"
+                    className={cn(
+                      "text-white hover:text-white/80 transition rounded-full",
+                      isMobile ? "p-1.5" : "p-2" // Smaller padding on mobile
+                    )}
                     onClick={() => setShowSettingsMenu(!showSettingsMenu)}
                     aria-label="Settings"
                   >
-                    <Settings size={20} />
+                    <Settings size={isMobile ? 18 : 20} />
                   </button>
 
                   {/* Fullscreen button */}
                   <button
-                    className="text-white p-2 hover:text-white/80 transition rounded-full"
+                    className={cn(
+                      "text-white hover:text-white/80 transition rounded-full",
+                      isMobile ? "p-1.5" : "p-2" // Smaller padding on mobile
+                    )}
                     onClick={toggleFullScreen}
                     aria-label={isFullScreen ? "Exit fullscreen" : "Enter fullscreen"}
                   >
-                    {isFullScreen ? <Minimize size={22} /> : <Maximize size={22} />}
+                    {isFullScreen ? <Minimize size={isMobile ? 18 : 22} /> : <Maximize size={isMobile ? 18 : 22} />}
                   </button>
                 </div>
               </div>
