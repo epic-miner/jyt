@@ -619,7 +619,6 @@
     align-items: center !important;
     gap: 8px !important;
   }
-}
 
 /* Landscape Orientation */
 @media (orientation: landscape) {
