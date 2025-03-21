@@ -476,6 +476,18 @@ const VideoPlayer = ({
       videoRef.current.load();
     }
   };
+  
+  // Toggle autoplay feature
+  const toggleAutoplay = () => {
+    setAutoplayEnabled(prev => !prev);
+    
+    // Save autoplay preference to local storage
+    try {
+      localStorage.setItem('videoAutoplay', (!autoplayEnabled).toString());
+    } catch (err) {
+      console.error('Could not save autoplay preference:', err);
+    }
+  };
 
   // Open quality submenu
   const openQualitySubmenu = () => {
@@ -815,6 +827,8 @@ const VideoPlayer = ({
                     availableQualities={availableQualities}
                     playbackSpeed={playbackSpeed}
                     handlePlaybackSpeedChange={handlePlaybackSpeedChange}
+                    autoplayEnabled={autoplayEnabled}
+                    toggleAutoplay={toggleAutoplay}
                   />
                 ) : (
                   <VideoPlayerDesktopMenu
@@ -825,6 +839,8 @@ const VideoPlayer = ({
                     availableQualities={availableQualities}
                     playbackSpeed={playbackSpeed}
                     handlePlaybackSpeedChange={handlePlaybackSpeedChange}
+                    autoplayEnabled={autoplayEnabled}
+                    toggleAutoplay={toggleAutoplay}
                   />
                 )}
               </div>
