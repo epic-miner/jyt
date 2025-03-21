@@ -1162,8 +1162,8 @@ const VideoPlayer = ({
               isMobile && isFullScreen ? "pb-28 pt-4" : isMobile ? "pb-10 pt-6" : "pb-6 pt-8"
             )}>
               {/* Progress bar - YouTube style (thin line with hover effect) */}
-              <div className="progress-container"
-                className="relative w-full h-2 px-4 cursor-pointer flex items-center group"
+              <div 
+                className="progress-container relative w-full h-2 px-4 cursor-pointer flex items-center group"
                 onMouseMove={(e) => {
                   if (!progressBarRef.current || !videoRef.current) return;
 
