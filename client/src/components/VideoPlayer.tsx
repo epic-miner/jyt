@@ -479,6 +479,9 @@ const VideoPlayer = ({
   const [autoplayCountdown, setAutoplayCountdown] = useState(5);
   const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
   
+  // Reference to store wake lock
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  
   // Handle video end for autoplay feature
   useEffect(() => {
     if (!videoRef.current) return;
@@ -662,6 +665,63 @@ const VideoPlayer = ({
       videoRef.current.currentTime = percentage * videoDuration;
     }
   };
+
+  // Screen wake lock effect to prevent screen timeout during playback
+  useEffect(() => {
+    // Only request wake lock when the video is playing
+    const requestWakeLock = async () => {
+      try {
+        // Check if the Wake Lock API is supported
+        if ('wakeLock' in navigator) {
+          // Release any existing wake lock first
+          if (wakeLockRef.current) {
+            await wakeLockRef.current.release();
+            wakeLockRef.current = null;
+          }
+          
+          // Request a screen wake lock
+          wakeLockRef.current = await navigator.wakeLock.request('screen');
+          console.log('Wake Lock is active');
+          
+          // Add a listener to handle case when wake lock is released
+          wakeLockRef.current.addEventListener('release', () => {
+            console.log('Wake Lock was released');
+            wakeLockRef.current = null;
+          });
+        } else {
+          console.log('Wake Lock API not supported');
+        }
+      } catch (err) {
+        // Handle errors (e.g. when user denies permission or browser restrictions)
+        console.error('Error requesting wake lock:', err);
+      }
+    };
+    
+    // Release wake lock when not playing
+    const releaseWakeLock = async () => {
+      if (wakeLockRef.current) {
+        try {
+          await wakeLockRef.current.release();
+          wakeLockRef.current = null;
+          console.log('Wake Lock released');
+        } catch (err) {
+          console.error('Error releasing wake lock:', err);
+        }
+      }
+    };
+    
+    // Request wake lock when playing, release when paused
+    if (isPlaying) {
+      requestWakeLock();
+    } else {
+      releaseWakeLock();
+    }
+    
+    // Clean up on unmount
+    return () => {
+      releaseWakeLock();
+    };
+  }, [isPlaying]);
 
   // Effect to update duration and playing state
   useEffect(() => {
