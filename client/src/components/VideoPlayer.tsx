@@ -1166,8 +1166,8 @@ const VideoPlayer = ({
               {/* Progress bar - YouTube style (thin line with hover effect) */}
               <div
                 className={cn(
-                  "relative w-full h-2 px-4 cursor-pointer flex items-center group",
-                  isMobile && "mb-2" // Add bottom margin on mobile
+                  "relative w-full cursor-pointer flex items-center group",
+                  isMobile ? "h-5 px-2 mb-1" : "h-2 px-4 mb-0" // Increased touch target height on mobile
                 )}
                 onMouseMove={(e) => {
                   if (!progressBarRef.current || !videoRef.current) return;
@@ -1200,7 +1200,10 @@ const VideoPlayer = ({
                 {/* Progress bar track */}
                 <div
                   ref={progressBarRef}
-                  className="w-full h-full bg-gray-600/50 rounded-full relative group-hover:h-3 transition-all duration-150"
+                  className={cn(
+                    "w-full bg-gray-600/50 rounded-full relative transition-all duration-150",
+                    isMobile ? "h-1.5" : "h-full group-hover:h-3" // Taller default height on mobile
+                  )}
                   onClick={handleProgressBarClick}
                   onMouseDown={(e) => {
                     const handleDrag = (e: MouseEvent) => {
@@ -1316,11 +1319,19 @@ const VideoPlayer = ({
 
                   {/* Played progress - red for YouTube */}
                   <div
-                    className="absolute top-00 left-0 h-full bg-red-60 rounded-full transition-all duration-150 group-hover:bg-red-500"
+                    className={cn(
+                      "absolute top-0 left-0 h-full rounded-full transition-all duration-150",
+                      isMobile ? "bg-red-500" : "bg-red-600 group-hover:bg-red-500" // Brighter color on mobile
+                    )}
                     style={{ width: `${(videoRef.current?.currentTime || 0) / (videoRef.current?.duration || 1) * 100}%` }}
                   >
-                    {/* Thumb dot - larger on hover */}
-                    <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-0 h-3 bg-red-600 rounded-full group-hover:w-4 group-hover:h-4 group-hover:bg-red-500 group-hover:shadow-md transition-all duration-150"></div>
+                    {/* Thumb dot - larger on hover or mobile */}
+                    <div className={cn(
+                      "absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 bg-red-600 rounded-full transition-all duration-150",
+                      isMobile 
+                        ? "w-3 h-3 bg-red-500 shadow-md" // Always visible on mobile
+                        : "w-0 h-3 group-hover:w-4 group-hover:h-4 group-hover:bg-red-500 group-hover:shadow-md" // Show on hover on desktop
+                    )}></div>
                   </div>
                 </div>
               </div>
