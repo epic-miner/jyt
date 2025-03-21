@@ -20,6 +20,22 @@ import VideoPlayerDesktopMenu from './VideoPlayerDesktopMenu';
 import VideoPlayerMobileMenu from './VideoPlayerMobileMenu';
 import { initializeSecurity } from '../lib/security';
 
+// Define the WakeLockSentinel interface for TypeScript
+interface WakeLockSentinel extends EventTarget {
+  released: boolean;
+  type: 'screen';
+  release(): Promise<void>;
+}
+
+// Extend Navigator interface to include Wake Lock API
+declare global {
+  interface Navigator {
+    wakeLock?: {
+      request(type: 'screen'): Promise<WakeLockSentinel>;
+    };
+  }
+}
+
 interface VideoPlayerProps {
   anime: Anime;
   episode: Episode;
