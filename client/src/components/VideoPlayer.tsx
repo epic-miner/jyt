@@ -978,8 +978,8 @@ const VideoPlayer = ({
         )}
         data-fullscreen={isFullScreen ? "true" : "false"}
       >
-        <AspectRatio ratio={16 / 9} className="w-full h-full aspect-ratio">
-          <div className="w-full h-full relative flex justify-center items-center overflow-hidden"> {/* Centered video with overflow hidden */}
+        <AspectRatio ratio={16 / 9} className="w-full">
+          <div className="w-full h-full relative flex justify-center items-center"> {/* Centered video */}
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
                 <div className="flex flex-col items-center">
@@ -1159,7 +1159,7 @@ const VideoPlayer = ({
             <div className={cn(
               "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent z-10 transition-opacity duration-300",
               !showControls && "opacity-0 pointer-events-none",
-              isMobile && isFullScreen ? "pb-28 pt-4" : isMobile ? "pb-12 pt-6" : "pb-6 pt-8"
+              isMobile && isFullScreen ? "pb-24 pt-4" : "pb-6 pt-8"
             )}>
               {/* Progress bar - YouTube style (thin line with hover effect) */}
               <div
