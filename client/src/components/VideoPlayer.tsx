@@ -64,6 +64,18 @@ const VideoPlayer = ({
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false); // Added isBuffering state
+  const [thumbnailPreview, setThumbnailPreview] = useState<{src: string; position: number} | null>(null);
+  const [autoplayEnabled, setAutoplayEnabled] = useState(true);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+  const [miniPlayerMode, setMiniPlayerMode] = useState(false);
+  const [showPlaybackSpeedMenu, setShowPlaybackSpeedMenu] = useState(false);
+  const [chapters, setChapters] = useState<{time: number; title: string}[]>([
+    {time: 0, title: "Introduction"},
+    {time: 120, title: "Chapter 1"},
+    {time: 300, title: "Chapter 2"},
+    {time: 550, title: "Ending"}
+  ]);
+  const [activeChapter, setActiveChapter] = useState(0);
   const isMobile = useIsMobile();
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
