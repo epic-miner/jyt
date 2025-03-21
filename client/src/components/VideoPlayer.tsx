@@ -72,7 +72,7 @@ const VideoPlayer = ({
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [isHovering, setIsHovering] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
-  
+
   // YouTube-like features
   const [autoplayEnabled, setAutoplayEnabled] = useState(() => {
     try {
@@ -88,7 +88,7 @@ const VideoPlayer = ({
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [miniPlayerMode, setMiniPlayerMode] = useState(false);
   const [showPlaybackSpeedMenu, setShowPlaybackSpeedMenu] = useState(false);
-  
+
   // Chapter markers
   const [chapters, setChapters] = useState<{time: number; title: string}[]>([
     {time: 0, title: "Introduction"},
@@ -289,7 +289,7 @@ const VideoPlayer = ({
         // Exit fullscreen
         await document.exitFullscreen();
         setIsFullScreen(false);
-        
+
         // On mobile, try to unlock orientation if we're exiting fullscreen
         if (isMobile && 
             'orientation' in window.screen && 
@@ -513,19 +513,19 @@ const VideoPlayer = ({
       initializeSecurity(playerContainerRef.current);
     }
   }, []);
-  
+
   // State for autoplay countdown
   const [showAutoplayCountdown, setShowAutoplayCountdown] = useState(false);
   const [autoplayCountdown, setAutoplayCountdown] = useState(5);
   const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Reference to store wake lock
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
-  
+
   // Handle video end for autoplay feature
   useEffect(() => {
     if (!videoRef.current) return;
-    
+
     const handleVideoEnd = () => {
       // If autoplay is enabled and there's a next episode available, go to it
       if (autoplayEnabled && hasNext) {
@@ -533,35 +533,35 @@ const VideoPlayer = ({
         setShowControls(true);
         setShowAutoplayCountdown(true);
         setAutoplayCountdown(5);
-        
+
         // Create countdown timer
         let countdown = 5;
         const countdownInterval = setInterval(() => {
           countdown -= 1;
           setAutoplayCountdown(countdown);
-          
+
           if (countdown <= 0) {
             clearInterval(countdownInterval);
           }
         }, 1000);
-        
+
         // Set a timeout to navigate to the next episode
         autoplayTimerRef.current = setTimeout(() => {
           onNextEpisode();
           clearInterval(countdownInterval);
           setShowAutoplayCountdown(false);
         }, 5000); // 5 second delay before autoplay, like YouTube
-        
+
         return () => {
           clearTimeout(autoplayTimerRef.current!);
           clearInterval(countdownInterval);
         };
       }
     };
-    
+
     const videoElement = videoRef.current;
     videoElement.addEventListener('ended', handleVideoEnd);
-    
+
     return () => {
       if (autoplayTimerRef.current) {
         clearTimeout(autoplayTimerRef.current);
@@ -581,12 +581,12 @@ const VideoPlayer = ({
       videoRef.current.load();
     }
   };
-  
+
   // Toggle autoplay feature
   const toggleAutoplay = () => {
     const newValue = !autoplayEnabled;
     setAutoplayEnabled(newValue);
-    
+
     // If turning off autoplay and countdown is active, cancel it
     if (!newValue && showAutoplayCountdown) {
       setShowAutoplayCountdown(false);
@@ -595,7 +595,7 @@ const VideoPlayer = ({
         autoplayTimerRef.current = null;
       }
     }
-    
+
     // Save autoplay preference to local storage
     try {
       localStorage.setItem('videoAutoplay', newValue.toString());
@@ -718,12 +718,12 @@ const VideoPlayer = ({
             await wakeLockRef.current.release();
             wakeLockRef.current = null;
           }
-          
+
           // Request a screen wake lock using type assertion for TS compatibility
           const navWakeLock = navigator.wakeLock as any;
           wakeLockRef.current = await navWakeLock.request('screen');
           console.log('Wake Lock is active');
-          
+
           // Add a listener to handle case when wake lock is released
           wakeLockRef.current.addEventListener('release', () => {
             console.log('Wake Lock was released');
@@ -737,7 +737,7 @@ const VideoPlayer = ({
         console.error('Error requesting wake lock:', err);
       }
     };
-    
+
     // Release wake lock when not playing
     const releaseWakeLock = async () => {
       if (wakeLockRef.current) {
@@ -750,14 +750,14 @@ const VideoPlayer = ({
         }
       }
     };
-    
+
     // Request wake lock when playing, release when paused
     if (isPlaying) {
       requestWakeLock();
     } else {
       releaseWakeLock();
     }
-    
+
     // Clean up on unmount
     return () => {
       releaseWakeLock();
@@ -915,7 +915,10 @@ const VideoPlayer = ({
       {/* Main video container with 16:9 aspect ratio */}
       <div
         ref={playerContainerRef}
-        className="relative w-full bg-black overflow-hidden video-player-container"
+        className={cn(
+          "relative w-full bg-black overflow-hidden video-player-container",
+          isFullScreen ? "fixed inset-0 z-50 fullscreen" : ""
+        )}
       >
         <AspectRatio ratio={16 / 9} className="w-full">
           <div className="w-full h-full relative">
@@ -943,10 +946,10 @@ const VideoPlayer = ({
                 </div>
               </div>
             )}
-            
+
             {/* YouTube-style autoplay countdown UI */}
             {showAutoplayCountdown && (
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 flex flex-col items-center">
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 flex flexcol items-center">
                 <div className="bg-black/90 rounded-lg p-6 flex flex-col items-center w-80">
                   <div className="flex items-center mb-4">
                     <div className="relative mr-4">
@@ -990,7 +993,7 @@ const VideoPlayer = ({
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex w-full justify-between">
                     <button 
                       className="bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded text-sm"
