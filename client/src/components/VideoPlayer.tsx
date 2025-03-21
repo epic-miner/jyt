@@ -45,6 +45,7 @@ const VideoPlayer = ({
   const seekDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const bufferingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Basic video player states
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -63,12 +64,16 @@ const VideoPlayer = ({
   const [bufferProgress, setBufferProgress] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [isHovering, setIsHovering] = useState(false);
-  const [isBuffering, setIsBuffering] = useState(false); // Added isBuffering state
-  const [thumbnailPreview, setThumbnailPreview] = useState<{src: string; position: number} | null>(null);
+  const [isBuffering, setIsBuffering] = useState(false);
+  
+  // YouTube-like features
   const [autoplayEnabled, setAutoplayEnabled] = useState(true);
+  const [thumbnailPreview, setThumbnailPreview] = useState<{src: string; position: number} | null>(null);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [miniPlayerMode, setMiniPlayerMode] = useState(false);
   const [showPlaybackSpeedMenu, setShowPlaybackSpeedMenu] = useState(false);
+  
+  // Chapter markers
   const [chapters, setChapters] = useState<{time: number; title: string}[]>([
     {time: 0, title: "Introduction"},
     {time: 120, title: "Chapter 1"},
