@@ -966,9 +966,6 @@ const VideoPlayer = ({
     }, 50);
   };
 
-  const progress = (videoRef.current?.currentTime || 0) / (videoRef.current?.duration || 1* 100);
-  const loadedPercentage = bufferProgress;
-
 
   return (
     <div className="w-full flex flex-col bg-black">
@@ -1219,26 +1216,89 @@ const VideoPlayer = ({
                     handleDrag(e.nativeEvent);
                   }}
                   onTouchStart={(e) => {
-                    e.stopPropagation(); // Prevent other touch handlers from firing
+                    let rafId: number;
+                    let isDragging = false;
+                    let lastX = 0;
+                    let velocity = 0;
+                    let lastTimestamp = 0;
+                    let previewTime = videoRef.current?.currentTime || 0;
 
-                    const handleTouchDrag = (e: TouchEvent | React.TouchEvent) => {
-                      if (!videoRef.current || !progressBarRef.current) return;
-                      e.preventDefault(); // Prevent scrolling while seeking
-                      const touch = e.touches[0];
-                      const bounds = progressBarRef.current.getBoundingClientRect();
-                      const x = Math.max(0, Math.min(touch.clientX - bounds.left, bounds.width));
-                      const percentage = x / bounds.width;
-                      videoRef.current.currentTime = percentage * videoRef.current.duration;
-                    };
-
-                    const handleTouchEnd = (e: TouchEvent) => {
+                    const handleTouchDrag = (e: Event) => {
                       e.preventDefault();
-                      window.removeEventListener('touchmove', handleTouchDrag as EventListener);
-                      window.removeEventListener('touchend', handleTouchEnd);
-                      setShowControls(true); // Keep controls visible after touch interaction
+                      const touchEvent = e as TouchEvent;
+                      const now = performance.now();
+                      const touch = touchEvent.touches[0];
+
+                      if (!isDragging) {
+                        isDragging = true;
+                        lastX = touch.clientX;
+                        lastTimestamp = now;
+                        if (videoRef.current && !videoRef.current.paused) {
+                          try {
+                            videoRef.current.pause();
+                          } catch (err) {
+                            // Ignore interruption errors
+                          }
+                        }
+                      }
+
+                      const deltaX = touch.clientX - lastX;
+                      const deltaTime = Math.max(1, now - lastTimestamp);
+                      velocity = deltaX / deltaTime;
+
+                      cancelAnimationFrame(rafId);
+                      rafId = requestAnimationFrame(() => {
+                        if (!videoRef.current || !progressBarRef.current) return;
+                        // Store touch data to use inside RAF
+                        const storedTouch = touchEvent.touches[0];
+                        const bounds = progressBarRef.current.getBoundingClientRect();
+                        const x = Math.max(0, Math.min(storedTouch.clientX - bounds.left, bounds.width));
+                        const percentage = x / bounds.width;
+                        const duration = videoRef.current.duration || 0;
+                        previewTime = percentage * duration;
+
+                        // Ensure all values are finite
+                        if (isFinite(previewTime) && isFinite(velocity) && isFinite(duration)) {
+                          const velocityFactor = Math.min(0.2, Math.abs(velocity) * 0.1);
+                          const smoothedTime = previewTime + (velocity > 0 ? velocityFactor : -velocityFactor);
+                          const finalTime = Math.max(0, Math.min(smoothedTime, duration));
+
+                          videoRef.current.currentTime = finalTime;
+                          lastX = storedTouch.clientX;
+                          lastTimestamp = now;
+                        }
+                      });
                     };
 
-                    window.addEventListener('touchmove', handleTouchDrag as EventListener, { passive: false });
+                    const handleTouchEnd = async () => {
+                      cancelAnimationFrame(rafId);
+                      if (isDragging && videoRef.current) {
+                        //                        // Ensure we have valid numbers
+                        const finalVelocity = isFinite(velocity) ? velocity * 0.5 : 0;
+                        const duration = videoRef.current.duration || 0;
+                        const safePreviewTime = isFinite(previewTime) ? previewTime : 0;
+                        const finalTime = Math.max(0, Math.min(
+                          safePreviewTime + finalVelocity,
+                          duration
+                        ));
+
+                        if (isFinite(finalTime)) {
+                          videoRef.current.currentTime = finalTime;
+                        }
+
+                        if (isPlaying && videoRef.current) {
+                          try {
+                            await videoRef.current.play();
+                          } catch (err) {
+                            // Ignore play interruption errors
+                          }
+                        }
+                      }
+                      window.removeEventListener('touchmove', handleTouchDrag);
+                      window.removeEventListener('touchend', handleTouchEnd);
+                    };
+
+                    window.addEventListener('touchmove', handleTouchDrag);
                     window.addEventListener('touchend', handleTouchEnd);
                     handleTouchDrag(e.nativeEvent);
                   }}
@@ -1252,7 +1312,7 @@ const VideoPlayer = ({
                   {/* Played progress - red for YouTube */}
                   <div
                     className="absolute top-00 left-0 h-full bg-red-60 rounded-full transition-all duration-150 group-hover:bg-red-500"
-                    style={{ width: `${progress}%` }}
+                    style={{ width: `${(videoRef.current?.currentTime || 0) / (videoRef.current?.duration || 1) * 100}%` }}
                   >
                     {/* Thumb dot - larger on hover */}
                     <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-0 h-3 bg-red-600 rounded-full group-hover:w-4 group-hover:h-4 group-hover:bg-red-500 group-hover:shadow-md transition-all duration-150"></div>
@@ -1380,27 +1440,23 @@ const VideoPlayer = ({
                   </div>
                 </div>
 
-                {/* Right controls */}
-                <div className="flex items-center space-x-3">
-                  {/* Settings button */}
-                  <button 
-                    className="text-white p-1.5 hover:text-white/80 transition rounded-full"
-                    onClick={() => {
-                      setShowSettingsMenu(true);
-                      setShowQualitySubmenu(false);
-                    }}
+                <div className="flex items-center space-x-1">
+                  {/* YouTube styled buttons */}
+                  <button
+                    className="text-white p-2 hover:text-white/80 transition rounded-full"
+                    onClick={() => setShowSettingsMenu(!showSettingsMenu)}
                     aria-label="Settings"
                   >
                     <Settings size={20} />
                   </button>
 
                   {/* Fullscreen button */}
-                  <button 
-                    className="text-white p-1.5 hover:text-white/80 transition rounded-full"
+                  <button
+                    className="text-white p-2 hover:text-white/80 transition rounded-full"
                     onClick={toggleFullScreen}
                     aria-label={isFullScreen ? "Exit fullscreen" : "Enter fullscreen"}
                   >
-                    {isFullScreen ? <Minimize size={20} /> : <Maximize size={20} />}
+                    {isFullScreen ? <Minimize size={22} /> : <Maximize size={22} />}
                   </button>
                 </div>
               </div>
