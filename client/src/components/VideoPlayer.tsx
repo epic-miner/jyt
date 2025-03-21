@@ -962,7 +962,7 @@ const VideoPlayer = ({
         if (wasPlaying) {
           videoRef.current.play().catch(() => {});
         }
-      }
+            }
     }, 50);
   };
 
