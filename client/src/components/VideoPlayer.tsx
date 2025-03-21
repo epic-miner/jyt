@@ -1167,7 +1167,7 @@ const VideoPlayer = ({
               <div
                 className={cn(
                   "relative w-full cursor-pointer flex items-center group",
-                  isMobile ? "h-5 px-2 mb-1" : "h-2 px-4 mb-0" // Increased touch target height on mobile
+                  isMobile ? "h-8 px-2 mb-0.5" : "h-2 px-4 mb-0" // Even larger touch target height on mobile for better interaction
                 )}
                 onMouseMove={(e) => {
                   if (!progressBarRef.current || !videoRef.current) return;
@@ -1199,7 +1199,7 @@ const VideoPlayer = ({
 
                 {/* Expanded touch area for mobile - invisible but improves touch target */}
                 {isMobile && (
-                  <div className="absolute inset-x-0 -top-3 -bottom-3 cursor-pointer z-0" />
+                  <div className="absolute inset-x-0 -top-4 -bottom-4 cursor-pointer z-0" />
                 )}
                 
                 {/* Progress bar track */}
@@ -1207,7 +1207,7 @@ const VideoPlayer = ({
                   ref={progressBarRef}
                   className={cn(
                     "w-full bg-gray-600/50 rounded-full relative transition-all duration-150 z-10",
-                    isMobile ? "h-2.5 my-1" : "h-full group-hover:h-3" // Taller height and margin for mobile touch targets
+                    isMobile ? "h-2.5 my-2" : "h-full group-hover:h-3" // Increased vertical margin on mobile for easier touch targeting
                   )}
                   onClick={handleProgressBarClick}
                   onMouseDown={(e) => {
@@ -1473,8 +1473,10 @@ const VideoPlayer = ({
 
                   {/* Time display */}
                   <div className={cn(
-                    "text-white font-medium ml-2",
-                    isMobile ? "text-xs bg-black/40 px-1.5 py-0.5 rounded-full" : "text-xs" // Better visibility on mobile
+                    "text-white font-medium",
+                    isMobile 
+                      ? "text-xs bg-black/60 px-2 py-0.5 rounded-full ml-1 shadow-sm" // Better visibility on mobile with darker background
+                      : "text-xs ml-2" 
                   )}>
                     <span className="tabular-nums">{formatTime(videoRef.current?.currentTime || 0)}</span>
                     <span className="mx-0.5 text-white/70">/</span>
