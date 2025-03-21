@@ -10,6 +10,8 @@ interface VideoPlayerDesktopMenuProps {
   availableQualities: { quality: VideoQuality; url: string | undefined }[];
   playbackSpeed: number;
   handlePlaybackSpeedChange: (speed: number) => void;
+  autoplayEnabled: boolean;
+  toggleAutoplay: () => void;
 }
 
 const VideoPlayerDesktopMenu = ({
@@ -18,8 +20,10 @@ const VideoPlayerDesktopMenu = ({
   selectedQuality,
   handleQualityChange,
   availableQualities,
-  playbackSpeed, // Added
-  handlePlaybackSpeedChange, // Added
+  playbackSpeed,
+  handlePlaybackSpeedChange,
+  autoplayEnabled,
+  toggleAutoplay,
 }: VideoPlayerDesktopMenuProps) => {
   if (!showQualityMenu) return null;
 
@@ -40,7 +44,7 @@ const VideoPlayerDesktopMenu = ({
   });
 
   return (
-    <div className="absolute right-0 top-10 bg-black/90 rounded-md overflow-hidden z-40 w-48 shadow-xl">
+    <div className="absolute right-0 top-10 bg-black/90 rounded-md overflow-hidden z-40 w-56 shadow-xl">
       {/* YouTube-style header with back button */}
       <div className="flex items-center px-2 py-1.5 border-b border-gray-800/50">
         <button
@@ -60,6 +64,32 @@ const VideoPlayerDesktopMenu = ({
             />
           </svg>
         </button>
+        <span className="text-sm font-medium text-white">Settings</span>
+      </div>
+      
+      {/* Autoplay option - YouTube style */}
+      <div className="border-b border-gray-800/50">
+        <div className="px-4 py-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-white">Autoplay</span>
+            <button 
+              className="relative inline-flex h-5 w-10 items-center rounded-full"
+              onClick={toggleAutoplay}
+            >
+              <span 
+                className={`absolute mx-1 inline-block h-4 w-8 rounded-full ${autoplayEnabled ? 'bg-red-600' : 'bg-gray-700'}`}
+              ></span>
+              <span 
+                className={`absolute h-3 w-3 transform rounded-full bg-white transition-transform ${autoplayEnabled ? 'translate-x-5' : 'translate-x-1'}`}
+              ></span>
+            </button>
+          </div>
+          <p className="text-xs text-gray-400 mt-1">When autoplay is enabled, a suggested video will automatically play next</p>
+        </div>
+      </div>
+
+      {/* Quality section header */}
+      <div className="px-4 py-2 border-b border-gray-800/50">
         <span className="text-sm font-medium text-white">Quality</span>
       </div>
 

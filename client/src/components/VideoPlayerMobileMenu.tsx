@@ -12,6 +12,8 @@ interface VideoPlayerMobileMenuProps {
   availableQualities: { quality: VideoQuality; url: string | undefined }[];
   playbackSpeed: number;
   handlePlaybackSpeedChange: (speed: number) => void;
+  autoplayEnabled: boolean;
+  toggleAutoplay: () => void;
 }
 
 const VideoPlayerMobileMenu = ({
@@ -26,6 +28,8 @@ const VideoPlayerMobileMenu = ({
   availableQualities,
   playbackSpeed,
   handlePlaybackSpeedChange,
+  autoplayEnabled,
+  toggleAutoplay,
 }: VideoPlayerMobileMenuProps) => {
   if (!showSettingsMenu) return null;
 
@@ -169,6 +173,29 @@ const VideoPlayerMobileMenu = ({
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
                 </svg>
+              </div>
+            </button>
+            
+            {/* Divider */}
+            <div className="h-px bg-gray-800 mx-4"></div>
+            
+            {/* Autoplay toggle option */}
+            <button 
+              className="w-full text-left px-4 py-4 flex items-center justify-between"
+              onClick={toggleAutoplay}
+            >
+              <div className="flex items-center">
+                <svg className="w-6 h-6 mr-6 text-white" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M17,10.5V7A1,1 0 0,0 16,6H4A1,1 0 0,0 3,7V17A1,1 0 0,0 4,18H16A1,1 0 0,0 17,17V13.5L21,17.5V6.5L17,10.5Z" />
+                </svg>
+                <span className="text-white text-base">Autoplay</span>
+              </div>
+              
+              <div className="flex items-center text-gray-400">
+                <span className="mr-2">{autoplayEnabled ? 'On' : 'Off'}</span>
+                <div className={`w-10 h-6 flex items-center rounded-full p-1 ${autoplayEnabled ? 'bg-red-600' : 'bg-gray-700'}`}>
+                  <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${autoplayEnabled ? 'translate-x-4' : ''}`}></div>
+                </div>
               </div>
             </button>
             
