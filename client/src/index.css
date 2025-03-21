@@ -1,3 +1,50 @@
+
+/* Base styles (existing) */
+
+/* Video Player Controls - Responsive styles */
+.video-player-container {
+  --control-spacing: 8px;
+  --control-icon-size: 20px;
+  --control-bar-height: 36px;
+}
+
+@media (max-width: 640px) {
+  .video-player-container {
+    --control-spacing: 6px;
+    --control-icon-size: 18px;
+    --control-bar-height: 32px;
+  }
+}
+
+/* Ensure seek bar is properly positioned */
+.video-player-container .progress-bar-container {
+  width: 100%;
+  height: 4px;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* Ensure controls are properly spaced in fullscreen */
+.video-player-container[data-fullscreen="true"] .controls-container {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+/* Fix time display alignment */
+.video-player-container .time-display {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Fix volume slider popup positioning */
+.video-player-container .volume-slider-container {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

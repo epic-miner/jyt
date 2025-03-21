@@ -966,7 +966,6 @@ const VideoPlayer = ({
     }, 50);
   };
 
-
   return (
     <div className="w-full flex flex-col bg-black">
       {/* Main video container with 16:9 aspect ratio */}
@@ -1440,23 +1439,27 @@ const VideoPlayer = ({
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-1">
-                  {/* YouTube styled buttons */}
-                  <button
-                    className="text-white p-2 hover:text-white/80 transition rounded-full"
-                    onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+                {/* Right controls */}
+                <div className="flex items-center space-x-3">
+                  {/* Settings button */}
+                  <button 
+                    className="text-white p-1.5 hover:text-white/80 transition rounded-full"
+                    onClick={() => {
+                      setShowSettingsMenu(true);
+                      setShowQualitySubmenu(false);
+                    }}
                     aria-label="Settings"
                   >
                     <Settings size={20} />
                   </button>
 
                   {/* Fullscreen button */}
-                  <button
-                    className="text-white p-2 hover:text-white/80 transition rounded-full"
+                  <button 
+                    className="text-white p-1.5 hover:text-white/80 transition rounded-full"
                     onClick={toggleFullScreen}
                     aria-label={isFullScreen ? "Exit fullscreen" : "Enter fullscreen"}
                   >
-                    {isFullScreen ? <Minimize size={22} /> : <Maximize size={22} />}
+                    {isFullScreen ? <Minimize size={20} /> : <Maximize size={20} />}
                   </button>
                 </div>
               </div>
