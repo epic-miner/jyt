@@ -135,6 +135,9 @@
   height: 100% !important;
   max-width: 100vw !important;
   max-height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* Force landscape mode when in fullscreen on mobile */
@@ -143,12 +146,24 @@
     transform: rotate(90deg) !important;
     width: 100vh !important;
     height: 100vw !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
   
   .landscape-fullscreen:fullscreen video {
-    width: 100vh !important;
-    height: 100vw !important;
-    transform: scale(1.0) !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 100vw !important;
+    aspect-ratio: 16/9 !important;
+    transform: none !important;
+  }
+  
+  .landscape-fullscreen:fullscreen .aspect-ratio {
+    aspect-ratio: 16/9 !important;
+    width: auto !important;
+    height: 100% !important;
+    max-width: 100vh !important;
   }
 }
 
@@ -156,15 +171,21 @@
   .video-container.fullscreen video,
   .fullscreen video,
   :fullscreen video {
-    width: 100vw !important;
+    width: auto !important;
     height: 100vh !important;
+    max-width: 100vw !important;
+    aspect-ratio: 16/9 !important;
     object-fit: contain !important;
+    margin: 0 auto !important;
   }
   
   /* This ensures the video takes full width in landscape mode */
   :fullscreen .aspect-ratio {
     width: 100% !important;
     height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 }
 
@@ -172,11 +193,12 @@
 .landscape-fullscreen::-webkit-full-screen {
   width: 100% !important;
   height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* Ensure controls are visible in fullscreen */
 .landscape-fullscreen .video-controls {
   z-index: 10000 !important;
-}
-
 }

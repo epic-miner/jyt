@@ -281,7 +281,7 @@ const VideoPlayer = ({
   };
 
   // Improved toggleFullScreen function that works on mobile regardless of orientation
-  const toggleFullScreen = async () => {
+  const toggleFullScreen = useCallback(async () => {
     try {
       if (!document.fullscreenElement) {
         // Request fullscreen
@@ -290,15 +290,15 @@ const VideoPlayer = ({
           if (isMobile) {
             // First, add the landscape-fullscreen class to prepare for orientation change
             playerContainerRef.current.classList.add('landscape-fullscreen');
-            
+
             // Try to lock orientation to landscape
             await requestOrientationLock();
           }
-          
+
           // Enter fullscreen
           await playerContainerRef.current.requestFullscreen();
           setIsFullScreen(true);
-          
+
           // After entering fullscreen on mobile, force a reflow to apply proper sizing
           if (isMobile && playerContainerRef.current) {
             setTimeout(() => {
@@ -315,7 +315,7 @@ const VideoPlayer = ({
         // Exit fullscreen
         await document.exitFullscreen();
         setIsFullScreen(false);
-        
+
         // Remove landscape-fullscreen class after exiting fullscreen
         if (playerContainerRef.current) {
           playerContainerRef.current.classList.remove('landscape-fullscreen');
@@ -338,7 +338,7 @@ const VideoPlayer = ({
       setError('Unable to enter fullscreen mode. Try rotating your device manually.');
       setTimeout(() => setError(null), 3000);
     }
-  };
+  }, [isMobile]);
 
   // Update orientation change handler
   useEffect(() => {
