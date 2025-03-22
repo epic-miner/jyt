@@ -979,7 +979,7 @@ const VideoPlayer = ({
   };
 
 
-  const togglePlayPause = () => {
+  const togglePlayPause = useCallback(() => {
     if (!videoRef.current) return;
 
     try {
@@ -1006,8 +1006,14 @@ const VideoPlayer = ({
       console.error("Error toggling play/pause:", error);
     }
 
-    showControlsTemporarily();
-  };
+    setShowControls(true);
+    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+    controlsTimeoutRef.current = setTimeout(() => {
+      if (isPlaying && !showSettingsMenu && (!isHovering || isMobile)) {
+        setShowControls(false);
+      }
+    }, 3000);
+  }, [isPlaying, showSettingsMenu, isHovering, isMobile]);
 
   const skipBackward = () => {
     if (videoRef.current) {
