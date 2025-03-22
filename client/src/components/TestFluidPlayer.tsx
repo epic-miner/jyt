@@ -20,11 +20,22 @@ const TestFluidPlayer = () => {
     
     // Initialize the player when the component mounts
     try {
-      // Check if fluidPlayer is loaded
-      console.log('window.fluidPlayer available:', typeof window.fluidPlayer === 'function');
-      
-      // Enhanced initialization with all features enabled
-      if (typeof window.fluidPlayer === 'function') {
+      // Check if fluidPlayer is loaded and wait for DOM to be ready
+      const initPlayer = () => {
+        console.log('window.fluidPlayer available:', typeof window.fluidPlayer === 'function');
+        
+        if (typeof window.fluidPlayer !== 'function') {
+          console.warn('Fluid Player not loaded yet, retrying in 500ms');
+          setTimeout(initPlayer, 500);
+          return;
+        }
+        
+        if (!document.getElementById('test-player')) {
+          console.warn('Video element not found, retrying in 500ms');
+          setTimeout(initPlayer, 500);
+          return;
+        }
+        
         console.log('Initializing fluid player with all features');
         const player = window.fluidPlayer('test-player', {
           layoutControls: {
@@ -123,6 +134,10 @@ const TestFluidPlayer = () => {
       } else {
         console.error('Fluid Player not loaded or available!');
       }
+    };
+    
+    initPlayer();
+    
     } catch (error) {
       console.error('Error initializing Fluid Player:', error);
     }
@@ -133,6 +148,7 @@ const TestFluidPlayer = () => {
       if (playerInstanceRef.current) {
         try {
           playerInstanceRef.current.destroy();
+          playerInstanceRef.current = null;
         } catch (error) {
           console.error('Error destroying player:', error);
         }

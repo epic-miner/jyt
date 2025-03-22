@@ -667,3 +667,191 @@ const FluidVideoPlayer = ({
 
 // Optimize with memo to prevent unnecessary re-renders
 export default memo(FluidVideoPlayer);
+import { useRef, useEffect, useState } from 'react';
+
+// Define the window fluidPlayer property
+declare global {
+  interface Window {
+    fluidPlayer: (target: string, options?: any) => any;
+  }
+}
+
+interface FluidVideoPlayerProps {
+  videoUrl: string;
+  poster?: string;
+  title?: string;
+  id?: string;
+  onTimeUpdate?: (timeData: { currentTime: number; duration: number }) => void;
+  onPlay?: () => void;
+  onPause?: () => void;
+  onEnded?: () => void;
+  className?: string;
+}
+
+const FluidVideoPlayer: React.FC<FluidVideoPlayerProps> = ({
+  videoUrl,
+  poster,
+  title,
+  id = 'fluid-player',
+  onTimeUpdate,
+  onPlay,
+  onPause,
+  onEnded,
+  className = 'w-full aspect-video',
+}) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const playerInstanceRef = useRef<any>(null);
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
+
+  useEffect(() => {
+    let initAttempts = 0;
+    const MAX_ATTEMPTS = 5;
+    
+    const initPlayer = () => {
+      if (initAttempts >= MAX_ATTEMPTS) {
+        console.error('Failed to initialize FluidVideoPlayer after multiple attempts');
+        return;
+      }
+      
+      initAttempts++;
+      
+      if (!videoRef.current || typeof window.fluidPlayer !== 'function') {
+        console.log(`FluidVideoPlayer: waiting for video element and player library (attempt ${initAttempts}/${MAX_ATTEMPTS})`);
+        setTimeout(initPlayer, 300);
+        return;
+      }
+
+      try {
+        // Cleanup any existing player instance
+        if (playerInstanceRef.current) {
+          try {
+            playerInstanceRef.current.destroy();
+          } catch (err) {
+            console.warn('Error destroying previous player instance:', err);
+          }
+          playerInstanceRef.current = null;
+        }
+
+        // Set up player options
+        const playerOptions = {
+          layoutControls: {
+            primaryColor: "#ef4444",
+            fillToContainer: true,
+            posterImage: poster,
+            playButtonShowing: true,
+            playPauseAnimation: true,
+            autoPlay: false,
+            mute: false,
+            keyboardControl: true,
+            loop: false,
+            allowTheatre: true,
+            allowDownload: false,
+            playbackRateEnabled: true,
+            controlBar: {
+              autoHide: true,
+              autoHideTimeout: 3,
+              animated: true
+            },
+            logo: {
+              imageUrl: '/assets/logo_optimized.png',
+              position: 'top left',
+              clickUrl: null,
+              opacity: 0.8,
+              mouseOverImageUrl: null,
+              imageMargin: '10px',
+              hideWithControls: true,
+              showOverAds: false
+            },
+            contextMenu: {
+              controls: true,
+              links: []
+            }
+          }
+        };
+
+        // Initialize player
+        console.log(`Initializing Fluid Player with ID: ${id}`);
+        const player = window.fluidPlayer(id, playerOptions);
+        playerInstanceRef.current = player;
+        
+        // Register event listeners if provided
+        if (onPlay) player.on('play', onPlay);
+        if (onPause) player.on('pause', onPause);
+        if (onEnded) player.on('ended', onEnded);
+        
+        // Add time update event listener
+        if (onTimeUpdate && videoRef.current) {
+          videoRef.current.addEventListener('timeupdate', () => {
+            onTimeUpdate({
+              currentTime: videoRef.current?.currentTime || 0,
+              duration: videoRef.current?.duration || 0
+            });
+          });
+        }
+        
+        setIsPlayerReady(true);
+        console.log('FluidVideoPlayer initialized successfully');
+      } catch (error) {
+        console.error('Error initializing Fluid Player:', error);
+      }
+    };
+
+    initPlayer();
+
+    // Cleanup function
+    return () => {
+      if (playerInstanceRef.current) {
+        try {
+          playerInstanceRef.current.destroy();
+          playerInstanceRef.current = null;
+        } catch (error) {
+          console.error('Error destroying player on unmount:', error);
+        }
+      }
+      
+      // Clean up event listeners
+      if (videoRef.current) {
+        videoRef.current.removeEventListener('timeupdate', () => {});
+      }
+    };
+  }, [id, poster, onTimeUpdate, onPlay, onPause, onEnded]);
+
+  // Update video source if videoUrl changes
+  useEffect(() => {
+    if (videoRef.current && isPlayerReady) {
+      if (videoRef.current.src !== videoUrl) {
+        console.log(`Updating video source to: ${videoUrl}`);
+        videoRef.current.src = videoUrl;
+        videoRef.current.load();
+        
+        // Reinitialize player if needed
+        if (playerInstanceRef.current) {
+          try {
+            playerInstanceRef.current.handleTechChange();
+          } catch (err) {
+            console.warn('Error updating player source:', err);
+          }
+        }
+      }
+    }
+  }, [videoUrl, isPlayerReady]);
+
+  return (
+    <div className="fluid-player-container">
+      <video
+        id={id}
+        ref={videoRef}
+        className={className}
+        controls
+        playsInline
+        poster={poster}
+        title={title}
+      >
+        <source src={videoUrl} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  );
+};
+
+export default FluidVideoPlayer;

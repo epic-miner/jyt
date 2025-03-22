@@ -90,9 +90,19 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
   };
 
   useEffect(() => {
+    let initAttempts = 0;
+    const MAX_ATTEMPTS = 10;
+    
     const initPlayer = () => {
+      if (initAttempts >= MAX_ATTEMPTS) {
+        console.error('Failed to initialize player after multiple attempts');
+        return;
+      }
+      
+      initAttempts++;
+      
       if (!videoRef.current || typeof window.fluidPlayer !== 'function') {
-        console.log('Video element or fluidPlayer not available yet');
+        console.log(`Video element or fluidPlayer not available yet (attempt ${initAttempts}/${MAX_ATTEMPTS})`);
         setTimeout(initPlayer, 200);
         return;
       }
@@ -100,6 +110,7 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
       try {
         if (playerInstanceRef.current) {
           playerInstanceRef.current.destroy();
+          playerInstanceRef.current = null;
         }
 
         const playerOptions = {
@@ -163,10 +174,17 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
     return () => {
       if (playerInstanceRef.current) {
         try {
+          console.log('Destroying player instance on unmount');
           playerInstanceRef.current.destroy();
+          playerInstanceRef.current = null;
         } catch (error) {
           console.error('Error destroying player:', error);
         }
+      }
+      
+      // Clean up event listeners from the video element
+      if (videoRef.current) {
+        videoRef.current.onloadeddata = null;
       }
     };
   }, [videoUrl, poster, episode, onTimeUpdate]);
@@ -174,8 +192,12 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
   // Update video source when quality changes
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.src = getCurrentVideoUrl();
-      videoRef.current.load();
+      const newUrl = getCurrentVideoUrl();
+      if (videoRef.current.src !== newUrl) {
+        console.log(`Updating video source to: ${newUrl}`);
+        videoRef.current.src = newUrl;
+        videoRef.current.load();
+      }
     }
   }, [selectedQuality, episode]);
 
