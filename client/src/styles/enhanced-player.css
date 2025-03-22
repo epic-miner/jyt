@@ -1,90 +1,154 @@
-/* Enhanced Player Styles */
+/* Enhanced Player styles */
 .enhanced-player-container {
   position: relative;
-  border-radius: 4px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
 }
 
 .enhanced-player-container:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  transform: scale(1.01);
 }
 
-/* Custom loading spinner */
+/* Loading spinner */
 .loader-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid rgba(255, 255, 255, 0.2);
+  border: 4px solid rgba(255, 255, 255, 0.1);
   border-radius: 50%;
-  border-top-color: #ef4444;
-  animation: spin 1s ease-in-out infinite;
+  border-top: 4px solid #ef4444;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-/* Improve quality menu appearance */
+/* Quality menu styling */
 .quality-menu {
-  min-width: 80px;
-  transform-origin: bottom right;
-  animation: scaleIn 0.2s ease-out;
+  min-width: 100px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.2s ease-out;
 }
 
-@keyframes scaleIn {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Better control visibility transitions */
-.enhanced-player-container .fluid_controls_container {
-  transition: opacity 0.3s ease-in-out !important;
-}
-
-/* Improvements for Fluid Player integration */
-.fluid_video_wrapper.fluid_player_layout_default {
-  border-radius: 4px !important;
-  overflow: hidden !important;
-}
-
-/* Fix for quality selector positioning on various screen sizes */
+/* For mobile devices */
 @media (max-width: 640px) {
-  .enhanced-player-container .quality-menu {
+  .enhanced-player-container {
+    border-radius: 0;
+  }
+  
+  .quality-menu {
     right: 0;
-    bottom: 40px;
     left: auto;
   }
 }
 
-/* Improve player controls on mobile */
-@media (max-width: 480px) {
-  .enhanced-player-container .fluid_control_volume {
-    display: none !important;
-  }
-  
-  .enhanced-player-container .fluid_controls_container {
-    padding: 0 8px !important;
-  }
+/* Custom video player controls */
+.enhanced-player-container video::-webkit-media-controls {
+  opacity: 0.9;
 }
 
-/* Better button focus states for accessibility */
-.enhanced-player-container button:focus {
-  outline: 2px solid #ef4444;
-  outline-offset: 2px;
+.enhanced-player-container video::-webkit-media-controls-panel {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
 }
 
-/* Theatre mode enhancements */
-.theatre-mode {
-  max-width: 100% !important;
-  width: 100% !important;
-  background-color: #000 !important;
-  transition: all 0.3s ease-in-out !important;
+/* Fix for fluid player shadow DOM issues */
+.fluid_video_wrapper.fluid_player_layout_default {
+  background-color: transparent !important;
+}
+
+/* Adaptive video sizing */
+.enhanced-player-container.theater-mode {
+  width: 100%;
+  max-width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  border-radius: 0;
+}
+
+/* Glass card effect for episode cards */
+.glass-card {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive headings for mobile */
+.heading-responsive {
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 700;
+}
+
+.subheading-responsive {
+  font-size: clamp(1.1rem, 3vw, 1.8rem);
+  font-weight: 600;
+}
+
+.text-responsive {
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+}
+
+.caption-responsive {
+  font-size: clamp(0.75rem, 2vw, 0.875rem);
+}
+
+/* Mobile optimized text */
+.text-mobile-optimized {
+  letter-spacing: -0.01em;
+  word-spacing: 0.05em;
+}
+
+/* Enhanced episode thumbnails */
+.episode-thumbnail {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.episode-thumbnail:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.episode-thumbnail img {
+  transition: transform 0.5s ease;
+}
+
+.episode-thumbnail:hover img {
+  transform: scale(1.05);
+}
+
+/* Episode progress bar */
+.episode-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: #ef4444;
+  z-index: 5;
+}
+
+/* Glass effect background */
+.glass-effect {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }

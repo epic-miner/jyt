@@ -1,4 +1,7 @@
 
+/* Import Enhanced Player Styles */
+@import url('./styles/enhanced-player.css');
+
 /* YouTube-style mobile tap indicators */
 .tap-indicator-left,
 .tap-indicator-right {

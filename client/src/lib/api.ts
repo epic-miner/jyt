@@ -1,24 +1,5 @@
-import axios from 'axios';
 import { Anime, Episode } from '@shared/types';
-
-const API_URL = 'https://polished-river-de65.ahf626085.workers.dev/api';
-const API_KEY = '7291826614';
-
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// For requests that require API key (POST, PUT, DELETE operations)
-const apiWithAuth = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'X-API-Key': API_KEY,
-  },
-});
+import { api } from './axiosConfig';
 
 // Cache management with timeout for efficiency
 const apiCache = new Map<string, { data: any, timestamp: number }>();
@@ -140,7 +121,7 @@ export const fetchAnimeByGenre = async (genre: string, bypassCache = false): Pro
   try {
     const data = await cachedApiGet(`/search?genre=${genre}&type=anime`, bypassCache);
     
-    // Check if response has the expected structure (API returns a complex object)
+    // Check if response has the expected structure
     if (data && data.results && data.results.anime) {
       return data.results.anime;
     } else if (Array.isArray(data)) {

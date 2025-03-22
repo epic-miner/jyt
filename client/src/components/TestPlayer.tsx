@@ -115,11 +115,29 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         return;
       }
 
+      // Check if we already have a script tag for fluid player (avoid duplicates)
+      const existingScript = document.querySelector('script[src*="fluidplayer.min.js"]');
+      if (existingScript) {
+        // If script exists but wasn't loaded yet, wait for it
+        existingScript.addEventListener('load', () => resolve());
+        existingScript.addEventListener('error', () => 
+          reject(new Error('Existing Fluid Player script failed to load')));
+        return;
+      }
+
       const script = document.createElement('script');
       script.src = 'https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js';
       script.async = true;
+      script.crossOrigin = 'anonymous';
+      
+      // Add preconnect for performance optimization
+      const preconnect = document.createElement('link');
+      preconnect.rel = 'preconnect';
+      preconnect.href = 'https://cdn.fluidplayer.com';
+      document.head.appendChild(preconnect);
+      
       script.onload = () => resolve();
-      script.onerror = (err) => reject(new Error('Failed to load Fluid Player script'));
+      script.onerror = () => reject(new Error('Failed to load Fluid Player script'));
       document.head.appendChild(script);
     });
   }, []);
