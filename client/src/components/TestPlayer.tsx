@@ -259,27 +259,3 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
 };
 
 export default TestPlayer;
-// Find the fluidPlayer configuration object and add/modify the logo section:
-
-layoutControls: {
-  // ... other configurations
-  logo: {
-    imageUrl: null, // Set to null to remove the logo
-    position: 'top left',
-    clickUrl: null,
-    opacity: 1,
-    mouseOverImageUrl: null,
-    imageMargin: '2px',
-    hideWithControls: false,
-    showOverAds: false
-  },
-  // ... other configurations
-}
-// Add this after your player is initialized
-useEffect(() => {
-  // Find and remove the logo element
-  const logoElement = document.querySelector('.logo_holder');
-  if (logoElement) {
-    logoElement.remove();
-  }
-}, []);
