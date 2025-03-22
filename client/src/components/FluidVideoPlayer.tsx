@@ -3,11 +3,15 @@ import { Episode, Anime } from '@shared/types';
 import { updateWatchHistory } from '../lib/cookies';
 import { Helmet } from 'react-helmet-async';
 
-// Import FluidPlayer directly
-const fluidPlayer = require('fluid-player');
-
 // Add custom styles
 import '../styles/fluid-player.css';
+
+// Declare the global fluidPlayer variable loaded from CDN
+declare global {
+  interface Window {
+    fluidPlayer: (element: HTMLVideoElement, options: any) => any;
+  }
+}
 
 interface FluidVideoPlayerProps {
   anime: Anime;
@@ -144,8 +148,9 @@ const FluidVideoPlayer = ({
     };
 
     try {
-      // Initialize fluid player
-      const fpInstance = fluidPlayer(
+      // Initialize fluid player using the global variable
+      // @ts-ignore - fluidPlayer is loaded from CDN
+      const fpInstance = window.fluidPlayer(
         videoRef.current,
         playerOptions
       );
