@@ -175,10 +175,10 @@ const FluidVideoPlayer = ({
   const maxInitializationAttempts = 10;
 
 
-  // Get initial video URL based on available qualities
+  // Get initial video URL based on available qualities - prioritize 1080p
   const getVideoUrl = (): string => {
-    return episode.video_url_max_quality ||
-           episode.video_url_1080p ||
+    return episode.video_url_1080p ||
+           episode.video_url_max_quality ||
            episode.video_url_720p ||
            episode.video_url_480p || '';
   };
@@ -191,7 +191,8 @@ const FluidVideoPlayer = ({
       sources.push({
         src: episode.video_url_1080p,
         type: 'video/mp4',
-        title: '1080p'
+        title: '1080p',
+        selected: true // Mark 1080p as selected by default
       });
     }
 
@@ -211,8 +212,9 @@ const FluidVideoPlayer = ({
       });
     }
 
-    // If there's only one source, make it selected
-    if (sources.length === 1) {
+    // If 1080p isn't available, select the highest quality available
+    if (!episode.video_url_1080p && sources.length > 0) {
+      // Mark the first source as selected (highest quality available)
       sources[0].selected = true;
     }
 
@@ -371,12 +373,12 @@ const FluidVideoPlayer = ({
             // Set up HLS options for optimal playback
             return {
               ...options,
-              // Enable automatic quality selection
-              autoLevelCapping: -1,
+              // Set quality cap to 1080p (level will depend on available qualities)
+              autoLevelCapping: -1, // Still allow auto switching within cap
               // Optimize for low latency streaming
               lowLatencyMode: true,
-              // Faster startup time
-              startLevel: -1
+              // Start with highest quality immediately for better experience
+              startLevel: 2, // Usually level 2 corresponds to highest quality (1080p)
             };
           },
           onBeforeInitHls: (hls: any) => {
@@ -394,7 +396,11 @@ const FluidVideoPlayer = ({
               // These settings help with quality switching
               streaming: {
                 fastSwitchEnabled: true,
-                lowLatencyEnabled: true
+                lowLatencyEnabled: true,
+                abr: {
+                  initialBitrate: { video: 5000 }, // Target higher initial bitrate (~1080p)
+                  autoSwitchBitrate: { video: true }
+                }
               }
             };
           },
@@ -627,6 +633,7 @@ const FluidVideoPlayer = ({
             preload="auto"
           >
             {/* Use multiple source tags with data-fluid-hd attribute for HD quality sources */}
+            {/* Default to 1080p, make it the first source */}
             {episode.video_url_1080p && (
               <source src={episode.video_url_1080p} type="video/mp4" data-fluid-hd title="1080p" />
             )}
