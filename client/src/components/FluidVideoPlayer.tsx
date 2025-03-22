@@ -341,7 +341,7 @@ const FluidVideoPlayer = ({
         adClickable: true,
         showProgressbarMarkers: false,
         adCTAText: false,
-        adCTATextPosition: 'bottom right'
+        adCTATextPosition: 'bottom right' as 'bottom right'
       }
     };
 
