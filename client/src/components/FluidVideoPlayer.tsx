@@ -342,6 +342,48 @@ const FluidVideoPlayer = ({
         showProgressbarMarkers: false,
         adCTAText: false,
         adCTATextPosition: 'bottom right' as 'bottom right'
+      },
+      
+      // Modules configuration to enable HLS and DASH streaming with quality selection
+      modules: {
+        // HLS configuration for better streaming
+        configureHls: (options) => {
+          // Set up HLS options for optimal playback
+          return {
+            ...options,
+            // Enable automatic quality selection
+            autoLevelCapping: -1,
+            // Optimize for low latency streaming
+            lowLatencyMode: true,
+            // Faster startup time
+            startLevel: -1
+          };
+        },
+        onBeforeInitHls: (hls) => {
+          console.log('HLS about to initialize for streaming');
+        },
+        onAfterInitHls: (hls) => {
+          console.log('HLS initialized for streaming');
+        },
+        
+        // DASH configuration
+        configureDash: (options) => {
+          // Set up DASH options for optimal playback
+          return {
+            ...options,
+            // These settings help with quality switching
+            streaming: {
+              fastSwitchEnabled: true,
+              lowLatencyEnabled: true
+            }
+          };
+        },
+        onBeforeInitDash: (dash) => {
+          console.log('DASH about to initialize for streaming');
+        },
+        onAfterInitDash: (dash) => {
+          console.log('DASH initialized for streaming');
+        }
       }
     };
 
@@ -555,7 +597,19 @@ const FluidVideoPlayer = ({
             playsInline
             preload="auto"
           >
-            <source src={getVideoUrl()} type="video/mp4" />
+            {/* Use multiple source tags with data-fluid-hd attribute for HD quality sources */}
+            {episode.video_url_1080p && (
+              <source src={episode.video_url_1080p} type="video/mp4" data-fluid-hd title="1080p" />
+            )}
+            {episode.video_url_720p && (
+              <source src={episode.video_url_720p} type="video/mp4" data-fluid-hd title="720p" />
+            )}
+            {episode.video_url_480p && (
+              <source src={episode.video_url_480p} type="video/mp4" title="480p" />
+            )}
+            {!episode.video_url_1080p && !episode.video_url_720p && !episode.video_url_480p && (
+              <source src={episode.video_url_max_quality} type="video/mp4" title="Auto" />
+            )}
             Your browser does not support the video tag.
           </video>
         </div>

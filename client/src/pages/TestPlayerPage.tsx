@@ -1,5 +1,41 @@
 import { useEffect, useRef } from 'react';
 
+// Import types for Fluid Player
+interface FluidPlayerTestOptions {
+  layoutControls?: {
+    primaryColor?: string;
+    fillToContainer?: boolean;
+    autoPlay?: boolean;
+    playbackRateEnabled?: boolean; 
+    allowTheatre?: boolean;
+    miniPlayer?: {
+      enabled?: boolean;
+      width?: number;
+      widthMobile?: number;
+      placeholderText?: string;
+      position?: string;
+    };
+    controlBar?: {
+      autoHide?: boolean;
+      autoHideTimeout?: number;
+      animated?: boolean;
+    };
+    logo?: {
+      imageUrl?: string | null;
+      position?: string;
+      clickUrl?: string | null;
+      opacity?: number;
+    };
+    contextMenu?: {
+      controls?: boolean;
+    };
+  };
+  modules?: {
+    configureDash?: (options: any) => any;
+    configureHls?: (options: any) => any;
+  };
+}
+
 // Simple test page to verify Fluid Player is loading correctly
 const TestPlayerPage = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -34,12 +70,44 @@ const TestPlayerPage = () => {
       }
       
       try {
-        // Basic configuration
+        // Enhanced configuration with streaming support
         const playerInstance = window.fluidPlayer('test-video-player', {
           layoutControls: {
             primaryColor: "#ef4444",
             fillToContainer: true,
-            autoPlay: false
+            autoPlay: false,
+            playbackRateEnabled: true, // Enable playback speed control
+            allowTheatre: true, // Enable theater mode
+            miniPlayer: {
+              enabled: true,
+              width: 400,
+              widthMobile: 280,
+              placeholderText: "Playing in Mini Player",
+              position: "bottom right"
+            },
+            controlBar: {
+              autoHide: true,
+              autoHideTimeout: 3,
+              animated: true
+            },
+            logo: {
+              imageUrl: null,
+              position: "top left",
+              clickUrl: null,
+              opacity: 1
+            },
+            contextMenu: {
+              controls: true
+            }
+          },
+          // Modules configuration to properly handle streaming/quality options
+          modules: {
+            configureDash: (options) => {
+              return options;
+            },
+            configureHls: (options) => {
+              return options;
+            }
           }
         });
         
@@ -88,7 +156,10 @@ const TestPlayerPage = () => {
           controls
           playsInline
         >
-          <source src="https://cdn.fluidplayer.com/videos/valerian-480p.mkv" type="video/mp4" />
+          {/* Multiple quality sources for testing */}
+          <source src="https://cdn.fluidplayer.com/videos/valerian-1080p.mkv" type="video/mp4" data-fluid-hd title="1080p" />
+          <source src="https://cdn.fluidplayer.com/videos/valerian-720p.mkv" type="video/mp4" data-fluid-hd title="720p" />
+          <source src="https://cdn.fluidplayer.com/videos/valerian-480p.mkv" type="video/mp4" title="480p" />
           Your browser does not support the video tag.
         </video>
       </div>
