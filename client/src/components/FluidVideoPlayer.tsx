@@ -233,7 +233,7 @@ const FluidVideoPlayer = ({
         mute: false,
         keyboardControl: true,
         loop: false,
-        allowDownload: true,
+        allowDownload: false,
         playbackRateEnabled: true,
         allowTheatre: true,
         
