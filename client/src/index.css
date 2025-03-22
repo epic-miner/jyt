@@ -219,7 +219,7 @@
   .progress-bar-responsive {
     @apply h-2 transition-all duration-200;
   }
-  
+
   .progress-bar-responsive:hover {
     @apply h-4 xs:h-4 sm:h-5 md:h-5;
   }
@@ -243,7 +243,7 @@
   .settings-menu-responsive {
     @apply text-sm xs:text-sm sm:text-base md:text-base;
   }
-  
+
   /* Consistent button sizing and spacing */
   .video-control-button {
     @apply p-2 xs:p-2 sm:p-2.5 md:p-3 rounded-full bg-black/50 backdrop-blur-sm;
@@ -749,4 +749,25 @@ html {
 /* Ensure controls are visible in fullscreen */
 .landscape-fullscreen .video-controls {
   z-index: 10000 !important;
+}
+
+/* Video Player */
+.video-controls-overlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+}
+
+/* Tap feedback animation */
+@keyframes tap-feedback {
+  0% { opacity: 0.7; transform: scale(0.95); }
+  100% { opacity: 0; transform: scale(1.1); }
+}
+
+.tap-feedback {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: tap-feedback 0.3s ease-out forwards;
+  pointer-events: none;
 }
