@@ -160,83 +160,52 @@ const VideoPlayerPage = () => {
   // Store current navigation state in ref to prevent race conditions
   const navigationInProgressRef = useRef(false);
   
+  // Completely replace the navigation handling with a direct page reload approach
   const handleNextEpisode = useCallback(() => {
-    if (currentEpisodeIndex < episodes.length - 1 && !isNavigating && !navigationInProgressRef.current) {
+    if (currentEpisodeIndex < episodes.length - 1 && !navigationInProgressRef.current) {
       // Mark navigation as in progress to prevent double calls
       navigationInProgressRef.current = true;
+      
+      // Show loading overlay
       setIsNavigating(true);
       
       // Get next episode
       const nextEp = episodes[currentEpisodeIndex + 1];
       
-      // Clean up any existing video players first
-      const videoElements = document.querySelectorAll('video');
-      videoElements.forEach(video => {
-        if (video.src) {
-          // Pause and reset video source
-          try {
-            video.pause();
-            video.currentTime = 0;
-            video.removeAttribute('src');
-            video.load();
-          } catch (e) {
-            console.error('Error cleaning up video before navigation:', e);
-          }
-        }
-      });
-      
-      // Force a hard navigation
-      setTimeout(() => {
-        try {
-          window.location.href = `/watch/${animeId}/${nextEp.id}?t=${Date.now()}`;
-        } catch (e) {
-          console.error('Error during forced navigation:', e);
-          // Fallback to normal navigation if window.location fails
-          setLocation(`/watch/${animeId}/${nextEp.id}?t=${Date.now()}`);
-          navigationInProgressRef.current = false;
-        }
-      }, 300);
+      // Force a COMPLETE navigation - this essentially reloads the page entirely
+      try {
+        // Use replace instead of href to avoid issues with browser history
+        window.location.replace(`/watch/${animeId}/${nextEp.id}?force=true&t=${Date.now()}`);
+      } catch (e) {
+        console.error('Critical navigation error:', e);
+        // Last resort - reload the whole page and let it redirect
+        window.location.reload();
+      }
     }
-  }, [currentEpisodeIndex, episodes, animeId, setLocation, isNavigating]);
+  }, [currentEpisodeIndex, episodes, animeId]);
 
   const handlePreviousEpisode = useCallback(() => {
-    if (currentEpisodeIndex > 0 && !isNavigating && !navigationInProgressRef.current) {
+    if (currentEpisodeIndex > 0 && !navigationInProgressRef.current) {
       // Mark navigation as in progress to prevent double calls
       navigationInProgressRef.current = true;
+      
+      // Show loading overlay
       setIsNavigating(true);
       
       // Get previous episode
       const prevEp = episodes[currentEpisodeIndex - 1];
       
-      // Clean up any existing video players first
-      const videoElements = document.querySelectorAll('video');
-      videoElements.forEach(video => {
-        if (video.src) {
-          // Pause and reset video source
-          try {
-            video.pause();
-            video.currentTime = 0;
-            video.removeAttribute('src');
-            video.load();
-          } catch (e) {
-            console.error('Error cleaning up video before navigation:', e);
-          }
-        }
-      });
-      
-      // Force a hard navigation
-      setTimeout(() => {
-        try {
-          window.location.href = `/watch/${animeId}/${prevEp.id}?t=${Date.now()}`;
-        } catch (e) {
-          console.error('Error during forced navigation:', e);
-          // Fallback to normal navigation if window.location fails
-          setLocation(`/watch/${animeId}/${prevEp.id}?t=${Date.now()}`);
-          navigationInProgressRef.current = false;
-        }
-      }, 300);
+      // Force a COMPLETE navigation - this essentially reloads the page entirely
+      try {
+        // Use replace instead of href to avoid issues with browser history
+        window.location.replace(`/watch/${animeId}/${prevEp.id}?force=true&t=${Date.now()}`);
+      } catch (e) {
+        console.error('Critical navigation error:', e);
+        // Last resort - reload the whole page and let it redirect
+        window.location.reload();
+      }
     }
-  }, [currentEpisodeIndex, episodes, animeId, setLocation, isNavigating]);
+  }, [currentEpisodeIndex, episodes, animeId]);
 
   // Handle loading state
   if (isLoadingAnime || isLoadingEpisode) {
@@ -406,33 +375,15 @@ const VideoPlayerPage = () => {
                       navigationInProgressRef.current = true;
                       setIsNavigating(true);
                       
-                      // Clean up any existing video players first
-                      const videoElements = document.querySelectorAll('video');
-                      videoElements.forEach(video => {
-                        if (video.src) {
-                          // Pause and reset video source
-                          try {
-                            video.pause();
-                            video.currentTime = 0;
-                            video.removeAttribute('src');
-                            video.load();
-                          } catch (e) {
-                            console.error('Error cleaning up video before episode selection:', e);
-                          }
-                        }
-                      });
-                      
-                      // Force a hard navigation
-                      setTimeout(() => {
-                        try {
-                          window.location.href = `/watch/${animeId}/${ep.id}?t=${Date.now()}`;
-                        } catch (e) {
-                          console.error('Error during forced episode selection:', e);
-                          // Fallback to normal navigation
-                          setLocation(`/watch/${animeId}/${ep.id}?t=${Date.now()}`);
-                          navigationInProgressRef.current = false;
-                        }
-                      }, 300);
+                      // Force a COMPLETE navigation - this essentially reloads the page entirely
+                      try {
+                        // Use replace instead of href to avoid issues with browser history
+                        window.location.replace(`/watch/${animeId}/${ep.id}?force=true&t=${Date.now()}`);
+                      } catch (e) {
+                        console.error('Critical navigation error:', e);
+                        // Last resort - reload the whole page and let it redirect
+                        window.location.reload();
+                      }
                     }
                   }}
                   disabled={isNavigating}
