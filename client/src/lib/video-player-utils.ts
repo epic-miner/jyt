@@ -1,4 +1,3 @@
-
 // YouTube-like video player animations and utilities
 
 /**
@@ -12,11 +11,11 @@ export const showTapIndicator = (side: 'left' | 'right') => {
   // Reset any existing animations
   element.style.animation = 'none';
   element.offsetHeight; // Trigger reflow
-  
+
   // Apply a new animation
   element.style.animation = 'fadeInOut 0.6s ease-in-out';
   element.style.opacity = '1';
-  
+
   // Remove animation after it completes
   setTimeout(() => {
     element.style.animation = '';
@@ -30,7 +29,7 @@ export const showTapIndicator = (side: 'left' | 'right') => {
 export const addVideoPlayerKeyframes = () => {
   // Check if already added
   if (document.getElementById('video-player-keyframes')) return;
-  
+
   const style = document.createElement('style');
   style.id = 'video-player-keyframes';
   style.textContent = `
@@ -40,13 +39,13 @@ export const addVideoPlayerKeyframes = () => {
       80% { opacity: 1; transform: translate(0, 0) scale(1); }
       100% { opacity: 0; transform: translate(0, 0) scale(0.8); }
     }
-    
+
     @keyframes progressGrow {
       0% { transform: scaleX(0); }
       100% { transform: scaleX(1); }
     }
   `;
-  
+
   document.head.appendChild(style);
 };
 
@@ -57,21 +56,22 @@ export const setupYouTubeControls = (
   playerContainer: HTMLElement,
   skipBackward: () => void,
   skipForward: () => void,
-  togglePlayPause: () => void,
+  togglePlay: () => void,
   setShowControls: (show: boolean) => void,
-  showControlsTemporarily: () => void
-) => {
+  showControlsTemporarily: () => void,
+  isMobile: boolean
+): (() => void) | undefined => {
   let lastTap = 0;
   let tapTimeout: NodeJS.Timeout | null = null;
-  
+
   // Add keyframes needed for animations
   addVideoPlayerKeyframes();
-  
+
   // Function to show tap feedback indicator
   const showTapIndicator = (side: 'left' | 'right') => {
     // Create or get existing indicator
     let indicator = document.querySelector(`.tap-indicator-${side}`) as HTMLElement;
-    
+
     if (!indicator) {
       indicator = document.createElement('div');
       indicator.className = `tap-indicator-${side}`;
@@ -92,7 +92,7 @@ export const setupYouTubeControls = (
       indicator.style.transition = 'opacity 0.2s ease';
       indicator.style.zIndex = '100';
       indicator.style.pointerEvents = 'none';
-      
+
       const circle = indicator.querySelector('.tap-indicator-circle') as HTMLElement;
       if (circle) {
         circle.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
@@ -103,39 +103,39 @@ export const setupYouTubeControls = (
         circle.style.alignItems = 'center';
         circle.style.justifyContent = 'center';
       }
-      
+
       playerContainer.appendChild(indicator);
     }
-    
+
     // Show and animate the indicator
     indicator.style.opacity = '1';
-    
+
     // Hide after animation completes
     setTimeout(() => {
       indicator.style.opacity = '0';
     }, 500);
   };
-  
+
   const handleTap = (e: TouchEvent) => {
     const currentTime = new Date().getTime();
     const tapLength = currentTime - lastTap;
-    
+
     // Clear any pending single tap
     if (tapTimeout) {
       clearTimeout(tapTimeout);
       tapTimeout = null;
     }
-    
+
     // Detect double tap (YouTube-like behavior)
     if (tapLength < 300 && tapLength > 0) {
       // Double tap detected
       e.preventDefault();
-      
+
       // Get tap position to determine skip direction (left/right)
       const touch = e.touches[0] || e.changedTouches[0];
       const containerWidth = playerContainer.offsetWidth;
       const touchX = touch.clientX;
-      
+
       if (touchX < containerWidth / 2) {
         // Double tap on left side - skip backward
         skipBackward();
@@ -150,21 +150,23 @@ export const setupYouTubeControls = (
       tapTimeout = setTimeout(() => {
         // YouTube behavior: toggle controls on single tap
         if (e.target === playerContainer || playerContainer.contains(e.target as Node)) {
-          togglePlayPause();
+          togglePlay();
           showControlsTemporarily();
         }
       }, 200);
     }
-    
+
     lastTap = currentTime;
   };
-  
+
+  if (!playerContainer || !isMobile) return;
+
   playerContainer.addEventListener('touchstart', handleTap);
-  
+
   // Return a cleanup function
   return () => {
     playerContainer.removeEventListener('touchstart', handleTap);
-    
+
     if (tapTimeout) {
       clearTimeout(tapTimeout);
     }

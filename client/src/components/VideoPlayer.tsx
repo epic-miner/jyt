@@ -891,7 +891,8 @@ const VideoPlayer = ({
         skipForwardFunc,
         togglePlay,
         setShowControls,
-        showControlsTemporarily
+        showControlsTemporarily,
+        isMobile
       );
 
       // Standard touch events for showing controls during scroll
