@@ -156,33 +156,10 @@ const VideoPlayerPage = () => {
         <div className="w-full flex flex-col bg-black">
           <div className="relative w-full bg-black overflow-hidden aspect-video">
             <TestPlayer 
-              videoUrl={currentEpisode.video_url_max_quality}
+              videoUrl={currentEpisode.video_url_max_quality} 
               episode={currentEpisode}
-              videoSources={[
-                // Add multiple video quality sources if available
-                ...(currentEpisode.video_url_max_quality ? [{ 
-                  url: currentEpisode.video_url_max_quality, 
-                  label: '1080p', 
-                  type: 'video/mp4',
-                  quality: 'hd' 
-                }] : []),
-                ...(currentEpisode.video_url_high_quality ? [{ 
-                  url: currentEpisode.video_url_high_quality, 
-                  label: '720p', 
-                  type: 'video/mp4',
-                  quality: 'hd'
-                }] : []),
-                ...(currentEpisode.video_url_medium_quality ? [{ 
-                  url: currentEpisode.video_url_medium_quality, 
-                  label: '480p', 
-                  type: 'video/mp4' 
-                }] : []),
-                ...(currentEpisode.video_url_low_quality ? [{ 
-                  url: currentEpisode.video_url_low_quality, 
-                  label: '360p', 
-                  type: 'video/mp4' 
-                }] : [])
-              ].filter(source => source.url)} // Filter out undefined sources
+              poster={currentEpisode.thumbnail_url}
+              title={currentEpisode.title}
               onTimeUpdate={(time) => {
                 if (!anime?.id || !currentEpisode?.id) return;
 
