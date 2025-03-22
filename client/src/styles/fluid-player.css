@@ -206,14 +206,6 @@
     bottom: 60px !important;
   }
 }
-/* Fix for play/pause icon */
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button.fluid_button_play:before,
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button.fluid_button_pause:before {
-  background-position: center center;
-  background-size: 20px;
-  opacity: 1;
-}
-
 /* Custom styles for Fluid Player pause banner */
 .fluid-player-pause-banner {
   background-color: rgba(0, 0, 0, 0.7);
