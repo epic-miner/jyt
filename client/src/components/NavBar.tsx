@@ -191,7 +191,7 @@ const NavBar = memo(() => {
                     decoding="async"
                   />
                 </picture>
-                <span className="text-xl md:text-2xl font-bold">
+                <span className="text-base sm:text-xl font-bold">
                   <span className="text-primary">9</span>
                   <span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">Anime</span>
                 </span>

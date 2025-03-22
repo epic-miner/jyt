@@ -114,7 +114,7 @@ const SearchBar = memo(({ autoFocus = false }: SearchBarProps) => {
   const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
-    
+
     if (value.trim().length > 2) {
       setShowResults(true);
     } else {
@@ -308,7 +308,7 @@ const SearchBar = memo(({ autoFocus = false }: SearchBarProps) => {
                   <Link href={`/search?q=${searchTermEncoded}`}>
                     <button
                       className={cn(
-                        "text-sm text-primary hover:text-primary/80",
+                        "text-xs sm:text-sm text-primary hover:text-primary/80",
                         "transition-colors duration-200"
                       )}
                       onClick={handleItemClick}
