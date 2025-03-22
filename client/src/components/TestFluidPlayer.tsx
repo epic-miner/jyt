@@ -1,10 +1,10 @@
 
-import { useEffect, useRef } from 'react';
+import { useRef, useEffect } from 'react';
 
-// Declare the global fluidPlayer variable loaded from CDN
+// Define the window fluidPlayer property
 declare global {
   interface Window {
-    fluidPlayer: (element: string | HTMLVideoElement, options?: any) => any;
+    fluidPlayer: (target: string, options?: any) => any;
   }
 }
 
@@ -23,76 +23,101 @@ const TestFluidPlayer = () => {
       // Check if fluidPlayer is loaded
       console.log('window.fluidPlayer available:', typeof window.fluidPlayer === 'function');
       
-      // Enhanced initialization with more options
+      // Enhanced initialization with all features enabled
       if (typeof window.fluidPlayer === 'function') {
-        console.log('Initializing fluid player');
+        console.log('Initializing fluid player with all features');
         const player = window.fluidPlayer('test-player', {
           layoutControls: {
             primaryColor: "#ef4444", // Match your theme's primary color
             fillToContainer: true,
-            posterImage: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-576p.jpg', // Thumbnail image
+            posterImage: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-576p.jpg',
             playButtonShowing: true,
             playPauseAnimation: true,
             autoPlay: false,
             mute: false,
+            keyboardControl: true,
+            loop: false,
+            allowTheatre: true,
+            allowDownload: true,
+            playbackRateEnabled: true,
             controlBar: {
               autoHide: true,
               autoHideTimeout: 3,
               animated: true
             },
+            contextMenu: {
+              controls: true,
+              links: [
+                {
+                  href: 'https://github.com/fluid-player/fluid-player',
+                  label: 'Fluid Player Github'
+                }
+              ]
+            },
             logo: {
-              imageUrl: '/assets/logo_optimized.png', // Your logo
+              imageUrl: '/assets/logo_optimized.png',
               position: 'top left',
               clickUrl: null,
               opacity: 0.8,
               mouseOverImageUrl: null,
               imageMargin: '10px',
               hideWithControls: true,
-              showOverAds: false
+              showOverAds: true
             },
-            // Uncomment if you have a VTT file with thumbnails
-            // timelinePreview: {
-            //   file: '/assets/thumbnails.vtt',
-            //   type: 'VTT'
-            // },
-            allowDownload: true,
-            playbackRateEnabled: true,
-            allowTheatre: true,
-            theatreSettings: {
-              width: '100%',
-              height: '60%',
-              marginTop: 0,
-              horizontalAlign: 'center',
-              keepPosition: true
+            htmlOnPauseBlock: {
+              html: '<div class="fluid-player-pause-banner">Video is paused. Click play to continue.</div>',
+              height: 50,
+              width: 300
             },
-            contextMenu: {
-              controls: true,
-              links: [
-                {
-                  href: "https://github.com/fluid-player/fluid-player",
-                  label: "About Fluid Player"
-                }
-              ]
+            miniPlayer: {
+              enabled: true,
+              width: 400,
+              height: 225,
+              placeholderText: "Playing in mini player",
+              position: "bottom-right"
+            },
+            timelinePreview: {
+              file: null,
+              type: 'VTT'
+            },
+            captions: {
+              play: 'Play',
+              pause: 'Pause',
+              mute: 'Mute',
+              unmute: 'Unmute',
+              fullscreen: 'Fullscreen',
+              exitFullscreen: 'Exit Fullscreen'
             }
           },
-          // Add advertising if needed
-          // vastOptions: {
-          //   adList: [
-          //     {
-          //       roll: 'preRoll',
-          //       vastTag: 'your-vast-tag-url'
-          //     }
-          //   ]
-          // }
+          vastOptions: {
+            adList: [],
+            adCTAText: false,
+            adCTATextPosition: 'bottom right',
+            adClickable: true,
+            vastTimeout: 5000,
+            showProgressbarMarkers: false,
+            maxAllowedVastTagRedirects: 3,
+            vastAdvanced: {
+              vastLoadedCallback: () => console.log('VAST loaded'),
+              noVastVideoCallback: () => console.log('No VAST video'),
+              vastVideoSkippedCallback: () => console.log('VAST skipped'),
+              vastVideoEndedCallback: () => console.log('VAST ended')
+            }
+          }
         });
         
+        // Store player instance for cleanup and control
         playerInstanceRef.current = player;
         
-        // Add event listeners
-        player.on('play', () => console.log('Video playing'));
+        // Register event listeners
+        player.on('play', () => console.log('Video played'));
         player.on('pause', () => console.log('Video paused'));
+        player.on('timeupdate', (time) => console.log('Time update:', time));
         player.on('ended', () => console.log('Video ended'));
-        player.on('timeupdate', (currentTime) => console.log('Current time:', currentTime));
+        player.on('seeked', () => console.log('Video seeked'));
+        player.on('theatreModeOn', () => console.log('Theatre mode on'));
+        player.on('theatreModeOff', () => console.log('Theatre mode off'));
+        player.on('miniPlayerToggle', (event) => console.log('Mini player toggled:', event.detail.isToggledOn));
         
         console.log('Fluid player instance:', player);
       } else {
@@ -134,7 +159,33 @@ const TestFluidPlayer = () => {
         </div>
       </div>
       <div className="mt-3 text-sm text-gray-500">
-        Use keyboard shortcuts: Space (play/pause), F (fullscreen), M (mute)
+        Use keyboard shortcuts: Space (play/pause), F (fullscreen), M (mute), T (theatre mode)
+      </div>
+      <div className="mt-2 flex space-x-2">
+        <button 
+          onClick={() => playerInstanceRef.current?.play()} 
+          className="px-3 py-1 bg-blue-500 text-white rounded"
+        >
+          Play
+        </button>
+        <button 
+          onClick={() => playerInstanceRef.current?.pause()} 
+          className="px-3 py-1 bg-blue-500 text-white rounded"
+        >
+          Pause
+        </button>
+        <button 
+          onClick={() => playerInstanceRef.current?.toggleFullScreen()} 
+          className="px-3 py-1 bg-blue-500 text-white rounded"
+        >
+          Toggle Fullscreen
+        </button>
+        <button 
+          onClick={() => playerInstanceRef.current?.toggleMiniPlayer()} 
+          className="px-3 py-1 bg-blue-500 text-white rounded"
+        >
+          Toggle Mini Player
+        </button>
       </div>
     </div>
   );
