@@ -68,7 +68,7 @@ const MobileSearchOverlay = memo(({
   // Memoize overlay classes to prevent recreation on each render
   const overlayClasses = useMemo(() => 
     cn(
-      "fixed inset-0 bg-background/95 backdrop-blur-lg z-50 transition-all duration-300 will-change-transform",
+      "fixed inset-0 bg-gradient-to-b from-black/95 to-dark-900/95 backdrop-blur-xl z-50 transition-all duration-300 will-change-transform",
       "md:hidden flex flex-col",
       isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
     ),
@@ -77,8 +77,8 @@ const MobileSearchOverlay = memo(({
 
   return (
     <div className={overlayClasses}>
-      <div className="sticky top-0 border-b border-border/50">
-        <div className="container mx-auto px-4 h-14 flex items-center gap-3">
+      <div className="sticky top-0 border-b border-dark-800/30 bg-gradient-to-b from-black/80 to-dark-900/70 backdrop-blur-xl shadow-md">
+        <div className="container mx-auto px-4 h-16 flex items-center gap-3">
           <div className="flex-1">
             <SearchBar autoFocus />
           </div>
@@ -143,8 +143,8 @@ const NavBar = memo(() => {
   // Memoize header class names
   const headerClasses = useMemo(() => 
     cn(
-      "bg-dark-900/95 backdrop-blur-md sticky top-0 z-50 will-change-transform",
-      scrolled ? 'shadow-md' : 'border-b border-dark-800/60'
+      "bg-gradient-to-b from-black/90 to-dark-900/95 backdrop-blur-xl sticky top-0 z-50 will-change-transform shadow-lg",
+      scrolled ? 'shadow-md border-b border-dark-700/20' : 'border-b border-dark-800/30'
     ),
     [scrolled]
   );
@@ -153,7 +153,8 @@ const NavBar = memo(() => {
   const mobileMenuClasses = useMemo(() => 
     cn(
       "md:hidden overflow-hidden transition-all duration-300 ease-in-out will-change-height",
-      mobileMenuOpen ? "max-h-48 py-3" : "max-h-0"
+      "bg-gradient-to-b from-dark-900/90 to-black/80 backdrop-blur-md",
+      mobileMenuOpen ? "max-h-60 py-4 border-t border-dark-800/30 shadow-inner" : "max-h-0"
     ),
     [mobileMenuOpen]
   );
@@ -214,7 +215,7 @@ const NavBar = memo(() => {
               </button>
 
               {/* Desktop Navigation */}
-              <nav className="hidden md:flex items-center space-x-8">
+              <nav className="hidden md:flex items-center space-x-10">
                 {navigation.map((item) => (
                   <NavLink 
                     key={item.href}
@@ -239,7 +240,7 @@ const NavBar = memo(() => {
 
           {/* Mobile Navigation Menu */}
           <div className={mobileMenuClasses}>
-            <nav className="flex flex-col space-y-3">
+            <nav className="flex flex-col space-y-4 px-3">
               {navigation.map((item) => (
                 <NavLink 
                   key={item.href}
