@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useRoute, Link } from 'wouter';
+import { useRoute, useLocation, Link } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import AnimeCard from '../components/AnimeCard';
@@ -11,6 +11,7 @@ const GenrePage = () => {
   const [, params] = useRoute('/genre/:genre');
   const genre = params?.genre || 'all';
   const isAllGenres = genre === 'all';
+  const [location, setLocation] = useLocation();
   
   const [genres, setGenres] = useState<string[]>([]);
   const [filteredAnime, setFilteredAnime] = useState<Anime[]>([]);
@@ -79,7 +80,7 @@ const GenrePage = () => {
             genre="All Genres" 
             isActive={isAllGenres} 
             asButton 
-            onClick={() => window.location.href = '/genre/all'}
+            onClick={() => setLocation('/genre/all')}
           />
 
           {sortedGenres.map(g => (
@@ -88,7 +89,7 @@ const GenrePage = () => {
               genre={g} 
               isActive={decodeURIComponent(genre) === g}
               asButton
-              onClick={() => window.location.href = `/genre/${encodeURIComponent(g)}`}
+              onClick={() => setLocation(`/genre/${encodeURIComponent(g)}`)}
             />
           ))}
         </div>
