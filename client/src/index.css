@@ -231,7 +231,7 @@
 
   /* Volume slider responsiveness */
   .volume-slider-responsive {
-    @apply w-16 xs:w-18 sm:w-20 md:w-24;
+    @apply w-16 xs:w-16 sm:w-20 md:w-24;
   }
 
   /* Time display responsiveness */
