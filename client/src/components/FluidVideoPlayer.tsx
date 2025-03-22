@@ -8,7 +8,7 @@ import '../styles/fluid-player.css';
 // Declare the global fluidPlayer variable loaded from CDN
 declare global {
   interface Window {
-    fluidPlayer: (element: HTMLVideoElement, options: any) => any;
+    fluidPlayer: (element: string | HTMLVideoElement, options?: any) => any;
   }
 }
 

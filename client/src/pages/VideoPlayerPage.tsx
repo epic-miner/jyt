@@ -152,6 +152,7 @@ const VideoPlayerPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-black to-dark-950">
       <div className="max-w-7xl mx-auto w-full relative z-10">
+        {/* Main Fluid Player Component */}
         <FluidVideoPlayer 
           anime={anime}
           episode={currentEpisode}
@@ -160,6 +161,12 @@ const VideoPlayerPage = () => {
           hasNext={currentEpisodeIndex < episodes.length - 1}
           hasPrevious={currentEpisodeIndex > 0}
         />
+        
+        {/* Test Player for debugging */}
+        <div className="mt-6 mb-6 p-4 bg-gray-900 rounded-lg">
+          <h2 className="text-lg font-bold mb-4 text-white">Test Fluid Player</h2>
+          <TestFluidPlayer />
+        </div>
 
         <div className="p-4 space-y-4 md:space-y-6 rounded-t-xl backdrop-blur-sm bg-black/40 border-t border-white/5">
           {/* Episode Info */}
