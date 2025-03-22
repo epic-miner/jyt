@@ -11,6 +11,7 @@ interface TestPlayerProps {
   poster?: string;
   episode?: Episode; 
   onTimeUpdate?: (timeData: { currentTime: number; duration: number }) => void;
+  onEnded?: () => void;
 }
 
 // Add a type for Fluid Player global variable
@@ -20,7 +21,7 @@ interface FluidPlayerWindow extends Window {
 }
 declare const window: FluidPlayerWindow;
 
-const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episode, onTimeUpdate }) => {
+const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episode, onTimeUpdate, onEnded }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerInstanceRef = useRef<any>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
@@ -189,7 +190,7 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
             posterImageSize: 'cover',
             playButtonShowing: true,
             playPauseAnimation: true,
-            autoPlay: false,
+            autoPlay: true,
             mute: false,
             keyboardControl: true,
             doubleclickFullscreen: true,
@@ -266,6 +267,14 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
           });
         }
         
+        // Add ended event listener for auto-play next episode
+        if (onEnded && videoRef.current) {
+          videoRef.current.addEventListener('ended', () => {
+            console.log('Video ended, triggering next episode');
+            onEnded();
+          });
+        }
+        
         setIsPlayerReady(true);
       } catch (error) {
         console.error('Error initializing Fluid Player:', error);
@@ -303,7 +312,7 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         videoRef.current.onloadeddata = null;
       }
     };
-  }, [videoUrl, poster, episode, onTimeUpdate, loadFluidPlayerScript]);
+  }, [videoUrl, poster, episode, onTimeUpdate, onEnded, loadFluidPlayerScript]);
 
   // Handle mouse movement for controls visibility
   useEffect(() => {
@@ -339,9 +348,11 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         ref={videoRef}
         className="w-full aspect-video"
         controls
+        autoPlay
         playsInline
         poster={episode?.thumbnail_url || poster}
-        preload="metadata"
+        preload="auto"
+        onEnded={onEnded}
       >
         <source src={getCurrentVideoUrl()} type="video/mp4" />
         Your browser does not support the video tag.
