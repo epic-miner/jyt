@@ -3,7 +3,7 @@ import { cn } from '../lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { useRoute, useLocation } from 'wouter';
 import { Skeleton } from '@/components/ui/skeleton';
-import TestPlayer from '../components/TestPlayer'; // Assuming this component exists
+import TestPlayer from '../components/TestPlayer'; 
 import { fetchAnimeById, fetchEpisodeById, fetchEpisodesByAnimeId } from '../lib/api';
 import { updateWatchHistory, updateRecentlyWatchedAnime } from '../lib/cookies';
 import { Episode } from '@shared/types';
@@ -61,15 +61,15 @@ const VideoPlayerPage = () => {
         title: currentEpisode.title,
         episodeNumber: currentEpisode.episode_number,
         animeThumbnail: anime.thumbnail_url,
-        animeTitle: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, ''), // Remove tags from title
-        progress: 0, // Initial progress, will be updated by the video player
+        animeTitle: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, ''), 
+        progress: 0, 
         timestamp: new Date().getTime()
       });
 
       // Update recently watched anime
       updateRecentlyWatchedAnime({
         id: anime.id.toString(),
-        title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, ''), // Remove tags from title
+        title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, ''), 
         thumbnail_url: anime.thumbnail_url,
         genre: anime.genre,
         timestamp: new Date().getTime()
@@ -156,9 +156,8 @@ const VideoPlayerPage = () => {
         <div className="w-full flex flex-col bg-black">
           <div className="relative w-full bg-black overflow-hidden aspect-video">
             <TestPlayer 
-              videoUrl={currentEpisode.video_url_max_quality} // Or appropriate URL selection logic
-              title={currentEpisode.title}
-              poster={anime.thumbnail_url}
+              videoUrl={currentEpisode.video_url_max_quality} 
+              episode={currentEpisode}
               onTimeUpdate={(time) => {
                 if (!anime?.id || !currentEpisode?.id) return;
 

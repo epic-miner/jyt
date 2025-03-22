@@ -5,10 +5,11 @@ interface TestPlayerProps {
   videoUrl: string;
   title?: string;
   poster?: string;
+  episode?: any; // Add episode prop
   onTimeUpdate?: (timeData: { currentTime: number, duration: number }) => void;
 }
 
-const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, onTimeUpdate }) => {
+const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episode, onTimeUpdate }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerInstanceRef = useRef<any>(null);
   
@@ -123,7 +124,7 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, onTime
         className="w-full aspect-video"
         controls
         playsInline
-        poster={poster}
+        poster={episode?.thumbnail_url || poster}
       >
         <source src={videoUrl} type="video/mp4" />
         Your browser does not support the video tag.
