@@ -133,7 +133,7 @@ const VideoPlayerPage = () => {
   // Add custom Fluid Player refs at top level
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerInstanceRef = useRef<any>(null);
-  
+
   // If no episodes available
   if (!currentEpisode || episodes.length === 0) {
     return (
@@ -261,12 +261,12 @@ const VideoPlayerPage = () => {
 
         playerInstance.on('timeupdate', (time: number) => {
           if (!videoRef.current || !anime?.id || !currentEpisode?.id) return;
-          
+
           const currentVideoTime = videoRef.current.currentTime;
           const duration = videoRef.current.duration;
-          
+
           if (isNaN(duration) || duration <= 0) return;
-          
+
           // Calculate percentage progress and update watch history every 5 seconds
           if (Math.floor(currentVideoTime) % 5 === 0) {
             const progressPercentage = Math.floor((currentVideoTime / duration) * 100);
@@ -303,7 +303,7 @@ const VideoPlayerPage = () => {
                 button.remove();
               }
             });
-            
+
             // Remove from context menu if exists
             const contextMenuItems = document.querySelectorAll('.fluid_context_menu li');
             contextMenuItems.forEach(item => {
