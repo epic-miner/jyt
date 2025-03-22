@@ -877,8 +877,8 @@ const VideoPlayer = ({
       setShowControls(true);
       resetControlsTimeout();
     };
-    
-    // Save controls visibility preference
+
+    // Effect to save controls visibility preference
     useEffect(() => {
       try {
         localStorage.setItem('videoShowControls', showControls.toString());
@@ -967,7 +967,7 @@ const VideoPlayer = ({
     const newTime = pos * videoRef.current.duration;
 
     // Clear any pending seek operations
-    if (seekDebounceRef.current) {
+    ifif (seekDebounceRef.current) {
       clearTimeout(seekDebounceRef.current);
     }
 
@@ -1189,7 +1189,7 @@ const VideoPlayer = ({
                 )}
               </svg>
             </button>
-            
+
             {/* YouTube-style custom controls overlay */}
             <div className={cn(
               "absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent z-10 transition-opacity duration-300",
