@@ -882,8 +882,8 @@ const VideoPlayer = ({
     useEffect(() => {
       try {
         localStorage.setItem('videoShowControls', showControls.toString());
-      } catch (err) {
-        console.error('Failed to save controls preference:', err);
+      } catch (error) {
+        console.error('Failed to save controls preference to localStorage:', error);
       }
     }, [showControls]);
 
