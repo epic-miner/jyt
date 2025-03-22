@@ -266,7 +266,6 @@ const FluidVideoPlayer = ({
 
           // Logo options
           logo: {
-            imageUrl: '/assets/logo_optimized.png', // Update this to your actual logo path
             position: 'top left' as 'top left',
             clickUrl: null,
             opacity: 0.8,
