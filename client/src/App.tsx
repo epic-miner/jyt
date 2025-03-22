@@ -17,6 +17,7 @@ const VideoPlayerPage = lazy(() => import("./pages/VideoPlayerPage"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 const RecentlyWatched = lazy(() => import("./pages/RecentlyWatched"));
 const GenrePage = lazy(() => import("./pages/GenrePage"));
+const CategoryPage = lazy(() => import("./pages/CategoryPage"));
 const NotFound = lazy(() => import("./pages/not-found"));
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ function App() {
                   <Route path="/search" component={SearchResults} />
                   <Route path="/recently-watched" component={RecentlyWatched} />
                   <Route path="/genre/:genre" component={GenrePage} />
+                  <Route path="/category/:type" component={CategoryPage} />
                   <Route component={NotFound} />
                 </Switch>
               </PageTransition>
