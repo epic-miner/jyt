@@ -11,7 +11,8 @@ const GenrePage = () => {
   const [, params] = useRoute('/genre/:genre');
   const genre = params?.genre || 'all';
   const isAllGenres = genre === 'all';
-  const [location, setLocation] = useLocation();
+  const location = useLocation();
+  const setLocation = location[1];
   
   const [genres, setGenres] = useState<string[]>([]);
   const [filteredAnime, setFilteredAnime] = useState<Anime[]>([]);
@@ -121,11 +122,12 @@ const GenrePage = () => {
           <div className="text-4xl mb-4">🔍</div>
           <h3 className="text-xl font-semibold mb-2">No Anime Found</h3>
           <p className="text-slate-400 mb-6">We couldn't find any anime in the {decodeURIComponent(genre)} genre.</p>
-          <Link href="/genre/all">
-            <button className="bg-primary hover:bg-primary/90 transition px-6 py-2.5 rounded-lg text-white font-medium hover:scale-[1.02]">
-              Browse All Genres
-            </button>
-          </Link>
+          <button 
+            onClick={() => setLocation('/genre/all')} 
+            className="bg-primary hover:bg-primary/90 transition px-6 py-2.5 rounded-lg text-white font-medium hover:scale-[1.02]"
+          >
+            Browse All Genres
+          </button>
         </div>
       )}
     </div>
