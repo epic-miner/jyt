@@ -249,7 +249,7 @@ const FluidVideoPlayer = ({
           // Playback options
           playButtonShowing: true,
           playPauseAnimation: true,
-          autoPlay: false,
+          autoPlay: true,
           mute: false,
           keyboardControl: true,
           loop: false,
@@ -698,7 +698,7 @@ interface FluidVideoPlayerProps {
 const FluidVideoPlayer: React.FC<FluidVideoPlayerProps> = ({
   videoUrl,
   thumbnailUrl,
-  autoPlay = false,
+  autoPlay = true,
   id = "fluid-video-player",
   onReady
 }) => {

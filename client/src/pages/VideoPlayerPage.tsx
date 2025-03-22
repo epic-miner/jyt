@@ -80,14 +80,16 @@ const VideoPlayerPage = () => {
   const handleNextEpisode = useCallback(() => {
     if (currentEpisodeIndex < episodes.length - 1) {
       const nextEp = episodes[currentEpisodeIndex + 1];
-      setLocation(`/watch/${animeId}/${nextEp.id}`);
+      // Add timestamp to force reload and ensure autoplay works
+      setLocation(`/watch/${animeId}/${nextEp.id}?t=${Date.now()}`);
     }
   }, [currentEpisodeIndex, episodes, animeId, setLocation]);
 
   const handlePreviousEpisode = useCallback(() => {
     if (currentEpisodeIndex > 0) {
       const prevEp = episodes[currentEpisodeIndex - 1];
-      setLocation(`/watch/${animeId}/${prevEp.id}`);
+      // Add timestamp to force reload and ensure autoplay works
+      setLocation(`/watch/${animeId}/${prevEp.id}?t=${Date.now()}`);
     }
   }, [currentEpisodeIndex, episodes, animeId, setLocation]);
 
@@ -126,7 +128,7 @@ const VideoPlayerPage = () => {
 
   // If no episode is specified, redirect to first episode
   if (!currentEpisode && episodes.length > 0) {
-    setLocation(`/watch/${animeId}/${episodes[0].id}`);
+    setLocation(`/watch/${animeId}/${episodes[0].id}?t=${Date.now()}`);
     return null;
   }
 
@@ -234,7 +236,7 @@ const VideoPlayerPage = () => {
               {episodes.map((ep) => (
                 <button
                   key={ep.id}
-                  onClick={() => setLocation(`/watch/${animeId}/${ep.id}`)}
+                  onClick={() => setLocation(`/watch/${animeId}/${ep.id}?t=${Date.now()}`)}
                   className={cn(
                     "p-4 rounded-lg text-left transition-all duration-300 flex flex-col glass-card",
                     "hover:scale-[1.05] hover:shadow-lg hover:shadow-primary/20",
