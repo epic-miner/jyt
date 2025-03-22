@@ -3,14 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0" />
-  <meta name="theme-color" content="#000000" />
-  <meta name="color-scheme" content="dark" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />  <!-- Added for better mobile support -->
     <link rel="icon" type="image/jpeg" href="/favicon.jpg" />
     <title>9Anime - Watch Anime Online</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.css" />
+    <link rel="stylesheet" href="/src/styles/mobile-optimizations.css" />  <!-- Added mobile optimization stylesheet -->
     <script src="https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js"></script>
     <style>
       .glass-effect {
@@ -24,13 +26,13 @@
   </head>
   <body style="scroll-behavior: smooth;">
     <div id="root"></div>
-    
+
     <!-- Preload key resources -->
     <link rel="preload" href="/src/main.tsx" as="script" type="module" />
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style" />
-    
+
     <script type="module" src="/src/main.tsx"></script>
-    
+
     <!-- Responsive behavior enhancements -->
     <script>
       // Disable double-tap to zoom on mobile
@@ -39,17 +41,17 @@
           event.preventDefault();
         }
       }, { passive: false });
-      
+
       // Handle viewport height issues on mobile
       const setVH = () => {
         let vh = window.innerHeight * 0.01;
         document.documentElement.style.setProperty('--vh', `${vh}px`);
       };
-      
+
       window.addEventListener('resize', setVH);
       window.addEventListener('orientationchange', setVH);
       setVH();
-      
+
       // Ensure Fluid Player is properly loaded
       document.addEventListener('DOMContentLoaded', () => {
         // Check if Fluid Player script is loaded
@@ -63,7 +65,7 @@
             console.log('window.fluidPlayer now available:', typeof window.fluidPlayer === 'function');
           };
           document.head.appendChild(fluidPlayerScript);
-          
+
           // Also add the CSS
           const fluidPlayerCss = document.createElement('link');
           fluidPlayerCss.rel = 'stylesheet';

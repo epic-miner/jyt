@@ -1,4 +1,7 @@
 
+/* Import Enhanced Player Styles - moved to top to fix CSS warning */
+@import url('./styles/enhanced-player.css');
+
 /* Video player optimizations */
 .video-aspect-container {
   position: relative;
@@ -32,10 +35,6 @@
 .fluid_video_loading {
   background-color: rgba(0, 0, 0, 0.7) !important;
 }
-
-
-/* Import Enhanced Player Styles */
-@import url('./styles/enhanced-player.css');
 
 /* YouTube-style mobile tap indicators */
 .tap-indicator-left,

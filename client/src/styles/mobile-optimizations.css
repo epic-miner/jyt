@@ -1,0 +1,103 @@
+
+/* Mobile optimizations for MP4 video playback */
+
+/* Better touch targets for mobile */
+@media (max-width: 768px) {
+  /* Larger control buttons for easier tapping */
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button {
+    width: 40px !important;
+    height: 40px !important;
+    margin: 0 1px !important;
+  }
+  
+  /* Improve buffering performance */
+  .fluid_video_wrapper.fluid_player_layout_default video {
+    object-fit: contain !important;
+    /* Lower quality initially for faster loading */
+    filter: none !important;
+    backface-visibility: hidden !important;
+    transform: translateZ(0) !important;
+    will-change: transform !important;
+  }
+  
+  /* Bigger play button for easier tapping */
+  .fluid_initial_play {
+    transform: scale(1.5) !important;
+  }
+  
+  /* Smoother video controls on mobile */
+  .fluid_controls_container {
+    touch-action: manipulation !important;
+    user-select: none !important;
+  }
+  
+  /* Quick skip controls for mobile */
+  .fluid_video_wrapper:after {
+    content: '';
+    position: absolute;
+    width: 30%;
+    height: 70%;
+    top: 15%;
+    z-index: 10;
+    display: block;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  
+  /* Left side quick back control */
+  .fluid_video_wrapper.tapped-left:after {
+    content: '«';
+    left: 0;
+    text-align: center;
+    font-size: 32px;
+    color: white;
+    opacity: 0.7;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to right, rgba(0,0,0,0.3), transparent);
+  }
+  
+  /* Right side quick forward control */
+  .fluid_video_wrapper.tapped-right:after {
+    content: '»';
+    right: 0;
+    text-align: center;
+    font-size: 32px;
+    color: white;
+    opacity: 0.7;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(to left, rgba(0,0,0,0.3), transparent);
+  }
+  
+  /* Hide some controls on small screens */
+  .fluid_control_duration, .fluid_control_playback_rate, .fluid_control_download {
+    display: none !important;
+  }
+  
+  /* Improve mobile loading performance */
+  .fluid_video_wrapper {
+    -webkit-tap-highlight-color: transparent !important;
+  }
+  
+  /* Reduce buffer stutter */
+  video::-webkit-media-controls {
+    display: none !important;
+  }
+  
+  /* Optimize buffer sizes for mobile */
+  video {
+    webkit-playsinline: true !important;
+    playsinline: true !important;
+  }
+  
+  /* Enhance buffering UI */
+  .fluid_video_loading {
+    background-color: rgba(0, 0, 0, 0.5) !important;
+  }
+}
