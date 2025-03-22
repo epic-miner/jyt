@@ -346,13 +346,34 @@ const FluidVideoPlayer = ({
     };
 
     try {
-      // Check if fluidPlayer is available
-      console.log('Initializing Fluid Player with all features...');
+      // Extensive debugging to check if fluidPlayer is loaded and working
+      console.log('Attempting to initialize Fluid Player...');
+      console.log('window.fluidPlayer exists:', window.fluidPlayer ? 'YES' : 'NO');
+      console.log('window.fluidPlayer type:', typeof window.fluidPlayer);
+      console.log('video element exists:', videoRef.current ? 'YES' : 'NO');
+      
+      // Log all scripts loaded in the page to check for fluidplayer
+      const scripts = document.querySelectorAll('script');
+      console.log('All loaded scripts:');
+      scripts.forEach(script => {
+        console.log('Script src:', script.src);
+      });
       
       if (typeof window.fluidPlayer !== 'function') {
         console.error('Fluid Player not loaded correctly! window.fluidPlayer is:', window.fluidPlayer);
         // Use native video controls as fallback
         setIsPlayerReady(true);
+        
+        // Try to dynamically load Fluid Player
+        console.log('Attempting to dynamically load Fluid Player...');
+        const fluidPlayerScript = document.createElement('script');
+        fluidPlayerScript.src = 'https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js';
+        fluidPlayerScript.onload = () => {
+          console.log('Fluid Player script loaded dynamically!');
+          console.log('window.fluidPlayer now exists:', window.fluidPlayer ? 'YES' : 'NO');
+        };
+        document.head.appendChild(fluidPlayerScript);
+        
         return;
       }
       
