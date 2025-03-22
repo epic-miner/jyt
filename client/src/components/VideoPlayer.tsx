@@ -470,39 +470,22 @@ const VideoPlayer = ({
 
         case 'ArrowLeft': // Rewind 5 seconds
           e.preventDefault();
-          if (videoRef.current) {
-            videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 5);
-          }
+          skipBackward();
           break;
 
         case 'ArrowRight': // Fast forward 5 seconds
           e.preventDefault();
-          if (videoRef.current) {
-            videoRef.current.currentTime = Math.min(
-              videoRef.current.duration || 0,
-              videoRef.current.currentTime + 5
-            );
-          }
+          skipForward();
           break;
 
         case 'ArrowUp': // Volume up
           e.preventDefault();
-          if (videoRef.current) {
-            const newVolume = Math.min(1, volume + 0.05);
-            videoRef.current.volume = newVolume;
-            setVolume(newVolume);
-            setIsMuted(false);
-          }
+          adjustVolume(0.05);
           break;
 
         case 'ArrowDown': // Volume down
           e.preventDefault();
-          if (videoRef.current) {
-            const newVolume = Math.max(0, volume - 0.05);
-            videoRef.current.volume = newVolume;
-            setVolume(newVolume);
-            if (newVolume === 0) setIsMuted(true);
-          }
+          adjustVolume(-0.05);
           break;
 
         case '0':
@@ -516,10 +499,7 @@ const VideoPlayer = ({
         case '8':
         case '9': // Seek to percentage of video
           e.preventDefault();
-          if (videoRef.current) {
-            const percent = parseInt(e.key) * 10;
-            videoRef.current.currentTime = videoRef.current.duration * (percent / 100);
-          }
+          seekToPercentage(parseInt(e.key) * 10);
           break;
       }
     };
@@ -886,8 +866,17 @@ const VideoPlayer = ({
         });
       }
 
-      // Touch events for mobile
-      playerContainer.addEventListener('touchstart', showControlsTemporarily);
+      // YouTube-like controls for mobile
+      const cleanupTouchHandlers = setupYouTubeControls(
+        playerContainer,
+        skipBackward,
+        skipForward,
+        togglePlay,
+        setShowControls,
+        showControlsTemporarily
+      );
+
+      // Standard touch events for showing controls during scroll
       playerContainer.addEventListener('touchmove', showControlsTemporarily);
     }
 
@@ -917,7 +906,6 @@ const VideoPlayer = ({
         playerContainer.addEventListener('mouseenter', handleMouseEnter);
         playerContainer.addEventListener('mouseleave', handleMouseLeave);
       }
-      playerContainer.addEventListener('touchstart', showControlsTemporarily);
       playerContainer.addEventListener('touchmove', showControlsTemporarily);
     }
 
@@ -930,8 +918,11 @@ const VideoPlayer = ({
           playerContainer.removeEventListener('mouseenter', handleMouseEnter);
           playerContainer.removeEventListener('mouseleave', handleMouseLeave);
         }
-        playerContainer.removeEventListener('touchstart', showControlsTemporarily);
         playerContainer.removeEventListener('touchmove', showControlsTemporarily);
+
+        if (typeof cleanupTouchHandlers === 'function') {
+          cleanupTouchHandlers();
+        }
       }
 
       if (timeout) {
@@ -980,7 +971,7 @@ const VideoPlayer = ({
         data-fullscreen={isFullScreen ? "true" : "false"}
       >
         <AspectRatio ratio={16 / 9} className="w-full h-full">
-          <div className="w-full h-full relative flex justify-center items-center overflow-hidden"> {/* Centered video with overflow hidden */}
+          <div className="w-full h-full relative flex justify-center items-center overflow-hidden"> {/* Centered videowith overflow hidden */}
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
                 <div className="flex flex-col items-center">
@@ -1100,6 +1091,38 @@ const VideoPlayer = ({
               Your browser does not support the video tag.
             </video>
 
+            {/* YouTube-like play overlay when paused */}
+            {!isPlaying && !isLoading && (
+              <div 
+                className="absolute inset-0 flex items-center justify-center bg-black/30 z-10 cursor-pointer"
+                onClick={togglePlay}
+              >
+                <div className="rounded-full bg-black/50 p-4 transform transition-transform hover:scale-110">
+                  <Play size={isMobile ? 40 : 48} className="text-white" />
+                </div>
+              </div>
+            )}
+
+            {/* YouTube-like tap indicator for mobile */}
+            {isMobile && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-5">
+                <div id="tap-indicator-left" className="absolute left-1/4 top-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0">
+                  <div className="bg-white/20 rounded-full p-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                  </div>
+                </div>
+                <div id="tap-indicator-right" className="absolute right-1/4 top-1/2 transform translate-x-1/2 -translate-y-1/2 opacity-0">
+                  <div className="bg-white/20 rounded-full p-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* YouTube-style Title overlay at top */}
             <div className={cn(
               "absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 to-transparent text-white z-10 transition-opacity duration-500",
@@ -1164,6 +1187,7 @@ const VideoPlayer = ({
             )}>
               {/* Progress bar - YouTube style (thin line with hover effect) */}
               <div
+                ref={progressBarRef}
                 className={cn(
                   "relative w-full cursor-pointer flex items-center group",
                   isMobile ? "h-8 px-2 mb-0.5" : "h-2 px-4 mb-0" // Even larger touch target height on mobile for better interaction
@@ -1184,160 +1208,80 @@ const VideoPlayer = ({
                   }
                 }}
                 onMouseLeave={() => setTimePreview(null)}
+                onClick={(e) => {
+                  if (!progressBarRef.current || !videoRef.current) return;
+
+                  const progressBar = progressBarRef.current;
+                  const bounds = progressBar.getBoundingClientRect();
+                  const x = e.clientX - bounds.left;
+                  const width = bounds.width;
+                  const percentage = x / width;
+                  const newTime = duration * percentage;
+
+                  // Update video time
+                  videoRef.current.currentTime = newTime;
+                  setCurrentTime(newTime);
+                }}
+                onTouchMove={(e) => {
+                  if (!progressBarRef.current || !videoRef.current) return;
+                  e.stopPropagation();
+
+                  // Get touch position
+                  const touch = e.touches[0];
+                  const progressBar = progressBarRef.current;
+                  const bounds = progressBar.getBoundingClientRect();
+                  const x = touch.clientX - bounds.left;
+                  const width = bounds.width;
+
+                  // Clamp x within bounds
+                  const clampedX = Math.max(0, Math.min(x, width));
+                  const percentage = clampedX / width;
+
+                  const hoverTimeInSeconds = duration * percentage;
+                  setTimePreview({
+                    time: hoverTimeInSeconds,
+                    position: clampedX
+                  });
+                }}
+                onTouchEnd={(e) => {
+                  if (!progressBarRef.current || !videoRef.current || !timePreview) return;
+
+                  const newTime = timePreview.time;
+                  videoRef.current.currentTime = newTime;
+                  setCurrentTime(newTime);
+                  setTimePreview(null);
+                }}
               >
-                {/* Time preview tooltip (YouTube style) */}
-                {timePreview && (
+                {/* YouTube-style progress bar */}
+                <div className="yt-progress-bar">
+                  {/* Buffer progress */}
                   <div
-                    className="absolute bottom-6 bg-black/90 px-2 py-1 rounded text-xs text-white font-medium z-10 whitespace-nowrap pointer-events-none transform -translate-x-1/2"
-                    style={{ left: `${timePreview.position}%` }}
-                  >
-                    {formatTime(timePreview.time)}
-                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-black/90"></div>
-                  </div>
-                )}
-
-                {/* Expanded touch area for mobile - invisible but improves touch target */}
-                {isMobile && (
-                  <div className="absolute inset-x-0 -top-4 -bottom-4 cursor-pointer z-0" />
-                )}
-
-                {/* Progress bar track */}
-                <div
-                  ref={progressBarRef}
-                  className={cn(
-                    "w-full bg-gray-600/50 rounded-full relative transition-all duration-150 z-10",
-                    isMobile ? "h-2.5 my-2" : "h-full group-hover:h-3" // Increased vertical margin on mobile for easier touch targeting
-                  )}
-                  onClick={handleProgressBarClick}
-                  onMouseDown={(e) => {
-                    const handleDrag = (e: MouseEvent) => {
-                      if (!videoRef.current || !progressBarRef.current) return;
-                      const bounds = progressBarRef.current.getBoundingClientRect();
-                      const x = Math.max(0, Math.min(e.clientX - bounds.left, bounds.width));
-                      const percentage = x / bounds.width;
-                      videoRef.current.currentTime = percentage * videoRef.current.duration;
-                    };
-
-                    const handleDragEnd = () => {
-                      window.removeEventListener('mousemove', handleDrag);
-                      window.removeEventListener('mouseup', handleDragEnd);
-                    };
-
-                    window.addEventListener('mousemove', handleDrag);
-                    window.addEventListener('mouseup', handleDragEnd);
-                    handleDrag(e.nativeEvent);
-                  }}
-                  onTouchStart={(e) => {
-                    let rafId: number;
-                    let isDragging = false;
-                    let lastX = 0;
-                    let velocity = 0;
-                    let lastTimestamp = 0;
-                    let previewTime = videoRef.current?.currentTime || 0;
-
-                    const handleTouchDrag = (e: Event) => {
-                      e.preventDefault();
-                      const touchEvent = e as TouchEvent;
-                      const now = performance.now();
-                      const touch = touchEvent.touches[0];
-
-                      if (!isDragging) {
-                        isDragging = true;
-                        lastX = touch.clientX;
-                        lastTimestamp = now;
-                        if (videoRef.current && !videoRef.current.paused) {
-                          try {
-                            videoRef.current.pause();
-                          } catch (err) {
-                            // Ignore interruption errors
-                          }
-                        }
-                      }
-
-                      const deltaX = touch.clientX - lastX;
-                      const deltaTime = Math.max(1, now - lastTimestamp);
-                      velocity = deltaX / deltaTime;
-
-                      cancelAnimationFrame(rafId);
-                      rafId = requestAnimationFrame(() => {
-                        if (!videoRef.current || !progressBarRef.current) return;
-                        // Store touch data to use inside RAF
-                        const storedTouch = touchEvent.touches[0];
-                        const bounds = progressBarRef.current.getBoundingClientRect();
-                        const x = Math.max(0, Math.min(storedTouch.clientX - bounds.left, bounds.width));
-                        const percentage = x / bounds.width;
-                        const duration = videoRef.current.duration || 0;
-                        previewTime = percentage * duration;
-
-                        // Ensure all values are finite
-                        if (isFinite(previewTime) && isFinite(velocity) && isFinite(duration)) {
-                          const velocityFactor = Math.min(0.2, Math.abs(velocity) * 0.1);
-                          const smoothedTime = previewTime + (velocity > 0 ? velocityFactor : -velocityFactor);
-                          const finalTime = Math.max(0, Math.min(smoothedTime, duration));
-
-                          videoRef.current.currentTime = finalTime;
-                          lastX = storedTouch.clientX;
-                          lastTimestamp = now;
-                        }
-                      });
-                    };
-
-                    const handleTouchEnd = async () => {
-                      cancelAnimationFrame(rafId);
-                      if (isDragging && videoRef.current) {
-                        //                        // Ensure we have valid numbers
-                        const finalVelocity = isFinite(velocity) ? velocity * 0.5 : 0;
-                        const duration = videoRef.current.duration || 0;
-                        const safePreviewTime = isFinite(previewTime) ? previewTime : 0;
-                        const finalTime = Math.max(0, Math.min(
-                          safePreviewTime + finalVelocity,
-                          duration
-                        ));
-
-                        if (isFinite(finalTime)) {
-                          videoRef.current.currentTime = finalTime;
-                        }
-
-                        if (isPlaying && videoRef.current) {
-                          try {
-                            await videoRef.current.play();
-                          } catch (err) {
-                            // Ignore play interruption errors
-                          }
-                        }
-                      }
-                      window.removeEventListener('touchmove', handleTouchDrag);
-                      window.removeEventListener('touchend', handleTouchEnd);
-                    };
-
-                    window.addEventListener('touchmove', handleTouchDrag);
-                    window.addEventListener('touchend', handleTouchEnd);
-                    handleTouchDrag(e.nativeEvent);
-                  }}
-                >
-                  {/* Buffered progress */}
-                  <div
-                    className="absolute top-0 left-0 h-full bg-gray-500/70 rounded-full"
+                    className="yt-buffer-filled"
                     style={{ width: `${bufferProgress}%` }}
                   ></div>
 
-                  {/* Played progress - red for YouTube */}
+                  {/* Playback progress */}
                   <div
-                    className={cn(
-                      "absolute top-0 left-0 h-full rounded-full transition-all duration-150",
-                      isMobile ? "bg-red-500" : "bg-red-600 group-hover:bg-red-500" // Brighter color on mobile
-                    )}
-                    style={{ width: `${(videoRef.current?.currentTime || 0) / (videoRef.current?.duration || 1) * 100}%` }}
-                  >
-                    {/* Thumb dot - larger on hover or mobile */}
-                    <div className={cn(
-                      "absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 rounded-full transition-all duration-150",
-                      isMobile 
-                        ? "w-4 h-4 bg-red-500 shadow-lg" // Larger and always visible on mobile
-                        : "w-0 h-3 bg-red-600 group-hover:w-4 group-hover:h-4 group-hover:bg-red-500 group-hover:shadow-md" // Show on hover on desktop
-                    )}></div>
-                  </div>
+                    className="yt-progress-filled"
+                    style={{ width: `${(currentTime / duration) * 100}%` }}
+                  ></div>
+
+                  {/* Playback handle/thumb */}
+                  <div
+                    className="yt-progress-handle"
+                    style={{ left: `${(currentTime / duration) * 100}%` }}
+                  ></div>
                 </div>
+
+                {/* Preview time tooltip */}
+                {timePreview && (
+                  <div 
+                    className="yt-time-tooltip"
+                    style={{ left: `${timePreview.position}px` }}
+                  >
+                    {formatTime(timePreview.time)}
+                  </div>
+                )}
               </div>
 
               {/* Control buttons row */}
@@ -1540,3 +1484,66 @@ const VideoPlayer = ({
 
 // Optimize with memo to prevent unnecessary re-renders
 export default memo(VideoPlayer);
+
+const QUALITY_OPTIONS = {
+  'auto': 'Auto',
+  '1080p': '1080p',
+  '720p': '720p',
+  '480p': '480p'
+};
+
+const setupYouTubeControls = (
+  playerContainer: HTMLDivElement | null,
+  skipBackward: () => void,
+  skipForward: () => void,
+  togglePlayPause: () => void,
+  setShowControls: (show: boolean) => void,
+  showControlsTemporarily: () => void
+): (() => void) | undefined => {
+  if (!playerContainer || !isMobile) return;
+
+  const handleTouchStart = (e: TouchEvent) => {
+    const touch = e.touches[0];
+    const rect = playerContainer.getBoundingClientRect();
+
+    if (touch.clientX < rect.width / 2) {
+      showTapIndicator('left');
+      skipBackward();
+    } else {
+      showTapIndicator('right');
+      skipForward();
+    }
+
+    setShowControls(true);
+  };
+
+  playerContainer.addEventListener('touchstart', handleTouchStart);
+
+  return () => {
+    playerContainer.removeEventListener('touchstart', handleTouchStart);
+  };
+};
+
+const showTapIndicator = (side: 'left' | 'right') => {
+  const indicator = document.getElementById(`tap-indicator-${side}`);
+  if (indicator) {
+    indicator.classList.add('animate-tap-indicator');
+    setTimeout(() => {
+      indicator.classList.remove('animate-tap-indicator');
+    }, 500);
+  }
+};
+
+const adjustVolume = (amount: number) => {
+  if (!videoRef.current) return;
+  const newVolume = Math.min(1, Math.max(0, volume + amount));
+  videoRef.current.volume = newVolume;
+  setVolume(newVolume);
+  setIsMuted(newVolume === 0);
+};
+
+
+const seekToPercentage = (percentage: number) => {
+  if (!videoRef.current) return;
+  videoRef.current.currentTime = videoRef.current.duration * (percentage / 100);
+};

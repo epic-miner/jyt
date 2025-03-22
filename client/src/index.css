@@ -750,3 +750,221 @@ html {
 .landscape-fullscreen .video-controls {
   z-index: 10000 !important;
 }
+
+/* YouTube-like Video Player Styles */
+.video-player-youtube {
+  --yt-red: #ff0000;
+  --yt-light-red: #ff4d4d;
+  --yt-progress-color: var(--yt-red);
+  --yt-buffer-color: rgba(255, 255, 255, 0.4);
+  --yt-progress-height: 3px;
+  --yt-progress-hover-height: 5px;
+  --yt-controls-bg: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+/* YouTube progress bar styling */
+.yt-progress-container {
+  position: relative;
+  width: 100%;
+  height: 20px; /* Larger hit area */
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+
+.yt-progress-bar {
+  position: relative;
+  height: var(--yt-progress-height);
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  transition: height 0.2s ease;
+}
+
+.yt-progress-container:hover .yt-progress-bar {
+  height: var(--yt-progress-hover-height);
+}
+
+.yt-progress-filled {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: var(--yt-progress-color);
+  border-radius: 2px;
+  transition: width 0.1s linear;
+}
+
+.yt-buffer-filled {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: var(--yt-buffer-color);
+  border-radius: 2px;
+  transition: width 0.1s linear;
+}
+
+.yt-progress-handle {
+  position: absolute;
+  top: 50%;
+  height: 12px;
+  width: 12px;
+  background-color: var(--yt-progress-color);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.1s ease;
+  z-index: 2;
+}
+
+.yt-progress-container:hover .yt-progress-handle {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.yt-time-tooltip {
+  position: absolute;
+  top: -30px;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-size: 12px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.yt-progress-container:hover .yt-time-tooltip {
+  opacity: 1;
+}
+
+/* YouTube controls styling */
+.yt-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 12px 10px;
+  display: flex;
+  flex-direction: column;
+  background: var(--yt-controls-bg);
+  transition: opacity 0.3s ease;
+  z-index: 20;
+}
+
+.yt-controls-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.yt-left-controls, .yt-right-controls {
+  display: flex;
+  align-items: center;
+}
+
+.yt-control-button {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 8px;
+  margin: 0 2px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.yt-control-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.yt-volume-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.yt-volume-slider {
+  width: 0;
+  overflow: hidden;
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.yt-volume-container:hover .yt-volume-slider {
+  width: 80px;
+}
+
+/* YouTube settings menu styling */
+.yt-settings-menu {
+  position: absolute;
+  bottom: 60px;
+  right: 10px;
+  background-color: rgba(33, 33, 33, 0.95);
+  border-radius: 4px;
+  overflow: hidden;
+  width: 250px;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.yt-settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.yt-settings-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+  .yt-controls {
+    padding-bottom: 15px;
+  }
+  
+  .yt-control-button {
+    padding: 6px;
+    margin: 0 1px;
+  }
+  
+  .yt-settings-menu {
+    width: 200px;
+    max-height: 300px;
+  }
+  
+  .yt-volume-container:hover .yt-volume-slider {
+    width: 60px;
+  }
+}
+
+/* Tap-optimized controls for mobile */
+@media (max-width: 640px) {
+  .yt-progress-container {
+    height: 30px; /* Even larger hit area for mobile */
+  }
+  
+  .yt-progress-bar {
+    height: 4px; /* Slightly larger for mobile by default */
+  }
+  
+  .yt-progress-container:hover .yt-progress-bar {
+    height: 6px;
+  }
+  
+  .yt-progress-handle {
+    height: 16px;
+    width: 16px;
+  }
+}
