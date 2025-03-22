@@ -90,44 +90,18 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
   };
 
   useEffect(() => {
-    let attemptCount = 0;
-    const maxAttempts = 5;
-    let initTimeout: NodeJS.Timeout;
-
     const initPlayer = () => {
-      // Clear any existing timeouts
-      if (initTimeout) clearTimeout(initTimeout);
-      
-      // Check if FluidPlayer is available
       if (!videoRef.current || typeof window.fluidPlayer !== 'function') {
-        console.log(`Video element or fluidPlayer not available yet (attempt ${attemptCount + 1}/${maxAttempts})`);
-        
-        // Increase retry time with each attempt
-        const retryDelay = Math.min(200 * (attemptCount + 1), 1500);
-        
-        if (attemptCount < maxAttempts) {
-          attemptCount++;
-          initTimeout = setTimeout(initPlayer, retryDelay);
-          return;
-        } else {
-          console.error('Failed to initialize FluidPlayer after multiple attempts. Try refreshing the page.');
-          return;
-        }
+        console.log('Video element or fluidPlayer not available yet');
+        setTimeout(initPlayer, 200);
+        return;
       }
 
       try {
-        // Clean up any existing player instances
         if (playerInstanceRef.current) {
-          try {
-            playerInstanceRef.current.destroy();
-            playerInstanceRef.current = null;
-          } catch (destroyError) {
-            console.error('Error destroying previous player instance:', destroyError);
-          }
+          playerInstanceRef.current.destroy();
         }
 
-        console.log('Initializing FluidPlayer...');
-        
         const playerOptions = {
           layoutControls: {
             primaryColor: "#ef4444",
@@ -149,6 +123,7 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
               animated: true
             },
             logo: {
+              imageUrl: '/assets/logo_optimized.png',
               position: 'top left',
               clickUrl: null,
               opacity: 0.8,
@@ -167,14 +142,9 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         // Initialize player
         const videoId = videoRef.current.id;
         playerInstanceRef.current = window.fluidPlayer(videoId, playerOptions);
-        console.log('FluidPlayer successfully initialized');
 
-        // Register player events for debugging
-        playerInstanceRef.current.on('error', (err: any) => console.error('Player error:', err));
-        playerInstanceRef.current.on('ready', () => console.log('Player ready'));
-        
         // Add time update event listener
-        if (onTimeUpdate && videoRef.current) {
+        if (onTimeUpdate) {
           videoRef.current.addEventListener('timeupdate', () => {
             onTimeUpdate({
               currentTime: videoRef.current?.currentTime || 0,
@@ -184,43 +154,16 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         }
       } catch (error) {
         console.error('Error initializing Fluid Player:', error);
-        
-        // Try one more time after a delay if there was an error
-        if (attemptCount < maxAttempts) {
-          attemptCount++;
-          console.log(`Retrying player initialization (attempt ${attemptCount}/${maxAttempts})...`);
-          initTimeout = setTimeout(initPlayer, 800);
-        }
       }
     };
 
-    // Start initialization
     initPlayer();
-
-    // Add a manual retry button event listener
-    const retryButton = document.getElementById('retry-player-button');
-    const handleRetryClick = () => {
-      console.log('Manual retry requested');
-      attemptCount = 0;
-      initPlayer();
-    };
-    
-    if (retryButton) {
-      retryButton.addEventListener('click', handleRetryClick);
-    }
 
     // Cleanup
     return () => {
-      if (initTimeout) clearTimeout(initTimeout);
-      
-      if (retryButton) {
-        retryButton.removeEventListener('click', handleRetryClick);
-      }
-      
       if (playerInstanceRef.current) {
         try {
           playerInstanceRef.current.destroy();
-          playerInstanceRef.current = null;
         } catch (error) {
           console.error('Error destroying player:', error);
         }
@@ -281,39 +224,6 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
           <source src={getCurrentVideoUrl()} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
-
-        {/* Retry button for manual player initialization */}
-        <button
-          id="retry-player-button"
-          className="absolute top-2 left-2 bg-black bg-opacity-70 text-white px-3 py-1 rounded-md text-sm z-10 hover:bg-opacity-90"
-          onClick={(e) => {
-            e.stopPropagation();
-            console.log('Manually reinitializing player');
-            if (playerInstanceRef.current) {
-              try {
-                playerInstanceRef.current.destroy();
-              } catch (error) {
-                console.error('Error destroying player:', error);
-              }
-              playerInstanceRef.current = null;
-            }
-            if (videoRef.current && typeof window.fluidPlayer === 'function') {
-              setTimeout(() => {
-                if (videoRef.current) {
-                  playerInstanceRef.current = window.fluidPlayer(videoRef.current.id, {
-                    layoutControls: {
-                      primaryColor: "#ef4444",
-                      fillToContainer: true,
-                      posterImage: episode?.thumbnail_url || poster
-                    }
-                  });
-                }
-              }, 100);
-            }
-          }}
-        >
-          Retry Player
-        </button>
 
         {/* Quality selection button */}
         <div className="absolute bottom-16 right-4 z-10">

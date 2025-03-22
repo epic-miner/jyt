@@ -55,6 +55,7 @@ const TestFluidPlayer = () => {
               ]
             },
             logo: {
+              imageUrl: '/assets/logo_optimized.png',
               position: 'top left',
               clickUrl: null,
               opacity: 0.8,
