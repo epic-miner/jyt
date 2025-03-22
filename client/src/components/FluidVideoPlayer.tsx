@@ -5,11 +5,132 @@ import { updateWatchHistory } from '../lib/cookies';
 // Add custom styles
 import '../styles/fluid-player.css';
 
-// Declare the global fluidPlayer variable loaded from CDN
+// Declare the global fluidPlayer variable loaded from CDN with more specific types
 declare global {
   interface Window {
-    fluidPlayer: (element: string | HTMLVideoElement, options?: any) => any;
+    fluidPlayer: (element: string | HTMLVideoElement, options?: FluidPlayerOptions) => FluidPlayerInstance;
   }
+}
+
+// Types for Fluid Player
+interface FluidPlayerOptions {
+  layoutControls?: {
+    primaryColor?: string;
+    fillToContainer?: boolean;
+    posterImage?: string;
+    posterImageSize?: 'auto' | 'cover' | 'contain';
+    playButtonShowing?: boolean;
+    playPauseAnimation?: boolean;
+    autoPlay?: boolean;
+    mute?: boolean;
+    keyboardControl?: boolean;
+    loop?: boolean;
+    allowDownload?: boolean;
+    playbackRateEnabled?: boolean;
+    allowTheatre?: boolean;
+    controlBar?: {
+      autoHide?: boolean;
+      autoHideTimeout?: number;
+      animated?: boolean;
+    };
+    contextMenu?: {
+      controls?: boolean;
+      links?: Array<{
+        href: string;
+        label: string;
+      }>;
+    };
+    logo?: {
+      imageUrl: string | null;
+      position?: 'top left' | 'top right' | 'bottom left' | 'bottom right';
+      clickUrl?: string | null;
+      opacity?: number;
+      mouseOverImageUrl?: string | null;
+      imageMargin?: string;
+      hideWithControls?: boolean;
+      showOverAds?: boolean;
+    };
+    miniPlayer?: {
+      enabled?: boolean;
+      width?: number;
+      height?: number;
+      widthMobile?: number;
+      placeholderText?: string;
+      position?: string;
+      autoToggle?: boolean;
+    };
+    htmlOnPauseBlock?: {
+      html: string | null;
+      height?: number | null;
+      width?: number | null;
+    };
+    theatreAdvanced?: {
+      theatreElement?: string;
+      classToApply?: string;
+    };
+    persistentSettings?: {
+      volume?: boolean;
+      quality?: boolean;
+      speed?: boolean;
+      theatre?: boolean;
+    };
+    controlForwardBackward?: {
+      show?: boolean;
+      doubleTapMobile?: boolean;
+    };
+    captions?: {
+      play?: string;
+      pause?: string;
+      mute?: string;
+      unmute?: string;
+      fullscreen?: string;
+      exitFullscreen?: string;
+    };
+    showCardBoardView?: boolean;
+    roundedCorners?: number;
+    autoRotateFullScreen?: boolean;
+  };
+  vastOptions?: {
+    adList?: Array<any>;
+    adClickable?: boolean;
+    showProgressbarMarkers?: boolean;
+    adCTAText?: boolean | string;
+    adCTATextPosition?: string;
+    vastTimeout?: number;
+    vastAdvanced?: {
+      vastLoadedCallback?: () => void;
+      noVastVideoCallback?: () => void;
+      vastVideoSkippedCallback?: () => void;
+      vastVideoEndedCallback?: () => void;
+    };
+  };
+}
+
+// Player instance returned by fluidPlayer()
+interface FluidPlayerInstance {
+  play: () => void;
+  pause: () => void;
+  skipTo: (seconds: number) => void;
+  setPlaybackSpeed: (speed: number) => void;
+  setVolume: (volume: number) => void;
+  toggleFullScreen: (shouldToggle?: boolean) => void;
+  toggleMiniPlayer: (shouldToggle?: boolean) => void;
+  destroy: () => void;
+  dashInstance: () => any | null;
+  hlsInstance: () => any | null;
+  on: (event: string, callback: (eventInfo?: any, additionalInfo?: any) => void) => boolean;
+}
+
+// Event info types for better type checking
+interface PlayerEventInfo {
+  type?: string;
+  mediaSourceType?: 'source' | 'preRoll' | 'midRoll' | 'postRoll';
+}
+
+interface MiniPlayerToggleEvent extends CustomEvent {
+  detail: {
+    isToggledOn: boolean;
+  };
 }
 
 interface FluidVideoPlayerProps {
@@ -79,7 +200,7 @@ const FluidVideoPlayer = ({
     return sources;
   };
 
-  // Initialize Fluid Player
+  // Initialize Fluid Player with enhanced features
   useEffect(() => {
     if (!videoRef.current) return;
 
@@ -93,65 +214,199 @@ const FluidVideoPlayer = ({
       playerInstanceRef.current = null;
     }
 
-    // Get the video URL based on available qualities
-    const videoUrl = getVideoUrl();
-    console.log('Using video URL:', videoUrl);
-
-    // Set the source directly for now (we'll add quality switching later)
-    if (videoRef.current) {
-      videoRef.current.src = videoUrl;
-    }
-
-    // Minimal player configuration to start with
-    const basicOptions = {
+    // Get the video sources for quality options
+    const videoSources = getVideoSources();
+    
+    // Enhanced player configuration with all available features
+    const enhancedOptions: FluidPlayerOptions = {
       layoutControls: {
-        primaryColor: "#ef4444",
+        // Appearance
+        primaryColor: "#ef4444", // Primary accent color
         fillToContainer: true,
+        posterImage: episode.thumbnail_url || anime.thumbnail_url,
+        posterImageSize: 'cover' as 'cover', // Type assertion to match the expected type
+        
+        // Playback options
+        playButtonShowing: true,
+        playPauseAnimation: true,
         autoPlay: false,
+        mute: false,
+        keyboardControl: true,
+        loop: false,
+        allowDownload: true,
+        playbackRateEnabled: true,
+        allowTheatre: true,
+        
+        // Control bar options
+        controlBar: {
+          autoHide: true,
+          autoHideTimeout: 3,
+          animated: true
+        },
+        
+        // Logo options
+        logo: {
+          imageUrl: '/assets/logo_optimized.png', // Update this to your actual logo path
+          position: 'top left' as 'top left',
+          clickUrl: null,
+          opacity: 0.8,
+          mouseOverImageUrl: null,
+          imageMargin: '10px',
+          hideWithControls: true,
+          showOverAds: false
+        },
+        
+        // Context menu options
+        contextMenu: {
+          controls: true,
+          links: [
+            {
+              href: '/',
+              label: 'Back to Home'
+            },
+            {
+              href: `/anime/${anime.id}`,
+              label: `View ${anime.title}`
+            }
+          ]
+        },
+        
+        // Mini player support
+        miniPlayer: {
+          enabled: true,
+          width: 400,
+          height: 225,
+          widthMobile: 280,
+          placeholderText: "Playing in mini player",
+          position: "bottom right" as "bottom right",
+          autoToggle: false
+        },
+
+        // On-pause overlay
+        htmlOnPauseBlock: {
+          html: `
+            <div class="fluid-player-pause-banner">
+              <div style="display: flex; align-items: center;">
+                <img src="${anime.thumbnail_url}" style="width: 60px; height: 60px; border-radius: 4px; margin-right: 10px;">
+                <div>
+                  <div style="font-weight: bold;">${anime.title}</div>
+                  <div>Episode ${episode.episode_number}: ${episode.title}</div>
+                </div>
+              </div>
+            </div>
+          `,
+          height: null,
+          width: null
+        },
+        
+        // Captions
+        captions: {
+          play: 'Play',
+          pause: 'Pause',
+          mute: 'Mute',
+          unmute: 'Unmute',
+          fullscreen: 'Fullscreen',
+          exitFullscreen: 'Exit Fullscreen'
+        },
+        
+        // Advanced theater mode
+        theatreAdvanced: {
+          theatreElement: 'fluid-player-container',
+          classToApply: 'theatre-mode'
+        },
+        
+        // Persistent settings
+        persistentSettings: {
+          volume: true,
+          quality: true,
+          speed: true,
+          theatre: true
+        },
+        
+        // Controls for forward/backward
+        controlForwardBackward: {
+          show: true,
+          doubleTapMobile: true
+        },
+        
+        // Mobile enhancements
+        showCardBoardView: false,
+        roundedCorners: 8,
+        autoRotateFullScreen: true
+      },
+      
+      // VAST (Video Ad Serving Template) options - enabled but no ads by default
+      vastOptions: {
+        adList: [],
+        adClickable: true,
+        showProgressbarMarkers: false,
+        adCTAText: false,
+        adCTATextPosition: 'bottom right'
       }
     };
 
     try {
-      // Check if fluidPlayer is available - this should log what's in the window
-      console.log('window.fluidPlayer available:', typeof window.fluidPlayer === 'function');
+      // Check if fluidPlayer is available
+      console.log('Initializing Fluid Player with all features...');
       
       if (typeof window.fluidPlayer !== 'function') {
         console.error('Fluid Player not loaded correctly! window.fluidPlayer is:', window.fluidPlayer);
-        // If fluidPlayer isn't available, we'll just use the native video controls
+        // Use native video controls as fallback
         setIsPlayerReady(true);
         return;
       }
       
-      // Initialize with minimal options first
-      const fpInstance = window.fluidPlayer('anime-player', basicOptions);
-      console.log('Fluid Player instance created:', fpInstance);
+      // Initialize with enhanced options
+      const fpInstance = window.fluidPlayer('anime-player', enhancedOptions);
+      console.log('Fluid Player instance created successfully');
 
-      // Store the player instance for later use
+      // Store player instance for later control
       playerInstanceRef.current = fpInstance;
-
-      // Setup event listeners on the video element
-      if (videoRef.current) {
-        // When playback starts
-        videoRef.current.addEventListener('play', startWatchHistoryTracking);
-        
-        // When the time updates
-        videoRef.current.addEventListener('timeupdate', updateWatchProgress);
-        
-        // When the video ends
-        videoRef.current.addEventListener('ended', () => {
-          clearWatchHistoryTracking();
-          if (hasNext) {
-            setTimeout(() => {
-              onNextEpisode();
-            }, 1000);
-          }
-        });
-      }
+      
+      // Register event listeners for advanced functionality
+      fpInstance.on('play', (eventInfo: PlayerEventInfo) => {
+        console.log('Video played', eventInfo);
+        startWatchHistoryTracking();
+      });
+      
+      fpInstance.on('pause', (eventInfo: PlayerEventInfo) => {
+        console.log('Video paused', eventInfo);
+      });
+      
+      fpInstance.on('timeupdate', (time: number, eventInfo: PlayerEventInfo) => {
+        updateWatchProgress();
+      });
+      
+      fpInstance.on('ended', (eventInfo: PlayerEventInfo) => {
+        console.log('Video ended', eventInfo);
+        clearWatchHistoryTracking();
+        if (hasNext) {
+          setTimeout(() => {
+            onNextEpisode();
+          }, 1500);
+        }
+      });
+      
+      fpInstance.on('seeked', (eventInfo: PlayerEventInfo) => {
+        console.log('Video seeked', eventInfo);
+      });
+      
+      fpInstance.on('theatreModeOn', (event: Event, eventInfo: PlayerEventInfo) => {
+        console.log('Theatre mode enabled', eventInfo);
+      });
+      
+      fpInstance.on('theatreModeOff', (event: Event, eventInfo: PlayerEventInfo) => {
+        console.log('Theatre mode disabled', eventInfo);
+      });
+      
+      fpInstance.on('miniPlayerToggle', (event: MiniPlayerToggleEvent, eventInfo: PlayerEventInfo) => {
+        console.log('Mini player toggled:', event.detail.isToggledOn);
+      });
 
       setIsPlayerReady(true);
     } catch (error) {
       console.error('Error initializing Fluid Player:', error);
-      // Even if Fluid Player fails, we can still use the native video
+      // Fallback to native video if Fluid Player fails
       setIsPlayerReady(true);
     }
 
@@ -159,12 +414,6 @@ const FluidVideoPlayer = ({
     return () => {
       clearWatchHistoryTracking();
       try {
-        if (videoRef.current) {
-          videoRef.current.removeEventListener('play', startWatchHistoryTracking);
-          videoRef.current.removeEventListener('timeupdate', updateWatchProgress);
-          videoRef.current.removeEventListener('ended', onNextEpisode);
-        }
-        
         if (playerInstanceRef.current) {
           playerInstanceRef.current.destroy();
           playerInstanceRef.current = null;
