@@ -104,6 +104,22 @@ interface FluidPlayerOptions {
       vastVideoEndedCallback?: () => void;
     };
   };
+  modules?: {
+    configureDash?: (options: any) => any;
+    onBeforeInitDash?: (dash: any) => void;
+    onAfterInitDash?: (dash: any) => void;
+    configureHls?: (options: any) => any;
+    onBeforeInitHls?: (hls: any) => void;
+    onAfterInitHls?: (hls: any) => void;
+  };
+  captions?: {
+    play?: string;
+    pause?: string;
+    mute?: string;
+    unmute?: string;
+    fullscreen?: string;
+    exitFullscreen?: string;
+  };
 }
 
 // Player instance returned by fluidPlayer()
@@ -347,7 +363,7 @@ const FluidVideoPlayer = ({
       // Modules configuration to enable HLS and DASH streaming with quality selection
       modules: {
         // HLS configuration for better streaming
-        configureHls: (options) => {
+        configureHls: (options: any) => {
           // Set up HLS options for optimal playback
           return {
             ...options,
@@ -359,15 +375,15 @@ const FluidVideoPlayer = ({
             startLevel: -1
           };
         },
-        onBeforeInitHls: (hls) => {
+        onBeforeInitHls: (hls: any) => {
           console.log('HLS about to initialize for streaming');
         },
-        onAfterInitHls: (hls) => {
+        onAfterInitHls: (hls: any) => {
           console.log('HLS initialized for streaming');
         },
         
         // DASH configuration
-        configureDash: (options) => {
+        configureDash: (options: any) => {
           // Set up DASH options for optimal playback
           return {
             ...options,
@@ -378,10 +394,10 @@ const FluidVideoPlayer = ({
             }
           };
         },
-        onBeforeInitDash: (dash) => {
+        onBeforeInitDash: (dash: any) => {
           console.log('DASH about to initialize for streaming');
         },
-        onAfterInitDash: (dash) => {
+        onAfterInitDash: (dash: any) => {
           console.log('DASH initialized for streaming');
         }
       }

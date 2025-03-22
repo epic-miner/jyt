@@ -33,6 +33,10 @@ interface FluidPlayerTestOptions {
   modules?: {
     configureDash?: (options: any) => any;
     configureHls?: (options: any) => any;
+    onBeforeInitDash?: (dash: any) => void;
+    onAfterInitDash?: (dash: any) => void;
+    onBeforeInitHls?: (hls: any) => void;
+    onAfterInitHls?: (hls: any) => void;
   };
 }
 
@@ -102,10 +106,10 @@ const TestPlayerPage = () => {
           },
           // Modules configuration to properly handle streaming/quality options
           modules: {
-            configureDash: (options) => {
+            configureDash: (options: any) => {
               return options;
             },
-            configureHls: (options) => {
+            configureHls: (options: any) => {
               return options;
             }
           }
