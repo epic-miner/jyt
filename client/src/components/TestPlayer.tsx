@@ -5,92 +5,82 @@ interface TestPlayerProps {
   videoUrl: string;
   title?: string;
   poster?: string;
-  episode?: any; // Add episode prop
+  episode?: any; // Episode data
+  videoSources?: {url: string, label: string, type: string, quality?: string}[]; // Add video sources array
   onTimeUpdate?: (timeData: { currentTime: number, duration: number }) => void;
 }
 
-const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episode, onTimeUpdate }) => {
+const TestPlayer: React.FC<TestPlayerProps> = ({ 
+  videoUrl, 
+  title, 
+  poster, 
+  episode, 
+  videoSources = [], 
+  onTimeUpdate 
+}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerInstanceRef = useRef<any>(null);
   
   useEffect(() => {
-    console.log('TestPlayer - Component mounted');
-    
-    // Wait for window.fluidPlayer to be available
-    const checkForFluidPlayer = () => {
-      console.log('Checking for window.fluidPlayer availability');
-      
-      if (typeof window.fluidPlayer === 'function') {
-        console.log('Fluid Player is available, initializing player...');
-        initFluidPlayer();
-      } else {
-        console.log('Fluid Player not available yet, trying again in 500ms');
-        setTimeout(checkForFluidPlayer, 500);
-      }
-    };
-    
-    // Initialize the player
-    const initFluidPlayer = () => {
-      if (!videoRef.current) {
-        console.error('Video element reference is not available');
+    const initPlayer = () => {
+      if (!videoRef.current || typeof window.fluidPlayer !== 'function') {
+        console.log('Video element or fluidPlayer not available yet');
+        setTimeout(initPlayer, 200);
         return;
       }
-      
+
       try {
-        // Enhanced configuration with streaming support
-        const playerInstance = window.fluidPlayer(videoRef.current.id, {
+        if (playerInstanceRef.current) {
+          playerInstanceRef.current.destroy();
+        }
+
+        const playerOptions = {
           layoutControls: {
             primaryColor: "#ef4444",
             fillToContainer: true,
+            posterImage: episode?.thumbnail_url || poster,
+            posterImageSize: 'cover',
+            playButtonShowing: true,
+            playPauseAnimation: true,
             autoPlay: false,
+            mute: false,
+            keyboardControl: true,
+            loop: false,
+            allowDownload: false,
             playbackRateEnabled: true,
             allowTheatre: true,
-            miniPlayer: {
-              enabled: true,
-              width: 400,
-              widthMobile: 280,
-              placeholderText: "Playing in Mini Player",
-              position: "bottom right"
-            },
             controlBar: {
               autoHide: true,
               autoHideTimeout: 3,
               animated: true
             },
             logo: {
-              imageUrl: null,
-              position: "top left",
+              imageUrl: '/assets/logo_optimized.png',
+              position: 'top left',
               clickUrl: null,
-              opacity: 1
+              opacity: 0.8,
+              mouseOverImageUrl: null,
+              imageMargin: '10px',
+              hideWithControls: true,
+              showOverAds: false
             },
             contextMenu: {
-              controls: true
-            }
-          },
-          modules: {
-            configureDash: (options: any) => {
-              return options;
-            },
-            configureHls: (options: any) => {
-              return options;
+              controls: true,
+              links: []
             }
           }
-        });
-        
-        console.log('Fluid Player instance created successfully');
-        playerInstanceRef.current = playerInstance;
-        
-        // Set up time update handler
+        };
+
+        // Initialize player
+        const videoId = videoRef.current.id;
+        playerInstanceRef.current = window.fluidPlayer(videoId, playerOptions);
+
+        // Add time update event listener
         if (onTimeUpdate) {
-          playerInstance.on('timeupdate', (time: number) => {
-            if (!videoRef.current) return;
-            
-            const currentTime = videoRef.current.currentTime;
-            const duration = videoRef.current.duration;
-            
+          videoRef.current.addEventListener('timeupdate', () => {
             onTimeUpdate({
-              currentTime,
-              duration
+              currentTime: videoRef.current?.currentTime || 0,
+              duration: videoRef.current?.duration || 0
             });
           });
         }
@@ -98,35 +88,46 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         console.error('Error initializing Fluid Player:', error);
       }
     };
-    
-    // Start checking for Fluid Player
-    checkForFluidPlayer();
-    
+
+    initPlayer();
+
     // Cleanup
     return () => {
-      try {
-        if (playerInstanceRef.current) {
-          console.log('Cleaning up player instance');
+      if (playerInstanceRef.current) {
+        try {
           playerInstanceRef.current.destroy();
-          playerInstanceRef.current = null;
+        } catch (error) {
+          console.error('Error destroying player:', error);
         }
-      } catch (error) {
-        console.error('Error cleaning up player:', error);
       }
     };
-  }, [videoUrl, onTimeUpdate]);
-  
+  }, [videoUrl, poster, episode, onTimeUpdate]);
+
   return (
-    <div className="w-full aspect-video bg-black">
-      <video 
+    <div className="fluid-player-container">
+      <video
+        id="test-fluid-player"
         ref={videoRef}
-        id={`test-video-player-${Math.random().toString(36).substring(2, 9)}`}
         className="w-full aspect-video"
         controls
         playsInline
         poster={episode?.thumbnail_url || poster}
       >
-        <source src={videoUrl} type="video/mp4" />
+        {/* If videoSources are provided, use them for multiple qualities */}
+        {videoSources && videoSources.length > 0 ? (
+          videoSources.map((source, index) => (
+            <source 
+              key={index} 
+              src={source.url} 
+              title={source.label}
+              type={source.type}
+              {...(source.quality ? { 'data-fluid-hd': '' } : {})}
+            />
+          ))
+        ) : (
+          // Fallback to single video URL if no sources array
+          <source src={videoUrl} type="video/mp4" />
+        )}
         Your browser does not support the video tag.
       </video>
     </div>
