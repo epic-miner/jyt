@@ -865,7 +865,7 @@ const VideoPlayer = ({
           resetControlsTimeout();
         });
       }
-      
+
       // Define YouTube-like skip functions
       const skipBackwardFunc = () => {
         if (videoRef.current) {
@@ -873,7 +873,7 @@ const VideoPlayer = ({
           showControlsTemporarily();
         }
       };
-      
+
       const skipForwardFunc = () => {
         if (videoRef.current) {
           videoRef.current.currentTime = Math.min(
@@ -1517,9 +1517,10 @@ const setupYouTubeControls = (
   skipForward: () => void,
   togglePlayPause: () => void,
   setShowControls: (show: boolean) => void,
-  showControlsTemporarily: () => void
+  showControlsTemporarily: () => void,
+  isMobileDevice: boolean
 ): (() => void) | undefined => {
-  if (!playerContainer || !isMobile) return;
+  if (!playerContainer || !isMobileDevice) return;
 
   const handleTouchStart = (e: TouchEvent) => {
     const touch = e.touches[0];
