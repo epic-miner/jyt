@@ -87,7 +87,7 @@ export const MobileNavBar = memo(() => {
   ], [location]);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-lg border-t border-slate-800 shadow-lg pb-safe">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-lg border-t border-slate-800 shadow-lg pb-safe">
       <div className="flex items-center justify-around py-2">
         {navItems.map((item) => (
           <NavItem key={item.href} {...item} />
