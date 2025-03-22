@@ -1,7 +1,7 @@
 import { Route, Switch } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import NavBar from "./components/NavBar";
-import MobileNav from "./components/MobileNav";
+import { MobileNavBar } from "./components/MobileNavBar";
 import ScrollToTop from "./components/ScrollToTop";
 import { PageTransition } from "./components/PageTransition";
 import { lazy, Suspense, useEffect } from "react";
@@ -57,7 +57,7 @@ function App() {
               </PageTransition>
             </Suspense>
           </main>
-          <MobileNav />
+          <MobileNavBar />
           <ScrollToTop />
           <Toaster />
         </div>

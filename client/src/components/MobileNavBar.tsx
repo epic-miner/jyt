@@ -1,4 +1,4 @@
-import { Home, Search, Library, History, MessageCircle } from "lucide-react";
+import { Home, Search, LibraryBig, History, MessageCircle } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { memo, useMemo } from "react";
 import { motion } from "framer-motion";
@@ -14,8 +14,8 @@ interface NavItemProps {
 const NavItem = memo(({ href, icon, label, isActive }: NavItemProps) => {
   const className = useMemo(() => 
     cn(
-      "flex flex-col items-center space-y-1 px-2 py-1.5",
-      isActive ? "text-primary" : "text-muted-foreground hover:text-primary/80"
+      "flex flex-col items-center justify-center space-y-1",
+      isActive ? "text-primary" : "text-slate-400 hover:text-slate-200"
     ), 
     [isActive]
   );
@@ -29,37 +29,21 @@ const NavItem = memo(({ href, icon, label, isActive }: NavItemProps) => {
 
   return (
     <Link href={href}>
-      <motion.a 
+      <motion.span
         className={className} 
         onClick={handleClick}
         whileTap={{ scale: 0.9 }}
-        whileHover={{ scale: 1.1 }}
       >
-        <motion.div
-          initial={{ scale: 1 }}
-          animate={isActive ? {
-            scale: [1, 1.2, 1],
-            rotate: [0, -10, 10, 0],
-          } : {}}
-          transition={{ 
-            duration: 0.4,
-            ease: "easeInOut"
-          }}
-        >
+        <div className={cn(
+          "flex items-center justify-center rounded-full w-10 h-10",
+          isActive ? "bg-primary text-primary-foreground" : "text-slate-400"
+        )}>
           {icon}
-        </motion.div>
-        <motion.span 
-          className="text-[10px] font-medium tracking-tight"
-          animate={isActive ? { y: [-2, 2, -2] } : {}}
-          transition={{ 
-            duration: 1.5,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        >
+        </div>
+        <span className="text-[10px] font-medium tracking-tight">
           {label}
-        </motion.span>
-      </motion.a>
+        </span>
+      </motion.span>
     </Link>
   );
 });
@@ -84,7 +68,7 @@ export const MobileNavBar = memo(() => {
     },
     {
       href: "/genre/all",
-      icon: <Library className="w-5 h-5" />,
+      icon: <LibraryBig className="w-5 h-5" />,
       label: "Genres",
       isActive: location.startsWith("/genre")
     },
@@ -103,7 +87,7 @@ export const MobileNavBar = memo(() => {
   ], [location]);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t border-border shadow-lg pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-lg border-t border-slate-800 shadow-lg pb-safe">
       <div className="flex items-center justify-around py-2">
         {navItems.map((item) => (
           <NavItem key={item.href} {...item} />
