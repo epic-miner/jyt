@@ -22,11 +22,6 @@ export default defineConfig({
         ]
       : []),
   ],
-  server: {
-    hmr: {
-      overlay: false
-    }
-  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "client", "src"),

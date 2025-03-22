@@ -103,7 +103,7 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         console.log(`Video element or fluidPlayer not available yet (attempt ${attemptCount + 1}/${maxAttempts})`);
         
         // Increase retry time with each attempt
-        const retryDelay = Math.min(300 * (attemptCount + 1), 2000);
+        const retryDelay = Math.min(200 * (attemptCount + 1), 1500);
         
         if (attemptCount < maxAttempts) {
           attemptCount++;
@@ -114,97 +114,82 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
           return;
         }
       }
-      
-      // Add a small delay before initialization to ensure DOM is ready
-      setTimeout(() => {
-        try {
-          // Clean up any existing player instances
-          if (playerInstanceRef.current) {
-            try {
-              playerInstanceRef.current.destroy();
-              playerInstanceRef.current = null;
-            } catch (destroyError) {
-              console.error('Error destroying previous player instance:', destroyError);
-            }
-          }
 
-          console.log('Initializing FluidPlayer...');
-          
-          const playerOptions = {
-            layoutControls: {
-              primaryColor: "#ef4444",
-              fillToContainer: true,
-              posterImage: episode?.thumbnail_url || poster,
-              posterImageSize: 'cover',
-              playButtonShowing: true,
-              playPauseAnimation: true,
-              autoPlay: false,
-              mute: false,
-              keyboardControl: true,
-              loop: false,
-              allowDownload: false,
-              playbackRateEnabled: true,
-              allowTheatre: true,
-              controlBar: {
-                autoHide: true,
-                autoHideTimeout: 3,
-                animated: true
-              },
-              logo: {
-                position: 'top left',
-                clickUrl: null,
-                opacity: 0.8,
-                mouseOverImageUrl: null,
-                imageMargin: '10px',
-                hideWithControls: true,
-                showOverAds: false
-              },
-              contextMenu: {
-                controls: true,
-                links: []
-              }
-            }
-          };
-
-          // Initialize player
-          const videoId = videoRef.current.id;
+      try {
+        // Clean up any existing player instances
+        if (playerInstanceRef.current) {
           try {
-            playerInstanceRef.current = window.fluidPlayer(videoId, playerOptions);
-            console.log('FluidPlayer successfully initialized');
-
-            // Register player events for debugging
-            playerInstanceRef.current.on('error', (err: any) => console.error('Player error:', err));
-            playerInstanceRef.current.on('ready', () => console.log('Player ready'));
-            
-            // Add time update event listener
-            if (onTimeUpdate && videoRef.current) {
-              videoRef.current.addEventListener('timeupdate', () => {
-                onTimeUpdate({
-                  currentTime: videoRef.current?.currentTime || 0,
-                  duration: videoRef.current?.duration || 0
-                });
-              });
-            }
-          } catch (err) {
-            console.error('Error during player initialization:', err);
-            // If initialization fails, retry after a delay
-            if (attemptCount < maxAttempts) {
-              attemptCount++;
-              console.log(`Retrying after initialization error (attempt ${attemptCount}/${maxAttempts})...`);
-              initTimeout = setTimeout(initPlayer, 800);
-            }
-          }
-        } catch (error) {
-          console.error('Error initializing Fluid Player:', error);
-          
-          // Try one more time after a delay if there was an error
-          if (attemptCount < maxAttempts) {
-            attemptCount++;
-            console.log(`Retrying player initialization (attempt ${attemptCount}/${maxAttempts})...`);
-            initTimeout = setTimeout(initPlayer, 800);
+            playerInstanceRef.current.destroy();
+            playerInstanceRef.current = null;
+          } catch (destroyError) {
+            console.error('Error destroying previous player instance:', destroyError);
           }
         }
-      }, 100);
+
+        console.log('Initializing FluidPlayer...');
+        
+        const playerOptions = {
+          layoutControls: {
+            primaryColor: "#ef4444",
+            fillToContainer: true,
+            posterImage: episode?.thumbnail_url || poster,
+            posterImageSize: 'cover',
+            playButtonShowing: true,
+            playPauseAnimation: true,
+            autoPlay: false,
+            mute: false,
+            keyboardControl: true,
+            loop: false,
+            allowDownload: false,
+            playbackRateEnabled: true,
+            allowTheatre: true,
+            controlBar: {
+              autoHide: true,
+              autoHideTimeout: 3,
+              animated: true
+            },
+            logo: {
+              position: 'top left',
+              clickUrl: null,
+              opacity: 0.8,
+              mouseOverImageUrl: null,
+              imageMargin: '10px',
+              hideWithControls: true,
+              showOverAds: false
+            },
+            contextMenu: {
+              controls: true,
+              links: []
+            }
+          }
+        };
+
+        // Initialize player
+        const videoId = videoRef.current.id;
+        playerInstanceRef.current = window.fluidPlayer(videoId, playerOptions);
+        console.log('FluidPlayer successfully initialized');
+
+        // Register player events for debugging
+        playerInstanceRef.current.on('error', (err: any) => console.error('Player error:', err));
+        playerInstanceRef.current.on('ready', () => console.log('Player ready'));
+        
+        // Add time update event listener
+        if (onTimeUpdate && videoRef.current) {
+          videoRef.current.addEventListener('timeupdate', () => {
+            onTimeUpdate({
+              currentTime: videoRef.current?.currentTime || 0,
+              duration: videoRef.current?.duration || 0
+            });
+          });
+        }
+      } catch (error) {
+        console.error('Error initializing Fluid Player:', error);
+        
+        // Try one more time after a delay if there was an error
+        if (attemptCount < maxAttempts) {
+          attemptCount++;
+          console.log(`Retrying player initialization (attempt ${attemptCount}/${maxAttempts})...`);
+          initTimeout = setTimeout(initPlayer, 800);
         }
       }
     };
