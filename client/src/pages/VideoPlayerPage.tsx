@@ -17,7 +17,6 @@ const VideoPlayerPage = () => {
 
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState<number>(-1);
-  const [selectedQuality, setSelectedQuality] = useState<string | null>(null); // Add state for selected quality
 
   // Fetch anime details
   const { data: anime, isLoading: isLoadingAnime } = useQuery({
@@ -150,12 +149,6 @@ const VideoPlayerPage = () => {
     );
   }
 
-  // Generate quality options (assuming currentEpisode.video_url is an array of URLs)
-  const qualityOptions = (currentEpisode.video_url || []).map((url, index) => ({
-    label: `Quality ${index + 1}`, //Simple label, improve as needed
-    url: url
-  }));
-
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-black to-dark-950">
       <div className="max-w-7xl mx-auto w-full relative z-10">
@@ -163,12 +156,10 @@ const VideoPlayerPage = () => {
         <div className="w-full flex flex-col bg-black">
           <div className="relative w-full bg-black overflow-hidden aspect-video">
             <TestPlayer 
-              videoUrl={selectedQuality || currentEpisode.video_url_max_quality} // Use selected quality or default
+              videoUrl={currentEpisode.video_url_max_quality} 
               episode={currentEpisode}
               poster={currentEpisode.thumbnail_url}
               title={currentEpisode.title}
-              qualities={qualityOptions} // Pass quality options
-              onQualityChange={setSelectedQuality} // Callback to update selected quality
               onTimeUpdate={(time) => {
                 if (!anime?.id || !currentEpisode?.id) return;
 

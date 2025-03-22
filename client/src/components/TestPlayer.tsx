@@ -1,223 +1,259 @@
-import React, { useEffect, useRef, useState } from 'react';
-import fluidPlayer from 'fluid-player';
-import 'fluid-player/src/css/fluidplayer.css';
-import './TestPlayer.css';
+import { useRef, useEffect, useState } from 'react';
+
+// Define available quality options
+type VideoQuality = '480p' | '720p' | '1080p' | 'max';
 
 interface TestPlayerProps {
-  src: string[];
-  poster?: string;
+  videoUrl: string;
   title?: string;
-  qualities?: { label: string; url: string }[];
+  poster?: string;
+  episode?: any; 
+  onTimeUpdate?: (timeData: { currentTime: number; duration: number }) => void;
 }
 
-const TestPlayer: React.FC<TestPlayerProps> = ({ src, poster, title, qualities }) => {
+const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episode, onTimeUpdate }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerInstanceRef = useRef<any>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentQuality, setCurrentQuality] = useState<string>('');
+  const [selectedQuality, setSelectedQuality] = useState<VideoQuality>('max');
+  const [showQualityMenu, setShowQualityMenu] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (videoRef.current && src.length > 0) {
-      // Destroy previous player instance if it exists
-      if (playerInstanceRef.current) {
-        playerInstanceRef.current.destroy();
-      }
+  // Get available quality options from episode
+  const getAvailableQualities = () => {
+    if (!episode) return [];
 
-      // If qualities are provided, use them, otherwise use the src array
-      const videoSources = qualities?.length 
-        ? qualities.map(q => ({ 
-            type: 'video/mp4',
-            src: q.url,
-            title: q.label
-          }))
-        : src.map(url => ({
-            type: 'video/mp4',
-            src: url,
-            title: 'Default'
-          }));
+    const qualities: { quality: VideoQuality; url: string | undefined }[] = [];
 
-      // Set the initial quality
-      if (qualities?.length) {
-        setCurrentQuality(qualities[0].label);
-      }
-
-      // Initialize Fluid Player
-      playerInstanceRef.current = fluidPlayer(videoRef.current, {
-        layoutControls: {
-          primaryColor: "#ff0000",
-          posterImage: poster || '',
-          playButtonShowing: true,
-          playPauseAnimation: true,
-          fillToContainer: true,
-          autoPlay: false,
-          preload: 'auto',
-          mute: false,
-          doubleclickFullscreen: true,
-          subtitlesEnabled: false,
-          keyboardControl: true,
-          title: title || 'Video Player',
-          allowDownload: false,
-          controlBar: {
-            autoHide: true,
-            autoHideTimeout: 3,
-            animated: true
-          },
-          logo: {
-            imageUrl: null,
-            position: 'top left',
-            clickUrl: null,
-            opacity: 1,
-            mouseOverImageUrl: null,
-            imageMargin: '2px',
-            hideWithControls: false,
-            showOverAds: false
-          },
-        },
-        vastOptions: {
-          adList: [],
-          skipButtonCaption: 'Skip ad in [seconds]',
-          skipButtonClickCaption: 'Skip ad <span class="skip_button_icon"></span>',
-          adText: null,
-          adTextPosition: 'top left',
-          adCTAText: 'Visit now!',
-          adCTATextPosition: 'bottom right',
-        }
-      });
-
-      // Add quality selector button if qualities are provided
-      if (qualities?.length && qualities.length > 1) {
-        const player = playerInstanceRef.current;
-
-        // Create quality menu button
-        const controlBar = document.querySelector('.fluid_controls_container');
-        if (controlBar) {
-          const qualityBtn = document.createElement('div');
-          qualityBtn.className = 'fluid_control fluid_button fluid_control_quality';
-          qualityBtn.innerHTML = `
-            <span class="quality_button_text">${currentQuality}</span>
-            <div class="fluid_quality_selector" style="display: none;">
-              ${qualities.map(q => `
-                <div class="fluid_quality_option ${q.label === currentQuality ? 'fluid_quality_selected' : ''}" 
-                     data-quality="${q.label}" 
-                     data-url="${q.url}">
-                  ${q.label}
-                </div>
-              `).join('')}
-            </div>
-          `;
-
-          // Insert before fullscreen button
-          const fullscreenBtn = document.querySelector('.fluid_control_fullscreen');
-          if (fullscreenBtn) {
-            controlBar.insertBefore(qualityBtn, fullscreenBtn);
-          } else {
-            controlBar.appendChild(qualityBtn);
-          }
-
-          // Toggle quality menu
-          qualityBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const selector = qualityBtn.querySelector('.fluid_quality_selector');
-            if (selector) {
-              selector.style.display = selector.style.display === 'none' ? 'block' : 'none';
-            }
-          });
-
-          // Add click handlers for quality options
-          document.querySelectorAll('.fluid_quality_option').forEach(option => {
-            option.addEventListener('click', (e) => {
-              e.stopPropagation();
-              const target = e.currentTarget as HTMLElement;
-              const quality = target.getAttribute('data-quality') || '';
-              const url = target.getAttribute('data-url') || '';
-
-              // Update selected quality
-              document.querySelectorAll('.fluid_quality_option').forEach(opt => {
-                opt.classList.remove('fluid_quality_selected');
-              });
-              target.classList.add('fluid_quality_selected');
-
-              // Update quality button text
-              const btnText = qualityBtn.querySelector('.quality_button_text');
-              if (btnText) {
-                btnText.textContent = quality;
-              }
-
-              // Hide selector
-              const selector = qualityBtn.querySelector('.fluid_quality_selector');
-              if (selector) {
-                selector.style.display = 'none';
-              }
-
-              // Remember current time and playing state
-              const currentTime = videoRef.current?.currentTime || 0;
-              const wasPlaying = !videoRef.current?.paused;
-
-              // Change source
-              if (videoRef.current) {
-                videoRef.current.src = url;
-                videoRef.current.load();
-                videoRef.current.currentTime = currentTime;
-
-                if (wasPlaying) {
-                  videoRef.current.play();
-                }
-              }
-
-              setCurrentQuality(quality);
-            });
-          });
-
-          // Close menu when clicking outside
-          document.addEventListener('click', () => {
-            const selector = qualityBtn.querySelector('.fluid_quality_selector');
-            if (selector) {
-              selector.style.display = 'none';
-            }
-          });
-        }
-      }
+    if (episode.video_url_480p) {
+      qualities.push({ quality: '480p', url: episode.video_url_480p });
     }
 
-    // Cleanup function
-    return () => {
-      if (playerInstanceRef.current) {
-        playerInstanceRef.current.destroy();
+    if (episode.video_url_720p) {
+      qualities.push({ quality: '720p', url: episode.video_url_720p });
+    }
+
+    if (episode.video_url_1080p) {
+      qualities.push({ quality: '1080p', url: episode.video_url_1080p });
+    }
+
+    // Always include max quality
+    qualities.push({ quality: 'max', url: episode.video_url_max_quality });
+
+    return qualities;
+  };
+
+  // Get current video URL based on selected quality
+  const getCurrentVideoUrl = () => {
+    if (!episode) return videoUrl;
+
+    switch (selectedQuality) {
+      case '480p':
+        return episode.video_url_480p || videoUrl;
+      case '720p':
+        return episode.video_url_720p || videoUrl;
+      case '1080p':
+        return episode.video_url_1080p || videoUrl;
+      case 'max':
+      default:
+        return episode.video_url_max_quality || videoUrl;
+    }
+  };
+
+  // Handle quality change
+  const handleQualityChange = (quality: VideoQuality) => {
+    if (videoRef.current) {
+      // Save current playback time and playing state
+      const currentTime = videoRef.current.currentTime;
+      const isPlaying = !videoRef.current.paused;
+
+      // Change quality
+      setSelectedQuality(quality);
+
+      // Apply new source
+      videoRef.current.src = getCurrentVideoUrl();
+      videoRef.current.load();
+
+      // Restore playback position
+      videoRef.current.onloadeddata = () => {
+        if (videoRef.current) {
+          videoRef.current.currentTime = currentTime;
+          if (isPlaying) {
+            videoRef.current.play().catch(e => {
+              console.error('Error playing video after quality change:', e);
+            });
+          }
+        }
+      };
+
+      // Hide quality menu
+      setShowQualityMenu(false);
+    }
+  };
+
+  useEffect(() => {
+    const initPlayer = () => {
+      if (!videoRef.current || typeof window.fluidPlayer !== 'function') {
+        console.log('Video element or fluidPlayer not available yet');
+        setTimeout(initPlayer, 200);
+        return;
+      }
+
+      try {
+        if (playerInstanceRef.current) {
+          playerInstanceRef.current.destroy();
+        }
+
+        const playerOptions = {
+          layoutControls: {
+            primaryColor: "#ef4444",
+            fillToContainer: true,
+            posterImage: episode?.thumbnail_url || poster,
+            posterImageSize: 'cover',
+            playButtonShowing: true,
+            playPauseAnimation: true,
+            autoPlay: false,
+            mute: false,
+            keyboardControl: true,
+            loop: false,
+            allowDownload: false,
+            playbackRateEnabled: true,
+            allowTheatre: true,
+            controlBar: {
+              autoHide: true,
+              autoHideTimeout: 3,
+              animated: true
+            },
+            logo: {
+              imageUrl: '/assets/logo_optimized.png',
+              position: 'top left',
+              clickUrl: null,
+              opacity: 0.8,
+              mouseOverImageUrl: null,
+              imageMargin: '10px',
+              hideWithControls: true,
+              showOverAds: false
+            },
+            contextMenu: {
+              controls: true,
+              links: []
+            }
+          }
+        };
+
+        // Initialize player
+        const videoId = videoRef.current.id;
+        playerInstanceRef.current = window.fluidPlayer(videoId, playerOptions);
+
+        // Add time update event listener
+        if (onTimeUpdate) {
+          videoRef.current.addEventListener('timeupdate', () => {
+            onTimeUpdate({
+              currentTime: videoRef.current?.currentTime || 0,
+              duration: videoRef.current?.duration || 0
+            });
+          });
+        }
+      } catch (error) {
+        console.error('Error initializing Fluid Player:', error);
       }
     };
-  }, [src, poster, title, qualities]); // Re-initialize player when these props change
+
+    initPlayer();
+
+    // Cleanup
+    return () => {
+      if (playerInstanceRef.current) {
+        try {
+          playerInstanceRef.current.destroy();
+        } catch (error) {
+          console.error('Error destroying player:', error);
+        }
+      }
+    };
+  }, [videoUrl, poster, episode, onTimeUpdate]);
+
+  // Update video source when quality changes
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.src = getCurrentVideoUrl();
+      videoRef.current.load();
+    }
+  }, [selectedQuality, episode]);
 
   useEffect(() => {
     const videoElement = videoRef.current;
+    if (!videoElement) return;
 
-    const handlePlay = () => {
-      setIsPlaying(true);
-    };
-
-    const handlePause = () => {
-      setIsPlaying(false);
-    };
-
-    if (videoElement) {
-      videoElement.addEventListener('play', handlePlay);
-      videoElement.addEventListener('pause', handlePause);
-    }
-
-    return () => {
-      if (videoElement) {
-        videoElement.removeEventListener('play', handlePlay);
-        videoElement.removeEventListener('pause', handlePause);
+    const handleTimeUpdate = () => {
+      if (onTimeUpdate && videoElement.duration) {
+        onTimeUpdate({
+          currentTime: videoElement.currentTime,
+          duration: videoElement.duration
+        });
       }
     };
-  }, []);
+
+    // Close quality menu when clicking outside
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showQualityMenu && 
+          !((event.target as HTMLElement).closest('.quality-menu') || 
+            (event.target as HTMLElement).closest('button'))) {
+        setShowQualityMenu(false);
+      }
+    };
+
+    videoElement.addEventListener('timeupdate', handleTimeUpdate);
+    document.addEventListener('click', handleClickOutside);
+
+    return () => {
+      videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [onTimeUpdate, showQualityMenu]);
 
   return (
-    <div className="video-player-container">
-      <video ref={videoRef} className="fluid-player" playsInline>
-        {src.map((url, index) => (
-          <source key={index} src={url} type="video/mp4" />
-        ))}
-      </video>
+    <div className="fluid-player-container">
+      <div className="relative w-full">
+        <video
+          id="test-fluid-player"
+          ref={videoRef}
+          className="w-full aspect-video"
+          controls
+          playsInline
+          poster={episode?.thumbnail_url || poster}
+        >
+          <source src={getCurrentVideoUrl()} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        {/* Quality selection button */}
+        <div className="absolute bottom-16 right-4 z-10">
+          <button
+            className="bg-black bg-opacity-70 text-white px-3 py-1 rounded-md text-sm flex items-center"
+            onClick={() => setShowQualityMenu(!showQualityMenu)}
+          >
+            {selectedQuality === 'max' ? 'MAX' : selectedQuality} 
+            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {/* Quality menu */}
+          {showQualityMenu && (
+            <div className="absolute bottom-10 right-0 bg-black bg-opacity-90 text-white rounded-md overflow-hidden">
+              {getAvailableQualities().map(({ quality, url }) => (
+                <button
+                  key={quality}
+                  className={`block w-full text-left px-4 py-2 hover:bg-gray-700 ${selectedQuality === quality ? 'bg-gray-700' : ''}`}
+                  onClick={() => handleQualityChange(quality)}
+                  disabled={!url}
+                >
+                  {quality === 'max' ? 'MAX' : quality}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
