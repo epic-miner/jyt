@@ -207,37 +207,46 @@
     @apply text-primary font-medium;
   }
 
-  /* Video player responsive controls */
+  /* Universal video player responsive controls */
   .controls-responsive button {
     @apply transition-transform duration-200;
   }
 
   .controls-responsive button svg {
-    @apply w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-6 md:h-6 lg:w-7 lg:h-7;
+    @apply w-5 h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-7 lg:h-7;
   }
 
+  .progress-bar-responsive {
+    @apply h-2 transition-all duration-200;
+  }
+  
   .progress-bar-responsive:hover {
-    @apply h-3 xs:h-4 sm:h-5 md:h-6;
+    @apply h-4 xs:h-4 sm:h-5 md:h-5;
   }
 
-  /* Video player title responsiveness */
+  /* Video player title responsiveness - consistent sizes */
   .video-title-responsive {
-    @apply text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-medium line-clamp-1;
+    @apply text-base xs:text-lg sm:text-xl md:text-xl lg:text-2xl font-medium line-clamp-1;
   }
 
   /* Volume slider responsiveness */
   .volume-slider-responsive {
-    @apply w-12 xs:w-16 sm:w-20 md:w-24;
+    @apply w-16 xs:w-18 sm:w-20 md:w-24;
   }
 
   /* Time display responsiveness */
   .time-display-responsive {
-    @apply text-xs xs:text-sm sm:text-base md:text-base;
+    @apply text-sm xs:text-sm sm:text-base md:text-base;
   }
 
   /* Settings menu responsiveness */
   .settings-menu-responsive {
-    @apply text-xs xs:text-sm sm:text-base;
+    @apply text-sm xs:text-sm sm:text-base md:text-base;
+  }
+  
+  /* Consistent button sizing and spacing */
+  .video-control-button {
+    @apply p-2 xs:p-2 sm:p-2.5 md:p-3 rounded-full bg-black/50 backdrop-blur-sm;
   }
 }
 
@@ -263,6 +272,7 @@
   align-items: center;
   width: 100%;
   background-color: black;
+  position: relative;
 }
 
 .video-container {
@@ -271,8 +281,22 @@
   align-items: center;
   width: 100%;
   max-width: 100%;
+  height: 0;
+  padding-bottom: 56.25%; /* Enforces 16:9 aspect ratio (9/16 = 0.5625) */
   margin: 0 auto;
   background-color: black;
+  position: relative;
+  overflow: hidden;
+}
+
+.video-container video,
+.video-container .aspect-ratio {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
 }
 
 .aspect-ratio {
@@ -284,6 +308,7 @@
   margin: 0 auto;
   overflow: hidden;
   position: relative;
+  aspect-ratio: 16/9; /* Modern way to enforce aspect ratio */
 }
 
 .aspect-ratio video {
@@ -293,18 +318,21 @@
   margin: 0 auto;
 }
 
+/* Universal styles that work across devices */
+@media (min-width: 320px) {
+  .aspect-ratio {
+    width: 100%;
+    max-width: 100vw;
+    margin: 0 auto;
+  }
+}
+
 /* Desktop specific styles */
 @media (min-width: 768px) {
   .aspect-ratio {
     max-width: 90vw;
-    height: calc(90vw * 9 / 16); /* Maintain 16:9 aspect ratio */
+    height: auto; /* Let aspect-ratio handle the height */
     margin: 0 auto;
-  }
-
-  .aspect-ratio video {
-    object-fit: fill;
-    width: 100%;
-    height: 100%;
   }
 }
 
@@ -574,12 +602,11 @@ html {
   justify-content: center !important;
 }
 
-/* Force landscape mode when in fullscreen on mobile */
-@media (orientation: portrait) {
+/* Consistent fullscreen behavior in all orientations */
+@media (orientation: portrait), (orientation: landscape) {
   .landscape-fullscreen:fullscreen {
-    transform: rotate(90deg) !important;
-    width: 100vh !important;
-    height: 100vw !important;
+    width: 100% !important;
+    height: 100% !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -592,7 +619,6 @@ html {
     max-width: 100% !important;
     max-height: 100% !important;
     aspect-ratio: 16/9 !important;
-    transform: none !important;
     object-fit: contain !important;
   }
 
@@ -642,7 +668,7 @@ html {
     object-fit: cover !important; /* Changed to cover to fill the space */
   }
 
-  /* Mobile fullscreen */
+  /* Universal fullscreen behavior */
   :fullscreen .aspect-ratio {
     width: 100vw !important;
     height: 100vh !important;
@@ -654,18 +680,24 @@ html {
   }
 
   :fullscreen video {
-    width: 100% !important;
-    height: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
     object-fit: contain !important;
-    max-height: 100vh !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 
-  /* Force video to fill available space in mobile */
+  /* Force video to maintain consistent behavior across devices */
   .video-player-container {
     width: 100% !important;
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
+    background-color: black !important;
   }
 }
 
