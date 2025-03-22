@@ -266,6 +266,7 @@ const FluidVideoPlayer = ({
 
           // Logo options
           logo: {
+            imageUrl: null,
             position: 'top left' as 'top left',
             clickUrl: null,
             opacity: 0.8,
@@ -622,6 +623,7 @@ const FluidVideoPlayer = ({
             id="anime-player"
             controls
             playsInline
+            autoPlay
             preload="auto"
           >
             {/* Use multiple source tags with data-fluid-hd attribute for HD quality sources */}
@@ -678,129 +680,3 @@ const FluidVideoPlayer = ({
 
 // Optimize with memo to prevent unnecessary re-renders
 export default memo(FluidVideoPlayer);
-import { useRef, useEffect, useState } from 'react';
-
-// Define the window fluidPlayer property
-declare global {
-  interface Window {
-    fluidPlayer: (target: string, options?: any) => any;
-  }
-}
-
-interface FluidVideoPlayerProps {
-  videoUrl: string;
-  thumbnailUrl?: string;
-  autoPlay?: boolean;
-  id?: string;
-  onReady?: (player: any) => void;
-}
-
-const FluidVideoPlayer: React.FC<FluidVideoPlayerProps> = ({
-  videoUrl,
-  thumbnailUrl,
-  autoPlay = true,
-  id = "fluid-video-player",
-  onReady
-}) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const playerInstanceRef = useRef<any>(null);
-  const [initializationAttempts, setInitializationAttempts] = useState(0);
-  const maxInitializationAttempts = 10;
-
-  useEffect(() => {
-    const initializePlayer = () => {
-      if (typeof window.fluidPlayer !== 'function') {
-        console.warn('Fluid Player not loaded yet, retrying in 300ms');
-        if (initializationAttempts < maxInitializationAttempts) {
-          setInitializationAttempts(prev => prev + 1);
-          setTimeout(initializePlayer, 300);
-        }
-        return;
-      }
-
-      if (!videoRef.current || !document.getElementById(id)) {
-        console.warn('Video element not found, retrying in 300ms');
-        if (initializationAttempts < maxInitializationAttempts) {
-          setInitializationAttempts(prev => prev + 1);
-          setTimeout(initializePlayer, 300);
-        }
-        return;
-      }
-
-      try {
-        if (playerInstanceRef.current) {
-          playerInstanceRef.current.destroy();
-        }
-
-        const player = window.fluidPlayer(id, {
-          layoutControls: {
-            primaryColor: "#ef4444",
-            fillToContainer: true,
-            posterImage: thumbnailUrl,
-            playButtonShowing: true,
-            playPauseAnimation: true,
-            autoPlay: autoPlay,
-            mute: false,
-            keyboardControl: true,
-            allowDownload: false,
-            playbackRateEnabled: true,
-            controlBar: {
-              autoHide: true,
-              autoHideTimeout: 3,
-              animated: true
-            },
-            logo: {
-              imageUrl: '/assets/logo_optimized.png',
-              position: 'top left',
-              clickUrl: null,
-              opacity: 0.8,
-              hideWithControls: true
-            }
-          }
-        });
-
-        playerInstanceRef.current = player;
-
-        if (onReady) {
-          onReady(player);
-        }
-      } catch (error) {
-        console.error('Error initializing Fluid Player:', error);
-        if (initializationAttempts < maxInitializationAttempts) {
-          setInitializationAttempts(prev => prev + 1);
-          setTimeout(initializePlayer, 500); //Retry after 500ms
-        }
-      }
-    };
-
-    initializePlayer();
-
-    return () => {
-      if (playerInstanceRef.current) {
-        try {
-          playerInstanceRef.current.destroy();
-          playerInstanceRef.current = null;
-        } catch (error) {
-          console.error('Error destroying player:', error);
-        }
-      }
-    };
-  }, [videoUrl, thumbnailUrl, autoPlay, id, onReady]);
-
-  return (
-    <div className="fluid-player-container w-full">
-      <video
-        ref={videoRef}
-        id={id}
-        className="fluid-video w-full"
-        controls
-        playsInline
-      >
-        <source src={videoUrl} type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-    </div>
-  );
-};
-
-export default FluidVideoPlayer;
