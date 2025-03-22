@@ -103,7 +103,7 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         console.log(`Video element or fluidPlayer not available yet (attempt ${attemptCount + 1}/${maxAttempts})`);
         
         // Increase retry time with each attempt
-        const retryDelay = Math.min(200 * (attemptCount + 1), 1500);
+        const retryDelay = Math.min(300 * (attemptCount + 1), 2000);
         
         if (attemptCount < maxAttempts) {
           attemptCount++;
@@ -114,6 +114,9 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
           return;
         }
       }
+      
+      // Add a small delay before initialization to ensure DOM is ready
+      setTimeout(() => {
 
       try {
         // Clean up any existing player instances
@@ -166,22 +169,33 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
 
         // Initialize player
         const videoId = videoRef.current.id;
-        playerInstanceRef.current = window.fluidPlayer(videoId, playerOptions);
-        console.log('FluidPlayer successfully initialized');
+        try {
+          playerInstanceRef.current = window.fluidPlayer(videoId, playerOptions);
+          console.log('FluidPlayer successfully initialized');
 
-        // Register player events for debugging
-        playerInstanceRef.current.on('error', (err: any) => console.error('Player error:', err));
-        playerInstanceRef.current.on('ready', () => console.log('Player ready'));
-        
-        // Add time update event listener
-        if (onTimeUpdate && videoRef.current) {
-          videoRef.current.addEventListener('timeupdate', () => {
-            onTimeUpdate({
-              currentTime: videoRef.current?.currentTime || 0,
-              duration: videoRef.current?.duration || 0
+          // Register player events for debugging
+          playerInstanceRef.current.on('error', (err: any) => console.error('Player error:', err));
+          playerInstanceRef.current.on('ready', () => console.log('Player ready'));
+          
+          // Add time update event listener
+          if (onTimeUpdate && videoRef.current) {
+            videoRef.current.addEventListener('timeupdate', () => {
+              onTimeUpdate({
+                currentTime: videoRef.current?.currentTime || 0,
+                duration: videoRef.current?.duration || 0
+              });
             });
-          });
+          }
+        } catch (err) {
+          console.error('Error during player initialization:', err);
+          // If initialization fails, retry after a delay
+          if (attemptCount < maxAttempts) {
+            attemptCount++;
+            console.log(`Retrying after initialization error (attempt ${attemptCount}/${maxAttempts})...`);
+            initTimeout = setTimeout(initPlayer, 800);
+          }
         }
+      }, 100); // Small delay before actual initialization
       } catch (error) {
         console.error('Error initializing Fluid Player:', error);
         
