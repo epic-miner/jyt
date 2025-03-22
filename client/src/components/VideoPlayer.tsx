@@ -51,8 +51,6 @@ const VideoPlayer = ({
   const progressBarRef = useRef<HTMLDivElement>(null);
   const seekDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const bufferingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const tapCountRef = useRef<number>(0);
-  const tapTimeoutRef = useRef<number | null>(null);
 
   // Basic video player states
   const [currentTime, setCurrentTime] = useState(0);
@@ -964,90 +962,14 @@ const VideoPlayer = ({
 
                 // Force immediate buffering
         if (wasPlaying) {
-          videoRefcurrent.play().catch(() => {});
+          videoRef.current.play().catch(() => {});
         }
             }
     }, 50);
   };
 
-  // Handle taps for mobile controls
-  const handleTap = useCallback((e: React.MouseEvent) => {
-    // Add visual feedback for tap
-    const container = fullscreenContainerRef.current;
-    if (container) {
-      const feedback = document.createElement('div');
-      feedback.className = 'tap-feedback';
-      feedback.style.left = `${e.clientX - 30}px`;
-      feedback.style.top = `${e.clientY - 30}px`;
-      container.appendChild(feedback);
 
-      // Remove the element after animation
-      setTimeout(() => {
-        container.removeChild(feedback);
-      }, 300);
-    }
-
-    tapCountRef.current += 1;
-
-    // Clear any existing timeout
-    if (tapTimeoutRef.current) {
-      window.clearTimeout(tapTimeoutRef.current);
-    }
-
-    // Set a timeout to process the tap count
-    tapTimeoutRef.current = window.setTimeout(() => {
-      // Double tap - toggle controls
-      if (tapCountRef.current === 2) {
-        setShowControls(prev => !prev);
-      }
-      // Triple tap - seek forward 15 seconds
-      else if (tapCountRef.current === 3 && videoRef.current) {
-        const newTime = Math.min(videoRef.current.currentTime + 15, videoRef.current.duration);
-        videoRef.current.currentTime = newTime;
-        // Show a seek indicator
-        setShowControls(true);
-        resetControlsTimeout();
-      }
-
-      // Reset tap count
-      tapCountRef.current = 0;
-    }, 300); // 300ms window for detecting multi-taps
-  }, [resetControlsTimeout]);
-
-  // Load initial show controls preference from localStorage
-  useEffect(() => {
-    try {
-      const savedPreference = localStorage.getItem('videoShowControls');
-      if (savedPreference !== null) {
-        setShowControls(savedPreference === 'true');
-      }
-    } catch (err) {
-      console.error('Failed to load controls preference:', err);
-    }
-  }, []);
-
-  // Save controls visibility preference
-  useEffect(() => {
-    try {
-      localStorage.setItem('videoShowControls', showControls.toString());
-    } catch (err) {
-      console.error('Failed to save controls preference:', err);
-    }
-  }, [showControls]);
-
-  const resetControlsTimeout = () => {
-    if (controlsTimeoutRef.current) {
-      clearTimeout(controlsTimeoutRef.current);
-    }
-    controlsTimeoutRef.current = setTimeout(() => {
-      if (!isHovering && isPlaying) {
-        setShowControls(false);
-      }
-    }, 3000);
-  };
-
-  return (
-    <div className="w-full flex flex-col bg-black">
+  return (<div className="w-full flex flex-col bg-black">
       {/* Main video container with 16:9 aspect ratio */}
       <div
         ref={playerContainerRef}
@@ -1056,11 +978,9 @@ const VideoPlayer = ({
           isFullScreen ? "fixed inset-0 z-50 fullscreen" : ""
         )}
         data-fullscreen={isFullScreen ? "true" : "false"}
-        onClick={isMobile ? handleTap : undefined}
       >
         <AspectRatio ratio={16 / 9} className="w-full h-full">
-          <div className="w-full h-full relative flex justify-center items-center overflow-hidden">
-            {/* Centered video with overflow hidden */}
+          <div className="w-full h-full relative flex justify-center items-center overflow-hidden"> {/* Centered video with overflow hidden */}
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
                 <div className="flex flex-col items-center">
@@ -1094,31 +1014,31 @@ const VideoPlayer = ({
                     <div className="relative mr-4">
                       {/* Circular countdown animation */}
                       <svg className="w-12 h-12" viewBox="0 0 48 48">
-                        <circle
-                          cx="24"
-                          cy="24"
-                          r="20"
-                          fill="transparent"
-                          stroke="#666"
+                        <circle 
+                          cx="24" 
+                          cy="24" 
+                          r="20" 
+                          fill="transparent" 
+                          stroke="#666" 
                           strokeWidth="4"
                         />
-                        <circle
-                          cx="24"
-                          cy="24"
-                          r="20"
-                          fill="transparent"
-                          stroke="#f00"
+                        <circle 
+                          cx="24" 
+                          cy="24" 
+                          r="20" 
+                          fill="transparent" 
+                          stroke="#f00" 
                           strokeWidth="4"
                           strokeDasharray="126"
                           strokeDashoffset={126 - (126 * autoplayCountdown / 5)}
                           transform="rotate(-90 24 24)"
                           style={{ transition: 'stroke-dashoffset 1s linear' }}
                         />
-                        <text
-                          x="24"
-                          y="28"
-                          fill="white"
-                          fontSize="16"
+                        <text 
+                          x="24" 
+                          y="28" 
+                          fill="white" 
+                          fontSize="16" 
                           textAnchor="middle"
                         >
                           {autoplayCountdown}
@@ -1134,7 +1054,7 @@ const VideoPlayer = ({
                   </div>
 
                   <div className="flex w-full justify-between">
-                    <button
+                    <button 
                       className="bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded text-sm"
                       onClick={() => {
                         setShowAutoplayCountdown(false);
@@ -1145,7 +1065,7 @@ const VideoPlayer = ({
                     >
                       Cancel
                     </button>
-                    <button
+                    <button 
                       className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded text-sm"
                       onClick={() => {
                         if (autoplayTimerRef.current) {
@@ -1412,7 +1332,7 @@ const VideoPlayer = ({
                     {/* Thumb dot - larger on hover or mobile */}
                     <div className={cn(
                       "absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 rounded-full transition-all duration-150",
-                      isMobile
+                      isMobile 
                         ? "w-4 h-4 bg-red-500 shadow-lg" // Larger and always visible on mobile
                         : "w-0 h-3 bg-red-600 group-hover:w-4 group-hover:h-4 group-hover:bg-red-500 group-hover:shadow-md" // Show on hover on desktop
                     )}></div>
@@ -1512,7 +1432,7 @@ const VideoPlayer = ({
                             const height = rect.height;
                             const y = e.clientY - rect.top;
                             // Calculate volume (0-1) based on click position, invert because 0 is bottom
-                            const newVolumeValue = Math.min(Math.max(1 - (y / height), 0), 1);
+                            const newVolumeValue = Math.min(Math.max(1 - (y /height), 0), 1);
                             videoRef.current.volume = newVolumeValue;
                             setVolume(newVolumeValue);
                             if (newVolumeValue === 0) setIsMuted(true);
