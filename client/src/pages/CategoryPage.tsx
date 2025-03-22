@@ -21,49 +21,52 @@ const CategoryPage = () => {
   const [filteredAnime, setFilteredAnime] = useState<Anime[]>([]);
   const [categoryTitle, setCategoryTitle] = useState('');
   const [categoryDescription, setCategoryDescription] = useState('');
+  const [categoryRating, setCategoryRating] = useState(4.0);
   
   useEffect(() => {
     if (allAnime) {
       let filtered: Anime[] = [];
       let title = '';
       let description = '';
+      let rating = 4.0;
       
       switch (categoryType) {
         case 'trending':
-          // For demo, assuming we sort by ID for trending (newest)
-          filtered = [...allAnime].sort((a, b) => b.id - a.id);
+          // Filter anime with (T) tag in the title for trending
+          filtered = allAnime.filter(anime => anime.title.includes('(T)'));
           title = 'Trending Anime';
           description = 'The hottest and most popular anime right now';
+          rating = 4.8; // Same as home page
           break;
           
         case 'popular':
-          // For demo, sorting based on episode count (if available) for popularity
-          filtered = [...allAnime].sort((a, b) => {
-            const aEpisodes = a.episode_count || 0;
-            const bEpisodes = b.episode_count || 0;
-            return bEpisodes - aEpisodes;
-          });
+          // Filter anime with (P) tag in the title for popular
+          filtered = allAnime.filter(anime => anime.title.includes('(P)'));
           title = 'Popular Anime';
           description = 'The most watched anime series of all time';
+          rating = 4.5; // Same as home page
           break;
           
         case 'recent':
-          // For demo, assuming we sort by ID for recent additions
-          filtered = [...allAnime].sort((a, b) => b.id - a.id).slice(0, 12);
-          title = 'Recently Added';
+          // Filter anime with (LR) tag in the title for latest released
+          filtered = allAnime.filter(anime => anime.title.includes('(LR)'));
+          title = 'Latest Released';
           description = 'Fresh new anime added to our collection';
+          rating = 4.6; // Same as home page
           break;
           
         default:
           filtered = allAnime;
           title = 'All Anime';
           description = 'Browse our complete anime collection';
+          rating = 4.2; // Same as home page
           break;
       }
       
       setFilteredAnime(filtered);
       setCategoryTitle(title);
       setCategoryDescription(description);
+      setCategoryRating(rating);
     }
   }, [allAnime, categoryType]);
   
@@ -131,8 +134,12 @@ const CategoryPage = () => {
                 variants={itemVariants}
               >
                 <AnimeCard 
-                  anime={anime} 
+                  anime={{
+                    ...anime,
+                    title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '') // Remove tags for display
+                  }}
                   episodeCount={anime.episode_count}
+                  rating={categoryRating}
                 />
               </motion.div>
             ))}
