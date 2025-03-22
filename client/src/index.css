@@ -396,6 +396,28 @@
 
 .card-content {
   @apply p-2 xs:p-3 sm:p-4;
+
+/* Video controls toggle button styles */
+.controls-toggle-button {
+  @apply fixed z-20 text-white bg-black/60 hover:bg-black/80 rounded-full p-2.5 transition-all duration-300 flex items-center justify-center shadow-lg;
+}
+
+.controls-toggle-button svg {
+  @apply w-5 h-5 sm:w-6 sm:h-6;
+}
+
+@media (max-width: 640px) {
+  .controls-toggle-button {
+    @apply top-3 right-3 p-2;
+  }
+}
+
+@media (min-width: 641px) {
+  .controls-toggle-button {
+    @apply top-4 right-4 p-2.5;
+  }
+}
+
 }
 
 .card-title {
