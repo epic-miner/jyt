@@ -180,7 +180,7 @@ const VideoPlayer = ({
         if (duration > 0) {
           const bufferPercentage = (bufferedEnd / duration) * 100;
           setBufferProgress(bufferPercentage);
-
+          
           // Update current time again to ensure progress bar is in sync
           setCurrentTime(videoRef.current.currentTime);
         }
@@ -977,7 +977,7 @@ const VideoPlayer = ({
                 // Force immediate buffering
         if (wasPlaying) {
           videoRef.current.play().catch(() => {});
-        }        }
+        }
             }
     }, 50);
   };
