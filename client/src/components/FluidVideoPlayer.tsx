@@ -71,7 +71,7 @@ const FluidVideoPlayer = ({
         setFluidPlayerLoaded(true);
       };
       document.body.appendChild(scriptElement);
-    } else if (window.fluidPlayer) {
+    } else if (typeof window.fluidPlayer === 'function') {
       setFluidPlayerLoaded(true);
     }
   }, []);
@@ -240,13 +240,15 @@ const FluidVideoPlayer = ({
     if (savedItem && savedItem.progress > 0) {
       // Wait for video metadata to load
       const handleMetadata = () => {
-        const durationSeconds = videoRef.current?.duration;
-        if (!isNaN(durationSeconds) && durationSeconds > 0 && playerRef.current) {
-          const timeToSet = savedItem.progress * durationSeconds / 100;
+        if (!videoRef.current || !playerRef.current) return;
+        
+        const durationSeconds = videoRef.current.duration;
+        if (!isNaN(durationSeconds) && durationSeconds > 0) {
+          const timeToSet = (savedItem.progress * durationSeconds) / 100;
           // Use Fluid Player's API to skip to the saved time
           playerRef.current.skipTo(timeToSet);
           
-          videoRef.current?.removeEventListener('loadedmetadata', handleMetadata);
+          videoRef.current.removeEventListener('loadedmetadata', handleMetadata);
         }
       };
       
@@ -254,12 +256,18 @@ const FluidVideoPlayer = ({
     }
   }, [isInitialized, anime.id, episode.id]);
 
+  // Quality menu toggle function defined outside the useEffect to prevent strict mode issues
+  const toggleQualityMenu = (menu: HTMLElement) => {
+    const isVisible = menu.style.display === 'block';
+    menu.style.display = isVisible ? 'none' : 'block';
+  };
+
   // Add quality switching functionality
   useEffect(() => {
     if (!isInitialized || !videoRef.current) return;
 
     // Prepare quality options
-    const qualities = [];
+    const qualities: Array<{label: string, url: string}> = [];
     
     if (episode.video_url_1080p) {
       qualities.push({ label: '1080p', url: episode.video_url_1080p });
@@ -286,19 +294,22 @@ const FluidVideoPlayer = ({
       qualityButton.className = 'fluid_button fluid_button_video_source';
       qualityButton.innerHTML = '<i class="fa fa-cog"></i>';
       qualityButton.title = 'Video Quality';
-      qualityButton.onclick = toggleQualityMenu;
+      
+      // Create quality menu
+      const qualityMenu = document.createElement('div');
+      qualityMenu.className = 'fluid_control_video_source';
+      qualityMenu.style.display = 'none';
+      qualityMenu.innerHTML = '<ul></ul>';
+      
+      // Wire up button click
+      qualityButton.onclick = () => toggleQualityMenu(qualityMenu);
       
       // Find control bar to append button
       const controlBar = videoWrapper.querySelector('.fluid_controls_container');
       if (controlBar) {
         controlBar.appendChild(qualityButton);
       }
-
-      // Create quality menu
-      const qualityMenu = document.createElement('div');
-      qualityMenu.className = 'fluid_control_video_source';
-      qualityMenu.style.display = 'none';
-      qualityMenu.innerHTML = '<ul></ul>';
+      
       videoWrapper.appendChild(qualityMenu);
 
       // Add quality options
@@ -309,17 +320,22 @@ const FluidVideoPlayer = ({
           listItem.className = 'fluid_video_source_list_item';
           listItem.textContent = quality.label;
           listItem.onclick = () => {
-            const currentTime = videoRef.current?.currentTime || 0;
-            const isPlaying = !videoRef.current?.paused;
-            videoRef.current!.src = quality.url;
-            videoRef.current!.load();
+            if (!videoRef.current) return;
+            
+            const currentTime = videoRef.current.currentTime || 0;
+            const isPlaying = !videoRef.current.paused;
+            videoRef.current.src = quality.url;
+            videoRef.current.load();
             
             // Restore playback state
-            videoRef.current!.addEventListener('loadedmetadata', function onMetadata() {
-              videoRef.current!.currentTime = currentTime;
-              if (isPlaying) videoRef.current!.play();
-              videoRef.current!.removeEventListener('loadedmetadata', onMetadata);
-            });
+            const onMetadata = () => {
+              if (!videoRef.current) return;
+              videoRef.current.currentTime = currentTime;
+              if (isPlaying) videoRef.current.play();
+              videoRef.current.removeEventListener('loadedmetadata', onMetadata);
+            };
+            
+            videoRef.current.addEventListener('loadedmetadata', onMetadata);
             
             // Update selected class
             document.querySelectorAll('.fluid_video_source_list_item').forEach(item => {
@@ -334,30 +350,34 @@ const FluidVideoPlayer = ({
         });
 
         // Mark current quality as selected
-        const currentQuality = qualities.find(q => q.url === videoRef.current?.src);
+        const currentQuality = qualities.find(q => videoRef.current && q.url === videoRef.current.src);
         if (currentQuality) {
-          const currentItem = menuList.querySelector(`li:contains('${currentQuality.label}')`);
-          if (currentItem) {
-            currentItem.classList.add('source_selected');
+          const currentItems = menuList.querySelectorAll('li');
+          for (let i = 0; i < currentItems.length; i++) {
+            if (currentItems[i].textContent === currentQuality.label) {
+              currentItems[i].classList.add('source_selected');
+              break;
+            }
           }
         }
       }
 
-      // Toggle quality menu function
-      function toggleQualityMenu() {
-        const isVisible = qualityMenu.style.display === 'block';
-        qualityMenu.style.display = isVisible ? 'none' : 'block';
-      }
-
       // Close menu when clicking outside
-      document.addEventListener('click', function closeMenu(e) {
+      const closeMenu = (e: MouseEvent) => {
         if (!qualityButton.contains(e.target as Node) && 
             !qualityMenu.contains(e.target as Node)) {
           qualityMenu.style.display = 'none';
         }
-      });
+      };
+      
+      document.addEventListener('click', closeMenu);
+      
+      // Clean up event listener on component unmount
+      return () => {
+        document.removeEventListener('click', closeMenu);
+      };
     }
-  }, [isInitialized]);
+  }, [isInitialized, episode.video_url_480p, episode.video_url_720p, episode.video_url_1080p]);
 
   return (
     <div className="w-full flex flex-col bg-black fluid-player-container">

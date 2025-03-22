@@ -151,7 +151,7 @@ const VideoPlayerPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-black to-dark-950">
       <div className="max-w-7xl mx-auto w-full relative z-10">
-        <VideoPlayer 
+        <FluidVideoPlayer 
           anime={anime}
           episode={currentEpisode}
           onNextEpisode={handleNextEpisode}
