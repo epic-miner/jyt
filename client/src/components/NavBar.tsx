@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Link, useLocation } from 'wouter';
 import SearchBar from './SearchBar';
-import { Search, X } from 'lucide-react';
+import { Search, X, Home, BookOpen, History, MessageCircle, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Memoized NavLink component to prevent unnecessary renders
 interface NavLinkProps {
   href: string;
-  icon: string;
+  icon: React.ReactNode;
   label: string;
   isActive: boolean;
   isMobile?: boolean;
@@ -17,33 +17,37 @@ const NavLink = memo(({ href, icon, label, isActive, isMobile = false }: NavLink
   // Memoize class names to avoid recalculations
   const className = useMemo(() => 
     cn(
-      "flex items-center gap-2",
-      isActive ? "text-white font-medium" : "text-slate-300 hover:text-white",
-      isMobile && "py-2"
+      "flex items-center gap-2 transition-all duration-200",
+      isActive 
+        ? "text-white font-medium" 
+        : "text-slate-300 hover:text-white",
+      isMobile && "py-2",
+      !isMobile && "hover:scale-105"
     ),
     [isActive, isMobile]
   );
 
-  const iconClass = useMemo(() => 
+  const iconStyle = useMemo(() => 
     cn(
-      `fas fa-${icon} text-sm text-primary`,
-      isMobile ? "mr-3" : "mr-2"
+      "transition-colors duration-200",
+      isActive ? "text-primary" : "text-slate-400 group-hover:text-primary",
+      isMobile ? "mr-1" : "mr-2"
     ),
-    [icon, isMobile]
+    [isActive, isMobile]
   );
 
   return (
     href.startsWith('https://t.me') ? (
           <a href={href} target="_blank" rel="noopener noreferrer">
-            <div className={className}>
-              <i className={iconClass}></i>
+            <div className={`${className} group`}>
+              <span className={iconStyle}>{icon}</span>
               <span>{label}</span>
             </div>
           </a>
         ) : (
           <Link href={href}>
-            <div className={className}>
-              <i className={iconClass}></i>
+            <div className={`${className} group`}>
+              <span className={iconStyle}>{icon}</span>
               <span>{label}</span>
             </div>
           </Link>
@@ -154,12 +158,12 @@ const NavBar = memo(() => {
     [mobileMenuOpen]
   );
 
-  const navigation = [
-    { href: '/', icon: 'home', label: 'Home' },
-    { href: '/genre/all', icon: 'tags', label: 'Genres' },
-    { href: '/recently-watched', icon: 'history', label: 'Recently Watched' },
-    { href: 'https://t.me/nineanimeofchat', icon: 'paper-plane', label: 'Contact' },
-  ];
+  const navigation = useMemo(() => [
+    { href: '/', icon: <Home className="w-5 h-5" />, label: 'Home' },
+    { href: '/genre/all', icon: <BookOpen className="w-5 h-5" />, label: 'Genres' },
+    { href: '/recently-watched', icon: <History className="w-5 h-5" />, label: 'Recently Watched' },
+    { href: 'https://t.me/nineanimeofchat', icon: <MessageCircle className="w-5 h-5" />, label: 'Contact' },
+  ], []);
 
   return (
     <>
@@ -228,7 +232,7 @@ const NavBar = memo(() => {
                 onClick={toggleMobileMenu}
                 aria-label="Toggle menu"
               >
-                <i className={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'} text-xl`}></i>
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
             </div>
           </div>
