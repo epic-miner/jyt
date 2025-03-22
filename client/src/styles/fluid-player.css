@@ -207,10 +207,25 @@
   opacity: 1;
 }
 
+/* Hide download button/option completely */
+#fluid_video_wrapper.fluid_player_layout_default .fluid_control_download,
+#fluid_video_wrapper .fluid_control_download,
+li[data-player-action="download"],
+.fluid_context_menu li[data-player-action="download"],
+.fluid_controls_container .fluid_button.fluid_button_download,
+#fluid_video_wrapper [data-player-action="download"],
+#fluid_video_wrapper div[title="Download"],
+.fluid_control_download_wrapper,
+#fluid_download_wrapper {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* Settings menus - glass effect styling */
 #fluid_video_wrapper.fluid_player_layout_default .fluid_control_video_source, 
-#fluid_video_wrapper.fluid_player_layout_default .fluid_control_playback_rate, 
-#fluid_video_wrapper.fluid_player_layout_default .fluid_control_download {
+#fluid_video_wrapper.fluid_player_layout_default .fluid_control_playback_rate {
   background-color: rgba(23, 23, 23, 0.95) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);

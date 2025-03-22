@@ -403,6 +403,30 @@ const FluidVideoPlayer = ({
         console.log('Mini player toggled:', event.detail.isToggledOn);
       });
 
+      // Additional script to remove download button completely (using DOM manipulation)
+      setTimeout(() => {
+        try {
+          // Remove any download buttons that might have been created
+          const downloadButtons = document.querySelectorAll('[data-player-action="download"], .fluid_control_download');
+          downloadButtons.forEach(button => {
+            if (button instanceof HTMLElement) {
+              button.style.display = 'none';
+              button.remove();
+            }
+          });
+          
+          // Remove from context menu if exists
+          const contextMenuItems = document.querySelectorAll('.fluid_context_menu li');
+          contextMenuItems.forEach(item => {
+            if (item.textContent?.includes('Download')) {
+              item.remove();
+            }
+          });
+        } catch (e) {
+          console.log('Note: Download button removal script ran', e);
+        }
+      }, 500);
+      
       setIsPlayerReady(true);
     } catch (error) {
       console.error('Error initializing Fluid Player:', error);
