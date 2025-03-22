@@ -196,8 +196,9 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
           }
         }
       }, 100); // Small delay before actual initialization
-      } catch (error) {
-        console.error('Error initializing Fluid Player:', error);
+      
+    } catch (error) {
+      console.error('Error initializing Fluid Player:', error);
         
         // Try one more time after a delay if there was an error
         if (attemptCount < maxAttempts) {
