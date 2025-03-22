@@ -979,6 +979,53 @@ const VideoPlayer = ({
   };
 
 
+  const togglePlayPause = () => {
+    if (!videoRef.current) return;
+
+    try {
+      if (isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        const playPromise = videoRef.current.play();
+
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true);
+            })
+            .catch(error => {
+              console.error("Error playing video:", error);
+              setIsPlaying(false);
+            });
+        } else {
+          setIsPlaying(true);
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling play/pause:", error);
+    }
+
+    showControlsTemporarily();
+  };
+
+  const skipBackward = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
+      showControlsTemporarily();
+    }
+  };
+
+  const skipForward = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = Math.min(
+        videoRef.current.duration,
+        videoRef.current.currentTime + 10
+      );
+      showControlsTemporarily();
+    }
+  };
+
   return (<div className="w-full flex flex-col bg-black">
       {/* Main video container with 16:9 aspect ratio */}
       <div
@@ -1276,19 +1323,19 @@ const VideoPlayer = ({
                   {/* Buffer progress */}
                   <div
                     className="yt-buffer-filled"
-                    style={{ width: `${bufferProgress}%` }}
+                    style={{ width: `${Math.min(bufferProgress, 100)}%` }}
                   ></div>
 
                   {/* Playback progress */}
                   <div
                     className="yt-progress-filled"
-                    style={{ width: `${(currentTime / duration) * 100}%` }}
+                    style={{ width: `${Math.min((currentTime / (duration || 1)) * 100, 100)}%` }}
                   ></div>
 
                   {/* Playback handle/thumb */}
                   <div
                     className="yt-progress-handle"
-                    style={{ left: `${(currentTime / duration) * 100}%` }}
+                    style={{ left: `${Math.min((currentTime / (duration || 1)) * 100, 100)}%` }}
                   ></div>
                 </div>
 
@@ -1470,6 +1517,28 @@ const VideoPlayer = ({
                   </button>
                 </div>
               </div>
+            </div>
+            {/* Center play/pause button - YouTube style (only shows when paused/hovering) */}
+            <div 
+              className={cn(
+                "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 transition-opacity duration-300",
+                (!isPlaying || isHovering) ? "opacity-100" : "opacity-0"
+              )}
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlayPause();
+              }}
+            >
+              <button
+                className="bg-black/70 backdrop-blur-sm rounded-full p-4 transition-transform hover:scale-110"
+                type="button"
+              >
+                {isPlaying ? (
+                  <Pause size={isMobile ? 24 : 32} className="text-white" />
+                ) : (
+                  <Play size={isMobile ? 24 : 32} className="text-white" />
+                )}
+              </button>
             </div>
           </div>
         </AspectRatio>
