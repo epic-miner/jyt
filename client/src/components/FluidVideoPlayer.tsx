@@ -171,6 +171,9 @@ const FluidVideoPlayer = ({
   const playerInstanceRef = useRef<any>(null);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [initializationAttempts, setInitializationAttempts] = useState(0);
+  const maxInitializationAttempts = 10;
+
 
   // Get initial video URL based on available qualities
   const getVideoUrl = (): string => {
@@ -218,311 +221,320 @@ const FluidVideoPlayer = ({
 
   // Initialize Fluid Player with enhanced features
   useEffect(() => {
-    if (!videoRef.current) return;
+    const initPlayer = () => {
+      if (!videoRef.current) return;
 
-    // Clean up any previous instance
-    if (playerInstanceRef.current) {
-      try {
-        playerInstanceRef.current.destroy();
-      } catch (e) {
-        console.error('Error destroying player:', e);
+      // Clean up any previous instance
+      if (playerInstanceRef.current) {
+        try {
+          playerInstanceRef.current.destroy();
+        } catch (e) {
+          console.error('Error destroying player:', e);
+        }
+        playerInstanceRef.current = null;
       }
-      playerInstanceRef.current = null;
-    }
 
-    // Get the video sources for quality options
-    const videoSources = getVideoSources();
+      // Get the video sources for quality options
+      const videoSources = getVideoSources();
 
-    // Enhanced player configuration with all available features
-    const enhancedOptions: FluidPlayerOptions = {
-      layoutControls: {
-        // Appearance
-        primaryColor: "#ef4444", // Primary accent color
-        fillToContainer: true,
-        posterImage: episode.thumbnail_url || anime.thumbnail_url,
-        posterImageSize: 'cover' as 'cover', // Type assertion to match the expected type
+      // Enhanced player configuration with all available features
+      const enhancedOptions: FluidPlayerOptions = {
+        layoutControls: {
+          // Appearance
+          primaryColor: "#ef4444", // Primary accent color
+          fillToContainer: true,
+          posterImage: episode.thumbnail_url || anime.thumbnail_url,
+          posterImageSize: 'cover' as 'cover', // Type assertion to match the expected type
 
-        // Playback options
-        playButtonShowing: true,
-        playPauseAnimation: true,
-        autoPlay: false,
-        mute: false,
-        keyboardControl: true,
-        loop: false,
-        allowDownload: false,
-        playbackRateEnabled: true,
-        allowTheatre: true,
+          // Playback options
+          playButtonShowing: true,
+          playPauseAnimation: true,
+          autoPlay: false,
+          mute: false,
+          keyboardControl: true,
+          loop: false,
+          allowDownload: false,
+          playbackRateEnabled: true,
+          allowTheatre: true,
 
-        // Control bar options
-        controlBar: {
-          autoHide: true,
-          autoHideTimeout: 3,
-          animated: true
-        },
+          // Control bar options
+          controlBar: {
+            autoHide: true,
+            autoHideTimeout: 3,
+            animated: true
+          },
 
-        // Logo options
-        logo: {
-          imageUrl: '/assets/logo_optimized.png', // Update this to your actual logo path
-          position: 'top left' as 'top left',
-          clickUrl: null,
-          opacity: 0.8,
-          mouseOverImageUrl: null,
-          imageMargin: '10px',
-          hideWithControls: true,
-          showOverAds: false
-        },
+          // Logo options
+          logo: {
+            imageUrl: '/assets/logo_optimized.png', // Update this to your actual logo path
+            position: 'top left' as 'top left',
+            clickUrl: null,
+            opacity: 0.8,
+            mouseOverImageUrl: null,
+            imageMargin: '10px',
+            hideWithControls: true,
+            showOverAds: false
+          },
 
-        // Context menu options
-        contextMenu: {
-          controls: true,
-          links: [
-            {
-              href: '/',
-              label: 'Back to Home'
-            },
-            {
-              href: `/anime/${anime.id}`,
-              label: `View ${anime.title}`
-            }
-          ]
-        },
+          // Context menu options
+          contextMenu: {
+            controls: true,
+            links: [
+              {
+                href: '/',
+                label: 'Back to Home'
+              },
+              {
+                href: `/anime/${anime.id}`,
+                label: `View ${anime.title}`
+              }
+            ]
+          },
 
-        // Mini player support
-        miniPlayer: {
-          enabled: true,
-          width: 400,
-          height: 225,
-          widthMobile: 280,
-          placeholderText: "Playing in mini player",
-          position: "bottom right" as "bottom right",
-          autoToggle: false
-        },
+          // Mini player support
+          miniPlayer: {
+            enabled: true,
+            width: 400,
+            height: 225,
+            widthMobile: 280,
+            placeholderText: "Playing in mini player",
+            position: "bottom right" as "bottom right",
+            autoToggle: false
+          },
 
-        // On-pause overlay
-        htmlOnPauseBlock: {
-          html: `
-            <div class="fluid-player-pause-banner">
-              <div style="display: flex; align-items: center;">
-                <img src="${anime.thumbnail_url}" style="width: 60px; height: 60px; border-radius: 4px; margin-right: 10px;">
-                <div>
-                  <div style="font-weight: bold;">${anime.title}</div>
-                  <div>Episode ${episode.episode_number}: ${episode.title}</div>
+          // On-pause overlay
+          htmlOnPauseBlock: {
+            html: `
+              <div class="fluid-player-pause-banner">
+                <div style="display: flex; align-items: center;">
+                  <img src="${anime.thumbnail_url}" style="width: 60px; height: 60px; border-radius: 4px; margin-right: 10px;">
+                  <div>
+                    <div style="font-weight: bold;">${anime.title}</div>
+                    <div>Episode ${episode.episode_number}: ${episode.title}</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          `,
-          height: null,
-          width: null
+            `,
+            height: null,
+            width: null
+          },
+
+          // Captions
+          captions: {
+            play: 'Play',
+            pause: 'Pause',
+            mute: 'Mute',
+            unmute: 'Unmute',
+            fullscreen: 'Fullscreen',
+            exitFullscreen: 'Exit Fullscreen'
+          },
+
+          // Advanced theater mode
+          theatreAdvanced: {
+            theatreElement: 'fluid-player-container',
+            classToApply: 'theatre-mode'
+          },
+
+          // Persistent settings
+          persistentSettings: {
+            volume: true,
+            quality: true,
+            speed: true,
+            theatre: true
+          },
+
+          // Controls for forward/backward
+          controlForwardBackward: {
+            show: true,
+            doubleTapMobile: true
+          },
+
+          // Mobile enhancements
+          showCardBoardView: false,
+          roundedCorners: 8,
+          autoRotateFullScreen: true
         },
 
-        // Captions
-        captions: {
-          play: 'Play',
-          pause: 'Pause',
-          mute: 'Mute',
-          unmute: 'Unmute',
-          fullscreen: 'Fullscreen',
-          exitFullscreen: 'Exit Fullscreen'
+        // VAST (Video Ad Serving Template) options - enabled but no ads by default
+        vastOptions: {
+          adList: [],
+          adClickable: true,
+          showProgressbarMarkers: false,
+          adCTAText: false,
+          adCTATextPosition: 'bottom right' as 'bottom right'
         },
 
-        // Advanced theater mode
-        theatreAdvanced: {
-          theatreElement: 'fluid-player-container',
-          classToApply: 'theatre-mode'
-        },
+        // Modules configuration to enable HLS and DASH streaming with quality selection
+        modules: {
+          // HLS configuration for better streaming
+          configureHls: (options: any) => {
+            // Set up HLS options for optimal playback
+            return {
+              ...options,
+              // Enable automatic quality selection
+              autoLevelCapping: -1,
+              // Optimize for low latency streaming
+              lowLatencyMode: true,
+              // Faster startup time
+              startLevel: -1
+            };
+          },
+          onBeforeInitHls: (hls: any) => {
+            console.log('HLS about to initialize for streaming');
+          },
+          onAfterInitHls: (hls: any) => {
+            console.log('HLS initialized for streaming');
+          },
 
-        // Persistent settings
-        persistentSettings: {
-          volume: true,
-          quality: true,
-          speed: true,
-          theatre: true
-        },
+          // DASH configuration
+          configureDash: (options: any) => {
+            // Set up DASH options for optimal playback
+            return {
+              ...options,
+              // These settings help with quality switching
+              streaming: {
+                fastSwitchEnabled: true,
+                lowLatencyEnabled: true
+              }
+            };
+          },
+          onBeforeInitDash: (dash: any) => {
+            console.log('DASH about to initialize for streaming');
+          },
+          onAfterInitDash: (dash: any) => {
+            console.log('DASH initialized for streaming');
+          }
+        }
+      };
 
-        // Controls for forward/backward
-        controlForwardBackward: {
-          show: true,
-          doubleTapMobile: true
-        },
+      try {
+        // Extensive debugging to check if fluidPlayer is loaded and working
+        console.log('Attempting to initialize Fluid Player...');
+        console.log('window.fluidPlayer exists:', typeof window.fluidPlayer !== 'undefined' ? 'YES' : 'NO');
+        console.log('window.fluidPlayer type:', typeof window.fluidPlayer);
+        console.log('video element exists:', videoRef.current ? 'YES' : 'NO');
 
-        // Mobile enhancements
-        showCardBoardView: false,
-        roundedCorners: 8,
-        autoRotateFullScreen: true
-      },
+        // Log all scripts loaded in the page to check for fluidplayer
+        const scripts = document.querySelectorAll('script');
+        console.log('All loaded scripts:');
+        scripts.forEach(script => {
+          console.log('Script src:', script.src);
+        });
 
-      // VAST (Video Ad Serving Template) options - enabled but no ads by default
-      vastOptions: {
-        adList: [],
-        adClickable: true,
-        showProgressbarMarkers: false,
-        adCTAText: false,
-        adCTATextPosition: 'bottom right' as 'bottom right'
-      },
+        if (typeof window.fluidPlayer !== 'function') {
+          console.error('Fluid Player not loaded correctly! window.fluidPlayer is:', window.fluidPlayer);
+          // Use native video controls as fallback
+          setIsPlayerReady(true);
 
-      // Modules configuration to enable HLS and DASH streaming with quality selection
-      modules: {
-        // HLS configuration for better streaming
-        configureHls: (options: any) => {
-          // Set up HLS options for optimal playback
-          return {
-            ...options,
-            // Enable automatic quality selection
-            autoLevelCapping: -1,
-            // Optimize for low latency streaming
-            lowLatencyMode: true,
-            // Faster startup time
-            startLevel: -1
+          // Try to dynamically load Fluid Player
+          console.log('Attempting to dynamically load Fluid Player...');
+          const fluidPlayerScript = document.createElement('script');
+          fluidPlayerScript.src = 'https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js';
+          fluidPlayerScript.onload = () => {
+            console.log('Fluid Player script loaded dynamically!');
+            console.log('window.fluidPlayer now exists:', typeof window.fluidPlayer !== 'undefined' ? 'YES' : 'NO');
+            initPlayer(); // Retry initialization after dynamic load
           };
-        },
-        onBeforeInitHls: (hls: any) => {
-          console.log('HLS about to initialize for streaming');
-        },
-        onAfterInitHls: (hls: any) => {
-          console.log('HLS initialized for streaming');
-        },
+          document.head.appendChild(fluidPlayerScript);
 
-        // DASH configuration
-        configureDash: (options: any) => {
-          // Set up DASH options for optimal playback
-          return {
-            ...options,
-            // These settings help with quality switching
-            streaming: {
-              fastSwitchEnabled: true,
-              lowLatencyEnabled: true
-            }
-          };
-        },
-        onBeforeInitDash: (dash: any) => {
-          console.log('DASH about to initialize for streaming');
-        },
-        onAfterInitDash: (dash: any) => {
-          console.log('DASH initialized for streaming');
+          return;
+        }
+
+        // Initialize with enhanced options
+        const fpInstance = window.fluidPlayer('anime-player', enhancedOptions);
+        console.log('Fluid Player instance created successfully');
+
+        // Store player instance for later control
+        playerInstanceRef.current = fpInstance;
+
+        // Register event listeners for advanced functionality
+        fpInstance.on('play', (eventInfo: PlayerEventInfo) => {
+          console.log('Video played', eventInfo);
+          startWatchHistoryTracking();
+        });
+
+        fpInstance.on('pause', (eventInfo: PlayerEventInfo) => {
+          console.log('Video paused', eventInfo);
+        });
+
+        fpInstance.on('timeupdate', (time: number, eventInfo: PlayerEventInfo) => {
+          updateWatchProgress();
+        });
+
+        fpInstance.on('ended', (eventInfo: PlayerEventInfo) => {
+          console.log('Video ended', eventInfo);
+          clearWatchHistoryTracking();
+          if (hasNext) {
+            setTimeout(() => {
+              onNextEpisode();
+            }, 1500);
+          }
+        });
+
+        fpInstance.on('seeked', (eventInfo: PlayerEventInfo) => {
+          console.log('Video seeked', eventInfo);
+        });
+
+        fpInstance.on('theatreModeOn', (event: Event, eventInfo: PlayerEventInfo) => {
+          console.log('Theatre mode enabled', eventInfo);
+        });
+
+        fpInstance.on('theatreModeOff', (event: Event, eventInfo: PlayerEventInfo) => {
+          console.log('Theatre mode disabled', eventInfo);
+        });
+
+        fpInstance.on('miniPlayerToggle', (event: MiniPlayerToggleEvent, eventInfo: PlayerEventInfo) => {
+          console.log('Mini player toggled:', event.detail.isToggledOn);
+        });
+
+        // Additional script to remove download button completely (using DOM manipulation)
+        setTimeout(() => {
+          try {
+            // Remove any download buttons that might have been created
+            const downloadButtons = document.querySelectorAll('[data-player-action="download"], .fluid_control_download');
+            downloadButtons.forEach(button => {
+              if (button instanceof HTMLElement) {
+                button.style.display = 'none';
+                button.remove();
+              }
+            });
+
+            // Remove from context menu if exists
+            const contextMenuItems = document.querySelectorAll('.fluid_context_menu li');
+            contextMenuItems.forEach(item => {
+              if (item.textContent?.includes('Download')) {
+                item.remove();
+              }
+            });
+          } catch (e) {
+            console.log('Note: Download button removal script ran', e);
+          }
+        }, 500);
+
+        setIsPlayerReady(true);
+      } catch (error) {
+        console.error('Error initializing Fluid Player:', error);
+        // Fallback to native video if Fluid Player fails
+        setIsPlayerReady(true);
+        if (initializationAttempts < maxInitializationAttempts) {
+          setInitializationAttempts(prev => prev + 1);
+          setTimeout(initPlayer, 500); //Retry after 500ms
         }
       }
     };
 
-    try {
-      // Extensive debugging to check if fluidPlayer is loaded and working
-      console.log('Attempting to initialize Fluid Player...');
-      console.log('window.fluidPlayer exists:', typeof window.fluidPlayer !== 'undefined' ? 'YES' : 'NO');
-      console.log('window.fluidPlayer type:', typeof window.fluidPlayer);
-      console.log('video element exists:', videoRef.current ? 'YES' : 'NO');
+    // Start initialization process
+    initPlayer();
 
-      // Log all scripts loaded in the page to check for fluidplayer
-      const scripts = document.querySelectorAll('script');
-      console.log('All loaded scripts:');
-      scripts.forEach(script => {
-        console.log('Script src:', script.src);
-      });
-
-      if (typeof window.fluidPlayer !== 'function') {
-        console.error('Fluid Player not loaded correctly! window.fluidPlayer is:', window.fluidPlayer);
-        // Use native video controls as fallback
-        setIsPlayerReady(true);
-
-        // Try to dynamically load Fluid Player
-        console.log('Attempting to dynamically load Fluid Player...');
-        const fluidPlayerScript = document.createElement('script');
-        fluidPlayerScript.src = 'https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js';
-        fluidPlayerScript.onload = () => {
-          console.log('Fluid Player script loaded dynamically!');
-          console.log('window.fluidPlayer now exists:', typeof window.fluidPlayer !== 'undefined' ? 'YES' : 'NO');
-        };
-        document.head.appendChild(fluidPlayerScript);
-
-        return;
-      }
-
-      // Initialize with enhanced options
-      const fpInstance = window.fluidPlayer('anime-player', enhancedOptions);
-      console.log('Fluid Player instance created successfully');
-
-      // Store player instance for later control
-      playerInstanceRef.current = fpInstance;
-
-      // Register event listeners for advanced functionality
-      fpInstance.on('play', (eventInfo: PlayerEventInfo) => {
-        console.log('Video played', eventInfo);
-        startWatchHistoryTracking();
-      });
-
-      fpInstance.on('pause', (eventInfo: PlayerEventInfo) => {
-        console.log('Video paused', eventInfo);
-      });
-
-      fpInstance.on('timeupdate', (time: number, eventInfo: PlayerEventInfo) => {
-        updateWatchProgress();
-      });
-
-      fpInstance.on('ended', (eventInfo: PlayerEventInfo) => {
-        console.log('Video ended', eventInfo);
-        clearWatchHistoryTracking();
-        if (hasNext) {
-          setTimeout(() => {
-            onNextEpisode();
-          }, 1500);
-        }
-      });
-
-      fpInstance.on('seeked', (eventInfo: PlayerEventInfo) => {
-        console.log('Video seeked', eventInfo);
-      });
-
-      fpInstance.on('theatreModeOn', (event: Event, eventInfo: PlayerEventInfo) => {
-        console.log('Theatre mode enabled', eventInfo);
-      });
-
-      fpInstance.on('theatreModeOff', (event: Event, eventInfo: PlayerEventInfo) => {
-        console.log('Theatre mode disabled', eventInfo);
-      });
-
-      fpInstance.on('miniPlayerToggle', (event: MiniPlayerToggleEvent, eventInfo: PlayerEventInfo) => {
-        console.log('Mini player toggled:', event.detail.isToggledOn);
-      });
-
-      // Additional script to remove download button completely (using DOM manipulation)
-      setTimeout(() => {
-        try {
-          // Remove any download buttons that might have been created
-          const downloadButtons = document.querySelectorAll('[data-player-action="download"], .fluid_control_download');
-          downloadButtons.forEach(button => {
-            if (button instanceof HTMLElement) {
-              button.style.display = 'none';
-              button.remove();
-            }
-          });
-
-          // Remove from context menu if exists
-          const contextMenuItems = document.querySelectorAll('.fluid_context_menu li');
-          contextMenuItems.forEach(item => {
-            if (item.textContent?.includes('Download')) {
-              item.remove();
-            }
-          });
-        } catch (e) {
-          console.log('Note: Download button removal script ran', e);
-        }
-      }, 500);
-
-      setIsPlayerReady(true);
-    } catch (error) {
-      console.error('Error initializing Fluid Player:', error);
-      // Fallback to native video if Fluid Player fails
-      setIsPlayerReady(true);
-    }
-
-    // Clean up on unmount
     return () => {
-      clearWatchHistoryTracking();
-      try {
-        if (playerInstanceRef.current) {
+      // Cleanup on unmount
+      if (playerInstanceRef.current) {
+        try {
           playerInstanceRef.current.destroy();
           playerInstanceRef.current = null;
+        } catch (error) {
+          console.error('Error destroying player:', error);
         }
-      } catch (error) {
-        console.error('Error cleaning up Fluid Player:', error);
       }
     };
   }, [anime.id, episode.id]); // Re-initialize when anime or episode changes
@@ -693,18 +705,26 @@ const FluidVideoPlayer: React.FC<FluidVideoPlayerProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerInstanceRef = useRef<any>(null);
+  const [initializationAttempts, setInitializationAttempts] = useState(0);
+  const maxInitializationAttempts = 10;
 
   useEffect(() => {
     const initializePlayer = () => {
       if (typeof window.fluidPlayer !== 'function') {
         console.warn('Fluid Player not loaded yet, retrying in 300ms');
-        setTimeout(initializePlayer, 300);
+        if (initializationAttempts < maxInitializationAttempts) {
+          setInitializationAttempts(prev => prev + 1);
+          setTimeout(initializePlayer, 300);
+        }
         return;
       }
 
       if (!videoRef.current || !document.getElementById(id)) {
         console.warn('Video element not found, retrying in 300ms');
-        setTimeout(initializePlayer, 300);
+        if (initializationAttempts < maxInitializationAttempts) {
+          setInitializationAttempts(prev => prev + 1);
+          setTimeout(initializePlayer, 300);
+        }
         return;
       }
 
@@ -747,6 +767,10 @@ const FluidVideoPlayer: React.FC<FluidVideoPlayerProps> = ({
         }
       } catch (error) {
         console.error('Error initializing Fluid Player:', error);
+        if (initializationAttempts < maxInitializationAttempts) {
+          setInitializationAttempts(prev => prev + 1);
+          setTimeout(initializePlayer, 500); //Retry after 500ms
+        }
       }
     };
 

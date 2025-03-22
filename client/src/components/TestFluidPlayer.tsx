@@ -20,16 +20,23 @@ const TestFluidPlayer = () => {
     // Initialize the player when the component mounts
     const initPlayer = () => {
       console.log('window.fluidPlayer available:', typeof window.fluidPlayer === 'function');
+      console.log('Video element available:', document.getElementById('test-player') !== null);
 
       if (typeof window.fluidPlayer !== 'function') {
-        console.warn('Fluid Player not loaded yet, retrying in 500ms');
-        setTimeout(initPlayer, 500);
+        console.warn('Fluid Player not loaded yet, retrying in 200ms');
+        setTimeout(initPlayer, 200);
         return;
       }
 
       if (!document.getElementById('test-player')) {
-        console.warn('Video element not found, retrying in 500ms');
-        setTimeout(initPlayer, 500);
+        console.warn('Video element not found, retrying in 200ms');
+        setTimeout(initPlayer, 200);
+        return;
+      }
+      
+      // Check if player is already initialized
+      if (playerInstanceRef.current) {
+        console.log('Player already initialized, skipping');
         return;
       }
 
