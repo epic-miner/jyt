@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useRoute, useLocation } from 'wouter';
 import { Skeleton } from '@/components/ui/skeleton';
 import FluidVideoPlayer from '../components/FluidVideoPlayer';
+import TestFluidPlayer from '../components/TestFluidPlayer';
 import { fetchAnimeById, fetchEpisodeById, fetchEpisodesByAnimeId } from '../lib/api';
 import { updateWatchHistory, updateRecentlyWatchedAnime } from '../lib/cookies';
 import { Episode } from '@shared/types';

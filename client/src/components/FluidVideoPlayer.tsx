@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, memo } from 'react';
 import { Episode, Anime } from '@shared/types';
 import { updateWatchHistory } from '../lib/cookies';
-import { Helmet } from 'react-helmet-async';
 
 // Add custom styles
 import '../styles/fluid-player.css';
@@ -86,84 +85,51 @@ const FluidVideoPlayer = ({
 
     // Clean up any previous instance
     if (playerInstanceRef.current) {
-      playerInstanceRef.current.destroy();
+      try {
+        playerInstanceRef.current.destroy();
+      } catch (e) {
+        console.error('Error destroying player:', e);
+      }
       playerInstanceRef.current = null;
     }
 
-    const videoSources = getVideoSources();
+    // Get the video URL based on available qualities
+    const videoUrl = getVideoUrl();
+    console.log('Using video URL:', videoUrl);
 
-    // Configure the player
-    const playerOptions = {
+    // Set the source directly for now (we'll add quality switching later)
+    if (videoRef.current) {
+      videoRef.current.src = videoUrl;
+    }
+
+    // Minimal player configuration to start with
+    const basicOptions = {
       layoutControls: {
         primaryColor: "#ef4444",
-        playButtonShowing: true,
-        playPauseAnimation: true,
         fillToContainer: true,
         autoPlay: false,
-        mute: false,
-        keyboardControl: true,
-        loop: false,
-        allowDownload: false,
-        playbackRateEnabled: true,
-        allowTheatre: true,
-        posterImage: episode.thumbnail_url || anime.thumbnail_url,
-        title: `${anime.title} - Episode ${episode.episode_number}: ${episode.title}`,
-        controlBar: {
-          autoHide: true,
-          autoHideTimeout: 3,
-          animated: true
-        },
-        logo: {
-          imageUrl: null,
-          position: 'top left' as 'top left',
-          clickUrl: null,
-          opacity: 0.8,
-          mouseOverImageUrl: null,
-          imageMargin: '2px',
-          hideWithControls: true,
-          showOverAds: false
-        },
-        controlForwardBackward: {
-          show: true
-        },
-        miniPlayer: {
-          enabled: true,
-          width: 400,
-          height: 225,
-          widthMobile: 280,
-          placeholderText: 'Minimize Player',
-          position: 'bottom right' as 'bottom right'
-        }
-      },
-      // Only set videoSources if we have multiple qualities
-      videoSources: videoSources.length > 1 ? videoSources : undefined,
-      captions: { 
-        play: 'Play', 
-        pause: 'Pause', 
-        mute: 'Mute', 
-        unmute: 'Unmute', 
-        fullscreen: 'Fullscreen', 
-        exitFullscreen: 'Exit Fullscreen' 
       }
     };
 
     try {
-      // Initialize fluid player using the global variable
-      // @ts-ignore - fluidPlayer is loaded from CDN
-      const fpInstance = window.fluidPlayer(
-        videoRef.current,
-        playerOptions
-      );
+      // Check if fluidPlayer is available - this should log what's in the window
+      console.log('window.fluidPlayer available:', typeof window.fluidPlayer === 'function');
+      
+      if (typeof window.fluidPlayer !== 'function') {
+        console.error('Fluid Player not loaded correctly! window.fluidPlayer is:', window.fluidPlayer);
+        // If fluidPlayer isn't available, we'll just use the native video controls
+        setIsPlayerReady(true);
+        return;
+      }
+      
+      // Initialize with minimal options first
+      const fpInstance = window.fluidPlayer('anime-player', basicOptions);
+      console.log('Fluid Player instance created:', fpInstance);
 
       // Store the player instance for later use
       playerInstanceRef.current = fpInstance;
 
-      // If we only have one source, set the src directly
-      if (videoSources.length === 1) {
-        videoRef.current.src = videoSources[0].src;
-      }
-
-      // Setup event listeners
+      // Setup event listeners on the video element
       if (videoRef.current) {
         // When playback starts
         videoRef.current.addEventListener('play', startWatchHistoryTracking);
@@ -185,6 +151,8 @@ const FluidVideoPlayer = ({
       setIsPlayerReady(true);
     } catch (error) {
       console.error('Error initializing Fluid Player:', error);
+      // Even if Fluid Player fails, we can still use the native video
+      setIsPlayerReady(true);
     }
 
     // Clean up on unmount
@@ -280,9 +248,7 @@ const FluidVideoPlayer = ({
 
   return (
     <div className="w-full flex flex-col bg-black fluid-player-container">
-      <Helmet>
-        <link rel="stylesheet" href="/assets/fluid-player/fluidplayer.css" />
-      </Helmet>
+      {/* Don't load CSS via Helmet since we've already added it to index.html */}
       
       {/* Main video container */}
       <div className="relative w-full bg-black overflow-hidden video-aspect-container">
@@ -293,6 +259,10 @@ const FluidVideoPlayer = ({
             className="fluid-video"
             data-fluid-player 
             id="anime-player"
+            controls
+            preload="auto"
+            width="100%"
+            style={{ width: '100%', height: '100%' }}
           >
             <source src={getVideoUrl()} type="video/mp4" />
             Your browser does not support the video tag.
