@@ -878,7 +878,19 @@ const VideoPlayer = ({
       resetControlsTimeout();
     };
 
-    // Effect to save controls visibility preference
+    // Load initial show controls preference from localStorage
+    useEffect(() => {
+      try {
+        const savedPreference = localStorage.getItem('videoShowControls');
+        if (savedPreference !== null) {
+          setShowControls(savedPreference === 'true');
+        }
+      } catch (err) {
+        console.error('Failed to load controls preference:', err);
+      }
+    }, []);
+
+    // Save controls visibility preference
     useEffect(() => {
       try {
         localStorage.setItem('videoShowControls', showControls.toString());
