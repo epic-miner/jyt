@@ -1,259 +1,223 @@
-import { useRef, useEffect, useState } from 'react';
-
-// Define available quality options
-type VideoQuality = '480p' | '720p' | '1080p' | 'max';
+import React, { useEffect, useRef, useState } from 'react';
+import fluidPlayer from 'fluid-player';
+import 'fluid-player/src/css/fluidplayer.css';
+import './TestPlayer.css';
 
 interface TestPlayerProps {
-  videoUrl: string;
-  title?: string;
+  src: string[];
   poster?: string;
-  episode?: any; 
-  onTimeUpdate?: (timeData: { currentTime: number; duration: number }) => void;
+  title?: string;
+  qualities?: { label: string; url: string }[];
 }
 
-const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episode, onTimeUpdate }) => {
+const TestPlayer: React.FC<TestPlayerProps> = ({ src, poster, title, qualities }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerInstanceRef = useRef<any>(null);
-  const [selectedQuality, setSelectedQuality] = useState<VideoQuality>('max');
-  const [showQualityMenu, setShowQualityMenu] = useState<boolean>(false);
-
-  // Get available quality options from episode
-  const getAvailableQualities = () => {
-    if (!episode) return [];
-
-    const qualities: { quality: VideoQuality; url: string | undefined }[] = [];
-
-    if (episode.video_url_480p) {
-      qualities.push({ quality: '480p', url: episode.video_url_480p });
-    }
-
-    if (episode.video_url_720p) {
-      qualities.push({ quality: '720p', url: episode.video_url_720p });
-    }
-
-    if (episode.video_url_1080p) {
-      qualities.push({ quality: '1080p', url: episode.video_url_1080p });
-    }
-
-    // Always include max quality
-    qualities.push({ quality: 'max', url: episode.video_url_max_quality });
-
-    return qualities;
-  };
-
-  // Get current video URL based on selected quality
-  const getCurrentVideoUrl = () => {
-    if (!episode) return videoUrl;
-
-    switch (selectedQuality) {
-      case '480p':
-        return episode.video_url_480p || videoUrl;
-      case '720p':
-        return episode.video_url_720p || videoUrl;
-      case '1080p':
-        return episode.video_url_1080p || videoUrl;
-      case 'max':
-      default:
-        return episode.video_url_max_quality || videoUrl;
-    }
-  };
-
-  // Handle quality change
-  const handleQualityChange = (quality: VideoQuality) => {
-    if (videoRef.current) {
-      // Save current playback time and playing state
-      const currentTime = videoRef.current.currentTime;
-      const isPlaying = !videoRef.current.paused;
-
-      // Change quality
-      setSelectedQuality(quality);
-
-      // Apply new source
-      videoRef.current.src = getCurrentVideoUrl();
-      videoRef.current.load();
-
-      // Restore playback position
-      videoRef.current.onloadeddata = () => {
-        if (videoRef.current) {
-          videoRef.current.currentTime = currentTime;
-          if (isPlaying) {
-            videoRef.current.play().catch(e => {
-              console.error('Error playing video after quality change:', e);
-            });
-          }
-        }
-      };
-
-      // Hide quality menu
-      setShowQualityMenu(false);
-    }
-  };
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentQuality, setCurrentQuality] = useState<string>('');
 
   useEffect(() => {
-    const initPlayer = () => {
-      if (!videoRef.current || typeof window.fluidPlayer !== 'function') {
-        console.log('Video element or fluidPlayer not available yet');
-        setTimeout(initPlayer, 200);
-        return;
+    if (videoRef.current && src.length > 0) {
+      // Destroy previous player instance if it exists
+      if (playerInstanceRef.current) {
+        playerInstanceRef.current.destroy();
       }
 
-      try {
-        if (playerInstanceRef.current) {
-          playerInstanceRef.current.destroy();
+      // If qualities are provided, use them, otherwise use the src array
+      const videoSources = qualities?.length 
+        ? qualities.map(q => ({ 
+            type: 'video/mp4',
+            src: q.url,
+            title: q.label
+          }))
+        : src.map(url => ({
+            type: 'video/mp4',
+            src: url,
+            title: 'Default'
+          }));
+
+      // Set the initial quality
+      if (qualities?.length) {
+        setCurrentQuality(qualities[0].label);
+      }
+
+      // Initialize Fluid Player
+      playerInstanceRef.current = fluidPlayer(videoRef.current, {
+        layoutControls: {
+          primaryColor: "#ff0000",
+          posterImage: poster || '',
+          playButtonShowing: true,
+          playPauseAnimation: true,
+          fillToContainer: true,
+          autoPlay: false,
+          preload: 'auto',
+          mute: false,
+          doubleclickFullscreen: true,
+          subtitlesEnabled: false,
+          keyboardControl: true,
+          title: title || 'Video Player',
+          allowDownload: false,
+          controlBar: {
+            autoHide: true,
+            autoHideTimeout: 3,
+            animated: true
+          },
+          logo: {
+            imageUrl: null,
+            position: 'top left',
+            clickUrl: null,
+            opacity: 1,
+            mouseOverImageUrl: null,
+            imageMargin: '2px',
+            hideWithControls: false,
+            showOverAds: false
+          },
+        },
+        vastOptions: {
+          adList: [],
+          skipButtonCaption: 'Skip ad in [seconds]',
+          skipButtonClickCaption: 'Skip ad <span class="skip_button_icon"></span>',
+          adText: null,
+          adTextPosition: 'top left',
+          adCTAText: 'Visit now!',
+          adCTATextPosition: 'bottom right',
         }
+      });
 
-        const playerOptions = {
-          layoutControls: {
-            primaryColor: "#ef4444",
-            fillToContainer: true,
-            posterImage: episode?.thumbnail_url || poster,
-            posterImageSize: 'cover',
-            playButtonShowing: true,
-            playPauseAnimation: true,
-            autoPlay: false,
-            mute: false,
-            keyboardControl: true,
-            loop: false,
-            allowDownload: false,
-            playbackRateEnabled: true,
-            allowTheatre: true,
-            controlBar: {
-              autoHide: true,
-              autoHideTimeout: 3,
-              animated: true
-            },
-            logo: {
-              imageUrl: '/assets/logo_optimized.png',
-              position: 'top left',
-              clickUrl: null,
-              opacity: 0.8,
-              mouseOverImageUrl: null,
-              imageMargin: '10px',
-              hideWithControls: true,
-              showOverAds: false
-            },
-            contextMenu: {
-              controls: true,
-              links: []
-            }
+      // Add quality selector button if qualities are provided
+      if (qualities?.length && qualities.length > 1) {
+        const player = playerInstanceRef.current;
+
+        // Create quality menu button
+        const controlBar = document.querySelector('.fluid_controls_container');
+        if (controlBar) {
+          const qualityBtn = document.createElement('div');
+          qualityBtn.className = 'fluid_control fluid_button fluid_control_quality';
+          qualityBtn.innerHTML = `
+            <span class="quality_button_text">${currentQuality}</span>
+            <div class="fluid_quality_selector" style="display: none;">
+              ${qualities.map(q => `
+                <div class="fluid_quality_option ${q.label === currentQuality ? 'fluid_quality_selected' : ''}" 
+                     data-quality="${q.label}" 
+                     data-url="${q.url}">
+                  ${q.label}
+                </div>
+              `).join('')}
+            </div>
+          `;
+
+          // Insert before fullscreen button
+          const fullscreenBtn = document.querySelector('.fluid_control_fullscreen');
+          if (fullscreenBtn) {
+            controlBar.insertBefore(qualityBtn, fullscreenBtn);
+          } else {
+            controlBar.appendChild(qualityBtn);
           }
-        };
 
-        // Initialize player
-        const videoId = videoRef.current.id;
-        playerInstanceRef.current = window.fluidPlayer(videoId, playerOptions);
+          // Toggle quality menu
+          qualityBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const selector = qualityBtn.querySelector('.fluid_quality_selector');
+            if (selector) {
+              selector.style.display = selector.style.display === 'none' ? 'block' : 'none';
+            }
+          });
 
-        // Add time update event listener
-        if (onTimeUpdate) {
-          videoRef.current.addEventListener('timeupdate', () => {
-            onTimeUpdate({
-              currentTime: videoRef.current?.currentTime || 0,
-              duration: videoRef.current?.duration || 0
+          // Add click handlers for quality options
+          document.querySelectorAll('.fluid_quality_option').forEach(option => {
+            option.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const target = e.currentTarget as HTMLElement;
+              const quality = target.getAttribute('data-quality') || '';
+              const url = target.getAttribute('data-url') || '';
+
+              // Update selected quality
+              document.querySelectorAll('.fluid_quality_option').forEach(opt => {
+                opt.classList.remove('fluid_quality_selected');
+              });
+              target.classList.add('fluid_quality_selected');
+
+              // Update quality button text
+              const btnText = qualityBtn.querySelector('.quality_button_text');
+              if (btnText) {
+                btnText.textContent = quality;
+              }
+
+              // Hide selector
+              const selector = qualityBtn.querySelector('.fluid_quality_selector');
+              if (selector) {
+                selector.style.display = 'none';
+              }
+
+              // Remember current time and playing state
+              const currentTime = videoRef.current?.currentTime || 0;
+              const wasPlaying = !videoRef.current?.paused;
+
+              // Change source
+              if (videoRef.current) {
+                videoRef.current.src = url;
+                videoRef.current.load();
+                videoRef.current.currentTime = currentTime;
+
+                if (wasPlaying) {
+                  videoRef.current.play();
+                }
+              }
+
+              setCurrentQuality(quality);
             });
           });
+
+          // Close menu when clicking outside
+          document.addEventListener('click', () => {
+            const selector = qualityBtn.querySelector('.fluid_quality_selector');
+            if (selector) {
+              selector.style.display = 'none';
+            }
+          });
         }
-      } catch (error) {
-        console.error('Error initializing Fluid Player:', error);
       }
-    };
+    }
 
-    initPlayer();
-
-    // Cleanup
+    // Cleanup function
     return () => {
       if (playerInstanceRef.current) {
-        try {
-          playerInstanceRef.current.destroy();
-        } catch (error) {
-          console.error('Error destroying player:', error);
-        }
+        playerInstanceRef.current.destroy();
       }
     };
-  }, [videoUrl, poster, episode, onTimeUpdate]);
-
-  // Update video source when quality changes
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.src = getCurrentVideoUrl();
-      videoRef.current.load();
-    }
-  }, [selectedQuality, episode]);
+  }, [src, poster, title, qualities]); // Re-initialize player when these props change
 
   useEffect(() => {
     const videoElement = videoRef.current;
-    if (!videoElement) return;
 
-    const handleTimeUpdate = () => {
-      if (onTimeUpdate && videoElement.duration) {
-        onTimeUpdate({
-          currentTime: videoElement.currentTime,
-          duration: videoElement.duration
-        });
-      }
+    const handlePlay = () => {
+      setIsPlaying(true);
     };
 
-    // Close quality menu when clicking outside
-    const handleClickOutside = (event: MouseEvent) => {
-      if (showQualityMenu && 
-          !((event.target as HTMLElement).closest('.quality-menu') || 
-            (event.target as HTMLElement).closest('button'))) {
-        setShowQualityMenu(false);
-      }
+    const handlePause = () => {
+      setIsPlaying(false);
     };
 
-    videoElement.addEventListener('timeupdate', handleTimeUpdate);
-    document.addEventListener('click', handleClickOutside);
+    if (videoElement) {
+      videoElement.addEventListener('play', handlePlay);
+      videoElement.addEventListener('pause', handlePause);
+    }
 
     return () => {
-      videoElement.removeEventListener('timeupdate', handleTimeUpdate);
-      document.removeEventListener('click', handleClickOutside);
+      if (videoElement) {
+        videoElement.removeEventListener('play', handlePlay);
+        videoElement.removeEventListener('pause', handlePause);
+      }
     };
-  }, [onTimeUpdate, showQualityMenu]);
+  }, []);
 
   return (
-    <div className="fluid-player-container">
-      <div className="relative w-full">
-        <video
-          id="test-fluid-player"
-          ref={videoRef}
-          className="w-full aspect-video"
-          controls
-          playsInline
-          poster={episode?.thumbnail_url || poster}
-        >
-          <source src={getCurrentVideoUrl()} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-
-        {/* Quality selection button */}
-        <div className="absolute bottom-16 right-4 z-10">
-          <button
-            className="bg-black bg-opacity-70 text-white px-3 py-1 rounded-md text-sm flex items-center"
-            onClick={() => setShowQualityMenu(!showQualityMenu)}
-          >
-            {selectedQuality === 'max' ? 'MAX' : selectedQuality} 
-            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-
-          {/* Quality menu */}
-          {showQualityMenu && (
-            <div className="absolute bottom-10 right-0 bg-black bg-opacity-90 text-white rounded-md overflow-hidden">
-              {getAvailableQualities().map(({ quality, url }) => (
-                <button
-                  key={quality}
-                  className={`block w-full text-left px-4 py-2 hover:bg-gray-700 ${selectedQuality === quality ? 'bg-gray-700' : ''}`}
-                  onClick={() => handleQualityChange(quality)}
-                  disabled={!url}
-                >
-                  {quality === 'max' ? 'MAX' : quality}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+    <div className="video-player-container">
+      <video ref={videoRef} className="fluid-player" playsInline>
+        {src.map((url, index) => (
+          <source key={index} src={url} type="video/mp4" />
+        ))}
+      </video>
     </div>
   );
 };

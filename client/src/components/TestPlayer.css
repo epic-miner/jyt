@@ -1,0 +1,41 @@
+
+
+/* Quality selector styles */
+.fluid_control_quality {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quality_button_text {
+  font-size: 12px;
+  padding: 0 5px;
+}
+
+.fluid_quality_selector {
+  position: absolute;
+  bottom: 40px;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 3px;
+  color: white;
+  width: 100px;
+  z-index: 10;
+}
+
+.fluid_quality_option {
+  padding: 8px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.fluid_quality_option:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.fluid_quality_selected {
+  background-color: rgba(255, 0, 0, 0.5);
+}
