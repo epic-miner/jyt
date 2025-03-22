@@ -17,6 +17,7 @@ const VideoPlayerPage = () => {
 
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState<number>(-1);
+  const [isNavigating, setIsNavigating] = useState<boolean>(false);
 
   // Fetch anime details
   const { data: anime, isLoading: isLoadingAnime } = useQuery({
@@ -76,22 +77,72 @@ const VideoPlayerPage = () => {
       });
     }
   }, [anime, currentEpisode, animeId, episodeId]);
+  
+  // Force a window scroll to the top when changing episodes
+  // This helps trigger any lazy-loaded components to reinitialize
+  useEffect(() => {
+    if (currentEpisode) {
+      // Scroll to top
+      window.scrollTo(0, 0);
+      
+      // Add a small delay before forcibly reloading any existing player elements
+      const timer = setTimeout(() => {
+        // Try to access any video elements and force them to reload
+        const videoElements = document.querySelectorAll('video');
+        videoElements.forEach(video => {
+          if (video.src) {
+            // Explicitly set video source to force reload
+            const currentSrc = video.src;
+            video.src = '';
+            video.load();
+            video.src = currentSrc;
+            video.load();
+            video.play().catch(e => console.error('Error playing after episode change:', e));
+          }
+        });
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentEpisode?.id]);
 
   const handleNextEpisode = useCallback(() => {
-    if (currentEpisodeIndex < episodes.length - 1) {
+    if (currentEpisodeIndex < episodes.length - 1 && !isNavigating) {
+      // Set navigating state to show loading and prevent multiple clicks
+      setIsNavigating(true);
+      
+      // Get next episode
       const nextEp = episodes[currentEpisodeIndex + 1];
-      // Add timestamp to force reload and ensure autoplay works
-      setLocation(`/watch/${animeId}/${nextEp.id}?t=${Date.now()}`);
+      
+      // Add a small delay to allow for better user feedback
+      setTimeout(() => {
+        // Add timestamp to force reload and ensure autoplay works
+        setLocation(`/watch/${animeId}/${nextEp.id}?t=${Date.now()}`);
+        
+        // Reset navigating state after a delay to ensure navigation is complete
+        setTimeout(() => setIsNavigating(false), 500);
+      }, 200);
     }
-  }, [currentEpisodeIndex, episodes, animeId, setLocation]);
+  }, [currentEpisodeIndex, episodes, animeId, setLocation, isNavigating]);
 
   const handlePreviousEpisode = useCallback(() => {
-    if (currentEpisodeIndex > 0) {
+    if (currentEpisodeIndex > 0 && !isNavigating) {
+      // Set navigating state to show loading and prevent multiple clicks
+      setIsNavigating(true);
+      
+      // Get previous episode
       const prevEp = episodes[currentEpisodeIndex - 1];
-      // Add timestamp to force reload and ensure autoplay works
-      setLocation(`/watch/${animeId}/${prevEp.id}?t=${Date.now()}`);
+      
+      // Add a small delay to allow for better user feedback
+      setTimeout(() => {
+        // Add timestamp to force reload and ensure autoplay works
+        setLocation(`/watch/${animeId}/${prevEp.id}?t=${Date.now()}`);
+        
+        // Reset navigating state after a delay to ensure navigation is complete
+        setTimeout(() => setIsNavigating(false), 500);
+      }, 200);
     }
-  }, [currentEpisodeIndex, episodes, animeId, setLocation]);
+  }, [currentEpisodeIndex, episodes, animeId, setLocation, isNavigating]);
 
   // Handle loading state
   if (isLoadingAnime || isLoadingEpisode) {
@@ -157,7 +208,18 @@ const VideoPlayerPage = () => {
         {/* Test Player Implementation */}
         <div className="w-full flex flex-col bg-black">
           <div className="relative w-full bg-black overflow-hidden aspect-video">
+            {/* Show loading overlay when navigating between episodes */}
+            {isNavigating && (
+              <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+                <div className="text-center">
+                  <div className="inline-block w-16 h-16 border-t-4 border-primary border-solid rounded-full animate-spin"></div>
+                  <p className="mt-4 text-white text-opacity-90 text-lg font-semibold">Loading episode...</p>
+                </div>
+              </div>
+            )}
+            
             <TestPlayer 
+              key={`episode-player-${currentEpisode.id}`} 
               videoUrl={currentEpisode.video_url_max_quality} 
               episode={currentEpisode}
               poster={currentEpisode.thumbnail_url}
@@ -190,11 +252,15 @@ const VideoPlayerPage = () => {
             <button
               className="bg-gray-800/70 hover:bg-gray-700/70 transition px-2 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               onClick={handlePreviousEpisode}
-              disabled={!(currentEpisodeIndex > 0)}
+              disabled={!(currentEpisodeIndex > 0) || isNavigating}
             >
-              <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="19 20 9 12 19 4"></polyline>
-              </svg> 
+              {isNavigating ? (
+                <div className="w-3 h-3 sm:w-4 sm:h-4 mr-1 border-t-2 border-white border-solid rounded-full animate-spin"></div>
+              ) : (
+                <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="19 20 9 12 19 4"></polyline>
+                </svg>
+              )}
               <span className="sm:inline hidden">Previous</span>
               <span className="sm:hidden inline">Prev</span>
             </button>
@@ -206,13 +272,17 @@ const VideoPlayerPage = () => {
             <button
               className="bg-gray-800/70 hover:bg-gray-700/70 transition px-2 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               onClick={handleNextEpisode}
-              disabled={!(currentEpisodeIndex < episodes.length - 1)}
+              disabled={!(currentEpisodeIndex < episodes.length - 1) || isNavigating}
             >
               <span className="sm:inline hidden">Next</span>
               <span className="sm:hidden inline">Next</span>
-              <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="5 4 15 12 5 20"></polyline>
-              </svg>
+              {isNavigating ? (
+                <div className="w-3 h-3 sm:w-4 sm:h-4 ml-1 border-t-2 border-white border-solid rounded-full animate-spin"></div>
+              ) : (
+                <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="5 4 15 12 5 20"></polyline>
+                </svg>
+              )}
             </button>
           </div>
         </div>
@@ -236,13 +306,25 @@ const VideoPlayerPage = () => {
               {episodes.map((ep) => (
                 <button
                   key={ep.id}
-                  onClick={() => setLocation(`/watch/${animeId}/${ep.id}?t=${Date.now()}`)}
+                  onClick={() => {
+                    if (!isNavigating) {
+                      setIsNavigating(true);
+                      // Add a slight delay for better UX
+                      setTimeout(() => {
+                        setLocation(`/watch/${animeId}/${ep.id}?t=${Date.now()}`);
+                        // Reset navigating state after navigation
+                        setTimeout(() => setIsNavigating(false), 500);
+                      }, 200);
+                    }
+                  }}
+                  disabled={isNavigating}
                   className={cn(
                     "p-4 rounded-lg text-left transition-all duration-300 flex flex-col glass-card",
                     "hover:scale-[1.05] hover:shadow-lg hover:shadow-primary/20",
                     ep.id === currentEpisode.id 
                       ? "bg-primary/20 text-white shadow-lg shadow-primary/30 border-primary/30" 
-                      : "text-gray-300 glass-effect"
+                      : "text-gray-300 glass-effect",
+                    isNavigating && "opacity-50 cursor-not-allowed"
                   )}
                 >
                   <div className="font-medium text-mobile-optimized">Episode {ep.episode_number}</div>
