@@ -60,15 +60,7 @@ const VideoPlayer = ({
   const [isMuted, setIsMuted] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  // Initialize showControls with localStorage preference if available
-  const [showControls, setShowControls] = useState(() => {
-    try {
-      const savedControls = localStorage.getItem('videoShowControls');
-      return savedControls === null ? true : savedControls === 'true';
-    } catch (err) {
-      return true;
-    }
-  });
+  const [showControls, setShowControls] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedQuality, setSelectedQuality] = useState<VideoQuality>('auto');
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
@@ -878,27 +870,6 @@ const VideoPlayer = ({
       resetControlsTimeout();
     };
 
-    // Load initial show controls preference from localStorage
-    useEffect(() => {
-      try {
-        const savedPreference = localStorage.getItem('videoShowControls');
-        if (savedPreference !== null) {
-          setShowControls(savedPreference === 'true');
-        }
-      } catch (err) {
-        console.error('Failed to load controls preference:', err);
-      }
-    }, []);
-
-    // Save controls visibility preference
-    useEffect(() => {
-      try {
-        localStorage.setItem('videoShowControls', showControls.toString());
-      } catch (error) {
-        console.error('Failed to save controls preference to localStorage:', error);
-      }
-    }, [showControls]);
-
     const playerContainer = playerContainerRef.current;
     if (playerContainer) {
       // Mouse events for desktop
@@ -1184,23 +1155,6 @@ const VideoPlayer = ({
                 )}
               </div>
             </div>
-
-            {/* Toggle controls button - always visible */}
-            <button 
-              onClick={() => setShowControls(!showControls)}
-              className={cn(
-                "absolute top-4 right-4 z-20 bg-black/60 hover:bg-black/80 p-2 rounded-full transition-all",
-                "text-white flex items-center justify-center"
-              )}
-            >
-              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
-                {showControls ? (
-                  <path d="M18.6247 20.7181L11.9995 17.2275L5.37431 20.7181V3.28241L11.9995 6.77295L18.6247 3.28241V20.7181Z" />
-                ) : (
-                  <path d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                )}
-              </svg>
-            </button>
 
             {/* YouTube-style custom controls overlay */}
             <div className={cn(
