@@ -967,7 +967,7 @@ const VideoPlayer = ({
     const newTime = pos * videoRef.current.duration;
 
     // Clear any pending seek operations
-    ifif (seekDebounceRef.current) {
+    if (seekDebounceRef.current) {
       clearTimeout(seekDebounceRef.current);
     }
 
