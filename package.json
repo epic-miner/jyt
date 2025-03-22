@@ -57,6 +57,7 @@
     "embla-carousel-react": "^8.3.0",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
+    "fluid-player": "^3.51.0",
     "framer-motion": "^11.13.1",
     "input-otp": "^1.2.4",
     "js-cookie": "^3.0.5",
