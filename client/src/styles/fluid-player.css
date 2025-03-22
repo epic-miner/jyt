@@ -27,6 +27,32 @@
 /* Player UI theme overrides */
 #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container {
   background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0)) !important;
+
+/* Fix for time display overlapping with sound button in portrait mode */
+@media (max-width: 480px) and (orientation: portrait) {
+  .fluid_video_wrapper .fluid_controls_container {
+    justify-content: space-between;
+  }
+  
+  .fluid_video_wrapper .fluid_controls_container .fluid_controls_left {
+    max-width: 40%;
+  }
+  
+  .fluid_video_wrapper .fluid_controls_container .fluid_control_duration {
+    margin-left: 2px;
+    font-size: 11px !important;
+  }
+  
+  .fluid_video_wrapper .fluid_controls_container .fluid_control_currenttime {
+    font-size: 11px !important;
+    margin-right: 2px;
+  }
+  
+  .fluid_video_wrapper .fluid_controls_container .fluid_control_playpause {
+    margin-right: 3px;
+  }
+}
+
   border-radius: 0 0 8px 8px;
   padding: 8px 0;
   transition: opacity 0.3s ease;
@@ -253,4 +279,49 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
   border-radius: 6px !important;
   overflow: hidden !important;
+}
+/* Mobile-specific video player controls */
+@media (max-width: 640px) and (orientation: portrait) {
+  /* Add better spacing for controls in portrait mode */
+  .fluid_video_wrapper .fluid_controls_container {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0 5px;
+  }
+  
+  /* Make the play controls and time display consistent */
+  .fluid_video_wrapper .fluid_controls_container .fluid_controls_left {
+    flex: 0 0 35%;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Adjust time display to prevent overlap */
+  .fluid_video_wrapper .fluid_controls_container .fluid_controls_left .fluid_control_currenttime,
+  .fluid_video_wrapper .fluid_controls_container .fluid_controls_left .fluid_control_duration {
+    font-size: 12px;
+    padding: 0 2px;
+  }
+  
+  /* Make volume and other controls more compact */
+  .fluid_video_wrapper .fluid_controls_container .fluid_controls_right {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+  }
+  
+  /* Reduce size of buttons on small screens */
+  .fluid_video_wrapper .fluid_controls_container .fluid_button {
+    width: 26px;
+    height: 26px;
+    margin: 0 2px;
+  }
+  
+  /* Hide volume slider on very small screens to save space */
+  @media (max-width: 360px) {
+    .fluid_video_wrapper .fluid_controls_container .fluid_control_volume_container .fluid_control_volume {
+      display: none;
+    }
+  }
 }
