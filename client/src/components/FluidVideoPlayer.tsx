@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, memo } from 'react';
 import { Episode, Anime } from '@shared/types';
 import { updateWatchHistory } from '../lib/cookies';
-import '../styles/fluid-player.css'; // This will be created later
+import '../styles/fluid-player.css';
 
 // Import Fluid Player TypeScript definitions
 declare global {
@@ -15,12 +15,8 @@ declare global {
     skipTo: (seconds: number) => void;
     setPlaybackSpeed: (speed: number) => void;
     setVolume: (volume: number) => void;
-    toggleControlBar: (shouldToggle: boolean) => void;
     toggleFullScreen: (shouldToggle: boolean) => void;
-    toggleMiniPlayer: (shouldToggle: boolean) => void;
     destroy: () => void;
-    dashInstance: () => any | null;
-    hlsInstance: () => any | null;
     on: (event: string, callback: (additionalInfo?: any) => void) => void;
   }
 }
@@ -46,6 +42,7 @@ const FluidVideoPlayer = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerRef = useRef<FluidPlayerInstance | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [fluidPlayerLoaded, setFluidPlayerLoaded] = useState(false);
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get video URL based on available qualities
@@ -56,178 +53,136 @@ const FluidVideoPlayer = ({
            episode.video_url_480p || '';
   };
 
+  // Load Fluid Player scripts
+  useEffect(() => {
+    // Only load if not already loaded
+    if (!window.fluidPlayer && !fluidPlayerLoaded) {
+      // Load CSS
+      const linkElement = document.createElement('link');
+      linkElement.rel = 'stylesheet';
+      linkElement.href = '/assets/fluid-player/fluidplayer.min.css';
+      document.head.appendChild(linkElement);
+
+      // Load JavaScript
+      const scriptElement = document.createElement('script');
+      scriptElement.src = '/assets/fluid-player/fluidplayer.min.js';
+      scriptElement.async = true;
+      scriptElement.onload = () => {
+        setFluidPlayerLoaded(true);
+      };
+      document.body.appendChild(scriptElement);
+    } else if (window.fluidPlayer) {
+      setFluidPlayerLoaded(true);
+    }
+  }, []);
+
   // Initialize Fluid Player
   useEffect(() => {
-    // Load Fluid Player scripts if they're not already loaded
-    const loadFluidPlayerScript = () => {
-      if (typeof window.fluidPlayer === 'undefined') {
-        // Import the Fluid Player scripts
-        import('../../fluid-player/dist/fluidplayer.min.js')
-          .then(() => {
-            initializePlayer();
-          })
-          .catch(err => {
-            console.error('Failed to load Fluid Player:', err);
-          });
-      } else {
-        initializePlayer();
+    if (!fluidPlayerLoaded || !videoRef.current || !window.fluidPlayer) return;
+
+    // Destroy previous instance if exists
+    if (playerRef.current) {
+      playerRef.current.destroy();
+      playerRef.current = null;
+    }
+
+    // Create Fluid Player instance
+    const options = {
+      layoutControls: {
+        primaryColor: "#ef4444", // Use primary color from theme
+        playButtonShowing: true,
+        playPauseAnimation: true,
+        fillToContainer: true,
+        autoPlay: false,
+        mute: false,
+        loop: false,
+        allowDownload: false,
+        playbackRateEnabled: true,
+        allowTheatre: true,
+        title: `${anime.title} - Episode ${episode.episode_number}: ${episode.title}`,
+        posterImage: episode.thumbnail_url || anime.thumbnail_url,
+        controlBar: {
+          autoHide: true,
+          autoHideTimeout: 3,
+          animated: true
+        },
+        logo: {
+          imageUrl: null,
+          position: 'top left',
+          clickUrl: null,
+          opacity: 0.8,
+          mouseOverImageUrl: null,
+          imageMargin: '2px',
+          hideWithControls: true,
+          showOverAds: false
+        },
+        controlForwardBackward: {
+          show: true
+        },
+        miniPlayer: {
+          enabled: true,
+          width: 400,
+          height: 225,
+          widthMobile: 280,
+          placeholderText: 'Minimize Player',
+          position: 'bottom right'
+        }
+      },
+      captions: { 
+        play: 'Play', 
+        pause: 'Pause', 
+        mute: 'Mute', 
+        unmute: 'Unmute', 
+        fullscreen: 'Fullscreen', 
+        exitFullscreen: 'Exit Fullscreen' 
       }
     };
 
-    // Initialize the player with our configuration
-    const initializePlayer = () => {
-      if (!videoRef.current || typeof window.fluidPlayer === 'undefined') return;
-      
-      // Destroy previous instance if exists
-      if (playerRef.current) {
-        playerRef.current.destroy();
-      }
-
-      // Configure available qualities
-      const videoSources = [];
-      
-      if (episode.video_url_1080p) {
-        videoSources.push({ 
-          label: '1080p', // Label that will appear in the menu
-          url: episode.video_url_1080p, 
-          default: !episode.video_url_max_quality
-        });
-      }
-      
-      if (episode.video_url_720p) {
-        videoSources.push({ 
-          label: '720p',
-          url: episode.video_url_720p,
-          default: !episode.video_url_max_quality && !episode.video_url_1080p
-        });
-      }
-      
-      if (episode.video_url_480p) {
-        videoSources.push({ 
-          label: '480p',
-          url: episode.video_url_480p,
-          default: !episode.video_url_max_quality && !episode.video_url_1080p && !episode.video_url_720p
-        });
-      }
-      
-      // If we have a max quality URL and it's different from the others
-      if (episode.video_url_max_quality) {
-        const isMaxQualitySame = 
-          episode.video_url_max_quality === episode.video_url_1080p || 
-          episode.video_url_max_quality === episode.video_url_720p || 
-          episode.video_url_max_quality === episode.video_url_480p;
-          
-        if (!isMaxQualitySame) {
-          videoSources.push({ 
-            label: 'Auto (Best Quality)',
-            url: episode.video_url_max_quality,
-            default: true
-          });
-        }
-      }
-
-      // Create Fluid Player instance
-      const options = {
-        layoutControls: {
-          primaryColor: "#ef4444", // Use the appropriate color from your theme
-          playButtonShowing: true,
-          playPauseAnimation: true,
-          fillToContainer: true,
-          autoPlay: false,
-          mute: false,
-          loop: false,
-          allowDownload: false,
-          playbackRateEnabled: true,
-          allowTheatre: true,
-          title: `${anime.title} - Episode ${episode.episode_number}: ${episode.title}`,
-          posterImage: episode.thumbnail_url || anime.thumbnail_url,
-          controlBar: {
-            autoHide: true,
-            autoHideTimeout: 3,
-            animated: true
-          },
-          logo: {
-            imageUrl: null, // Your logo image URL if needed
-            position: 'top left',
-            clickUrl: null,
-            opacity: 0.8,
-            mouseOverImageUrl: null,
-            imageMargin: '2px',
-            hideWithControls: true,
-            showOverAds: false
-          },
-          controlForwardBackward: {
-            show: true
-          },
-          // Enable mini player for a better viewing experience
-          miniPlayer: {
-            enabled: true,
-            width: 400,
-            height: 225,
-            widthMobile: 280,
-            placeholderText: 'Minimize Player',
-            position: 'bottom right'
-          }
-        },
-        // If you need multiple video source qualities
-        captions: { play: 'Play', pause: 'Pause', mute: 'Mute', unmute: 'Unmute', fullscreen: 'Fullscreen', exitFullscreen: 'Exit Fullscreen' }
-      };
-
+    try {
       // Initialize player
       playerRef.current = window.fluidPlayer(videoRef.current, options);
       
-      // Set video sources if available
-      if (videoSources.length > 1) {
-        // This approach will depend on how Fluid Player handles multiple sources
-        // This might need adjustment based on actual Fluid Player implementation
-        videoSources.forEach(source => {
-          // Add source elements dynamically
-          const sourceElement = document.createElement('source');
-          sourceElement.src = source.url;
-          sourceElement.type = 'video/mp4';
-          sourceElement.setAttribute('title', source.label);
-          sourceElement.setAttribute('data-fluid-hd', source.default ? 'true' : 'false');
-          videoRef.current?.appendChild(sourceElement);
-        });
-        
-        if (videoRef.current) {
-          videoRef.current.load();
-        }
-      }
-
       // Setup event handlers
       if (playerRef.current) {
-        // When the player's ready
+        // When playback starts
         playerRef.current.on('play', () => {
           startWatchHistoryTracking();
         });
 
-        playerRef.current.on('timeupdate', (time) => {
-          // Update time display and other UI elements
+        // When the time updates
+        playerRef.current.on('timeupdate', () => {
           updateWatchProgress();
         });
 
+        // When the video ends
         playerRef.current.on('ended', () => {
           clearWatchHistoryTracking();
           if (hasNext) {
-            onNextEpisode();
+            setTimeout(() => {
+              onNextEpisode();
+            }, 1000);
           }
         });
       }
 
       setIsInitialized(true);
-    };
+    } catch (error) {
+      console.error('Error initializing Fluid Player:', error);
+    }
 
-    loadFluidPlayerScript();
-
-    // Clean up on unmount
+    // Clean up on unmount or when episode changes
     return () => {
       clearWatchHistoryTracking();
       if (playerRef.current) {
-        playerRef.current.destroy();
+        try {
+          playerRef.current.destroy();
+          playerRef.current = null;
+        } catch (error) {
+          console.error('Error destroying Fluid Player:', error);
+        }
       }
     };
-  }, [anime.id, episode.id]); // Re-initialize when anime or episode changes
+  }, [fluidPlayerLoaded, anime.id, episode.id]); // Re-initialize when anime or episode changes
 
   // Watch history tracking functions
   const startWatchHistoryTracking = () => {
@@ -274,7 +229,7 @@ const FluidVideoPlayer = ({
 
   // Set up previously saved progress
   useEffect(() => {
-    if (!videoRef.current || !isInitialized) return;
+    if (!videoRef.current || !isInitialized || !playerRef.current) return;
 
     // Check if we have saved progress for this episode
     const savedHistoryItems = JSON.parse(localStorage.getItem('watchHistory') || '[]');
@@ -282,16 +237,127 @@ const FluidVideoPlayer = ({
       (item: any) => item.animeId === anime.id.toString() && item.episodeId === episode.id.toString()
     );
 
-    if (savedItem && savedItem.progress > 0 && playerRef.current) {
-      // Set video time to saved progress
-      const durationSeconds = videoRef.current.duration;
-      if (!isNaN(durationSeconds)) {
-        const timeToSet = savedItem.progress * durationSeconds / 100;
-        // Use Fluid Player's API to skip to the saved time
-        playerRef.current.skipTo(timeToSet);
-      }
+    if (savedItem && savedItem.progress > 0) {
+      // Wait for video metadata to load
+      const handleMetadata = () => {
+        const durationSeconds = videoRef.current?.duration;
+        if (!isNaN(durationSeconds) && durationSeconds > 0 && playerRef.current) {
+          const timeToSet = savedItem.progress * durationSeconds / 100;
+          // Use Fluid Player's API to skip to the saved time
+          playerRef.current.skipTo(timeToSet);
+          
+          videoRef.current?.removeEventListener('loadedmetadata', handleMetadata);
+        }
+      };
+      
+      videoRef.current.addEventListener('loadedmetadata', handleMetadata);
     }
   }, [isInitialized, anime.id, episode.id]);
+
+  // Add quality switching functionality
+  useEffect(() => {
+    if (!isInitialized || !videoRef.current) return;
+
+    // Prepare quality options
+    const qualities = [];
+    
+    if (episode.video_url_1080p) {
+      qualities.push({ label: '1080p', url: episode.video_url_1080p });
+    }
+    
+    if (episode.video_url_720p) {
+      qualities.push({ label: '720p', url: episode.video_url_720p });
+    }
+    
+    if (episode.video_url_480p) {
+      qualities.push({ label: '480p', url: episode.video_url_480p });
+    }
+
+    // Only add quality switcher if we have multiple qualities
+    if (qualities.length > 1) {
+      const videoWrapper = videoRef.current.closest('.fluid_video_wrapper');
+      if (!videoWrapper) return;
+
+      // Check if quality menu already exists
+      if (videoWrapper.querySelector('.fluid_control_video_source')) return;
+
+      // Create quality menu button
+      const qualityButton = document.createElement('div');
+      qualityButton.className = 'fluid_button fluid_button_video_source';
+      qualityButton.innerHTML = '<i class="fa fa-cog"></i>';
+      qualityButton.title = 'Video Quality';
+      qualityButton.onclick = toggleQualityMenu;
+      
+      // Find control bar to append button
+      const controlBar = videoWrapper.querySelector('.fluid_controls_container');
+      if (controlBar) {
+        controlBar.appendChild(qualityButton);
+      }
+
+      // Create quality menu
+      const qualityMenu = document.createElement('div');
+      qualityMenu.className = 'fluid_control_video_source';
+      qualityMenu.style.display = 'none';
+      qualityMenu.innerHTML = '<ul></ul>';
+      videoWrapper.appendChild(qualityMenu);
+
+      // Add quality options
+      const menuList = qualityMenu.querySelector('ul');
+      if (menuList) {
+        qualities.forEach(quality => {
+          const listItem = document.createElement('li');
+          listItem.className = 'fluid_video_source_list_item';
+          listItem.textContent = quality.label;
+          listItem.onclick = () => {
+            const currentTime = videoRef.current?.currentTime || 0;
+            const isPlaying = !videoRef.current?.paused;
+            videoRef.current!.src = quality.url;
+            videoRef.current!.load();
+            
+            // Restore playback state
+            videoRef.current!.addEventListener('loadedmetadata', function onMetadata() {
+              videoRef.current!.currentTime = currentTime;
+              if (isPlaying) videoRef.current!.play();
+              videoRef.current!.removeEventListener('loadedmetadata', onMetadata);
+            });
+            
+            // Update selected class
+            document.querySelectorAll('.fluid_video_source_list_item').forEach(item => {
+              item.classList.remove('source_selected');
+            });
+            listItem.classList.add('source_selected');
+            
+            // Hide menu
+            qualityMenu.style.display = 'none';
+          };
+          menuList.appendChild(listItem);
+        });
+
+        // Mark current quality as selected
+        const currentQuality = qualities.find(q => q.url === videoRef.current?.src);
+        if (currentQuality) {
+          const currentItem = menuList.querySelector(`li:contains('${currentQuality.label}')`);
+          if (currentItem) {
+            currentItem.classList.add('source_selected');
+          }
+        }
+      }
+
+      // Toggle quality menu function
+      function toggleQualityMenu() {
+        const isVisible = qualityMenu.style.display === 'block';
+        qualityMenu.style.display = isVisible ? 'none' : 'block';
+      }
+
+      // Close menu when clicking outside
+      document.addEventListener('click', function closeMenu(e) {
+        if (!qualityButton.contains(e.target as Node) && 
+            !qualityMenu.contains(e.target as Node)) {
+          qualityMenu.style.display = 'none';
+        }
+      });
+    }
+  }, [isInitialized]);
 
   return (
     <div className="w-full flex flex-col bg-black fluid-player-container">

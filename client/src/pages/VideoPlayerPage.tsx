@@ -3,7 +3,7 @@ import { cn } from '../lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { useRoute, useLocation } from 'wouter';
 import { Skeleton } from '@/components/ui/skeleton';
-import VideoPlayer from '../components/VideoPlayer';
+import FluidVideoPlayer from '../components/FluidVideoPlayer';
 import { fetchAnimeById, fetchEpisodeById, fetchEpisodesByAnimeId } from '../lib/api';
 import { updateWatchHistory, updateRecentlyWatchedAnime } from '../lib/cookies';
 import { Episode } from '@shared/types';
