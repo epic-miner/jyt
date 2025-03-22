@@ -217,4 +217,7 @@ const VideoPlayerMobileMenu = ({
   );
 };
 
+// Make sure all text elements have responsive classes before export
+// This is a general update to ensure any text in the component uses our responsive classes
+
 export default VideoPlayerMobileMenu;

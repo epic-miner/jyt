@@ -986,7 +986,7 @@ const VideoPlayer = ({
               <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">
                 <div className="flex flex-col items-center">
                   <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  <p className="mt-4 text-white">Loading video...</p>
+                  <p className="mt-4 text-white text-responsive">Loading video...</p>
                 </div>
               </div>
             )}
@@ -1533,7 +1533,7 @@ const VideoPlayer = ({
         </div>
 
         <button
-          className="bg-gray-800/70 hover:bg-gray-700/70 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          className="bg-gray-800/70 hover:bg-gray-700/70 transition px-4 py-2 rounded-full text-mobile-optimized disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           onClick={onNextEpisode}
           disabled={!hasNext}
         >

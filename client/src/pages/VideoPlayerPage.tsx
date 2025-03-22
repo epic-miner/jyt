@@ -135,10 +135,10 @@ const VideoPlayerPage = () => {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-black">
         <div className="text-center p-4">
-          <h1 className="text-2xl font-bold mb-2">No episodes available</h1>
-          <p className="mb-4">This anime doesn't have any episodes yet.</p>
+          <h1 className="heading-responsive mb-2">No episodes available</h1>
+          <p className="text-responsive mb-4">This anime doesn't have any episodes yet.</p>
           <button 
-            className="bg-primary hover:bg-primary/90 transition px-6 py-2 rounded-full"
+            className="bg-primary hover:bg-primary/90 transition px-6 py-2 rounded-full text-responsive"
             onClick={() => setLocation(`/anime/${animeId}`)}
           >
             Back to Anime
@@ -174,7 +174,7 @@ const VideoPlayerPage = () => {
 
           {/* Episodes List */}
           <div>
-            <h3 className="text-xl font-semibold mb-3">Episodes</h3>
+            <h3 className="subheading-responsive mb-3">Episodes</h3>
             <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {episodes.map((ep) => (
                 <button
@@ -188,8 +188,8 @@ const VideoPlayerPage = () => {
                       : "text-gray-300 glass-effect"
                   )}
                 >
-                  <div className="font-medium text-base">Episode {ep.episode_number}</div>
-                  <div className="text-sm opacity-80 truncate mt-1">{ep.title}</div>
+                  <div className="font-medium text-mobile-optimized">Episode {ep.episode_number}</div>
+                  <div className="caption-responsive truncate mt-1 line-clamp-1">{ep.title}</div>
                 </button>
               ))}
             </div>
