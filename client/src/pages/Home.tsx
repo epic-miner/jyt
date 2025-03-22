@@ -255,7 +255,7 @@ const Home = () => {
           <SectionTitle 
             icon="clock" 
             title="Latest Released" 
-            viewAllLink="/search?sort=latest" 
+            viewAllLink="/category/recent" 
           />
 
           <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
@@ -303,7 +303,7 @@ const Home = () => {
           <SectionTitle 
             icon="fire" 
             title="Popular Now" 
-            viewAllLink="/search?sort=popular" 
+            viewAllLink="/category/popular" 
           />
 
           <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
@@ -351,7 +351,7 @@ const Home = () => {
           <SectionTitle 
             icon="film" 
             title="All Anime" 
-            viewAllLink="/search?sort=all" 
+            viewAllLink="/category/all" 
           />
 
           <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
