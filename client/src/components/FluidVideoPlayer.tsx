@@ -348,7 +348,7 @@ const FluidVideoPlayer = ({
     try {
       // Extensive debugging to check if fluidPlayer is loaded and working
       console.log('Attempting to initialize Fluid Player...');
-      console.log('window.fluidPlayer exists:', window.fluidPlayer ? 'YES' : 'NO');
+      console.log('window.fluidPlayer exists:', typeof window.fluidPlayer !== 'undefined' ? 'YES' : 'NO');
       console.log('window.fluidPlayer type:', typeof window.fluidPlayer);
       console.log('video element exists:', videoRef.current ? 'YES' : 'NO');
       
@@ -370,7 +370,7 @@ const FluidVideoPlayer = ({
         fluidPlayerScript.src = 'https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js';
         fluidPlayerScript.onload = () => {
           console.log('Fluid Player script loaded dynamically!');
-          console.log('window.fluidPlayer now exists:', window.fluidPlayer ? 'YES' : 'NO');
+          console.log('window.fluidPlayer now exists:', typeof window.fluidPlayer !== 'undefined' ? 'YES' : 'NO');
         };
         document.head.appendChild(fluidPlayerScript);
         

@@ -49,6 +49,30 @@
       window.addEventListener('resize', setVH);
       window.addEventListener('orientationchange', setVH);
       setVH();
+      
+      // Ensure Fluid Player is properly loaded
+      document.addEventListener('DOMContentLoaded', () => {
+        // Check if Fluid Player script is loaded
+        if (typeof window.fluidPlayer !== 'function') {
+          console.log('Fluid Player not detected, loading manually...');
+          // Try to load Fluid Player script dynamically
+          const fluidPlayerScript = document.createElement('script');
+          fluidPlayerScript.src = 'https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js';
+          fluidPlayerScript.onload = () => {
+            console.log('Fluid Player script loaded successfully!');
+            console.log('window.fluidPlayer now available:', typeof window.fluidPlayer === 'function');
+          };
+          document.head.appendChild(fluidPlayerScript);
+          
+          // Also add the CSS
+          const fluidPlayerCss = document.createElement('link');
+          fluidPlayerCss.rel = 'stylesheet';
+          fluidPlayerCss.href = 'https://cdn.fluidplayer.com/v3/current/fluidplayer.min.css';
+          document.head.appendChild(fluidPlayerCss);
+        } else {
+          console.log('Fluid Player already loaded and available');
+        }
+      });
     </script>
   </body>
 </html>
