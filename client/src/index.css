@@ -1,3 +1,83 @@
+
+/* YouTube-style mobile tap indicators */
+.tap-indicator-left,
+.tap-indicator-right {
+  position: absolute;
+  z-index: 100;
+  pointer-events: none;
+}
+
+/* YouTube-like mobile optimizations */
+@media (max-width: 640px) {
+  .yt-volume-slider {
+    width: 0;
+    display: none; /* Hide volume slider on mobile by default */
+  }
+  
+  .yt-play-pause-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+  
+  .yt-play-pause-container.visible {
+    opacity: 1;
+  }
+  
+  .yt-big-play-button {
+    width: 60px;
+    height: 60px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 24px;
+  }
+  
+  /* Style for the bottom bar in mobile */
+  .yt-controls.mobile {
+    padding-bottom: 20px; /* Extra padding for touch targets */
+  }
+  
+  /* Make mobile progress bar easier to interact with */
+  .yt-progress-container.mobile {
+    height: 40px; /* Larger hit area for mobile */
+    padding: 12px 0;
+  }
+  
+  /* Full screen controls - like YouTube's */
+  .video-container.fullscreen .yt-controls {
+    padding-bottom: 30px;
+  }
+}
+
+/* YouTube-style double-tap effect */
+.tap-indicator-circle {
+  animation: pulse 0.5s ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

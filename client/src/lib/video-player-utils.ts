@@ -67,6 +67,55 @@ export const setupYouTubeControls = (
   // Add keyframes needed for animations
   addVideoPlayerKeyframes();
   
+  // Function to show tap feedback indicator
+  const showTapIndicator = (side: 'left' | 'right') => {
+    // Create or get existing indicator
+    let indicator = document.querySelector(`.tap-indicator-${side}`) as HTMLElement;
+    
+    if (!indicator) {
+      indicator = document.createElement('div');
+      indicator.className = `tap-indicator-${side}`;
+      indicator.innerHTML = `
+        <div class="tap-indicator-circle">
+          <div class="tap-indicator-icon">
+            ${side === 'left' ? '⟲ 10' : '⟳ 10'}
+          </div>
+        </div>
+      `;
+      indicator.style.position = 'absolute';
+      indicator.style.top = '50%';
+      indicator.style.transform = 'translateY(-50%)';
+      indicator.style[side] = '25%';
+      indicator.style.color = 'white';
+      indicator.style.fontSize = '20px';
+      indicator.style.opacity = '0';
+      indicator.style.transition = 'opacity 0.2s ease';
+      indicator.style.zIndex = '100';
+      indicator.style.pointerEvents = 'none';
+      
+      const circle = indicator.querySelector('.tap-indicator-circle') as HTMLElement;
+      if (circle) {
+        circle.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        circle.style.borderRadius = '50%';
+        circle.style.width = '60px';
+        circle.style.height = '60px';
+        circle.style.display = 'flex';
+        circle.style.alignItems = 'center';
+        circle.style.justifyContent = 'center';
+      }
+      
+      playerContainer.appendChild(indicator);
+    }
+    
+    // Show and animate the indicator
+    indicator.style.opacity = '1';
+    
+    // Hide after animation completes
+    setTimeout(() => {
+      indicator.style.opacity = '0';
+    }, 500);
+  };
+  
   const handleTap = (e: TouchEvent) => {
     const currentTime = new Date().getTime();
     const tapLength = currentTime - lastTap;

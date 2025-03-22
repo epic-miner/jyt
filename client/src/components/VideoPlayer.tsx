@@ -865,12 +865,30 @@ const VideoPlayer = ({
           resetControlsTimeout();
         });
       }
+      
+      // Define YouTube-like skip functions
+      const skipBackwardFunc = () => {
+        if (videoRef.current) {
+          videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
+          showControlsTemporarily();
+        }
+      };
+      
+      const skipForwardFunc = () => {
+        if (videoRef.current) {
+          videoRef.current.currentTime = Math.min(
+            videoRef.current.duration,
+            videoRef.current.currentTime + 10
+          );
+          showControlsTemporarily();
+        }
+      };
 
       // YouTube-like controls for mobile
       const cleanupTouchHandlers = setupYouTubeControls(
         playerContainer,
-        skipBackward,
-        skipForward,
+        skipBackwardFunc,
+        skipForwardFunc,
         togglePlay,
         setShowControls,
         showControlsTemporarily
