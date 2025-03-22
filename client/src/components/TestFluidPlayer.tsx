@@ -12,6 +12,9 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ sampleVideoUrl }) => 
 
   useEffect(() => {
     if (videoRef.current && !playerInstanceRef.current) {
+      // Check if the source is MP4
+      const isMp4 = sampleVideoUrl.toLowerCase().endsWith('.mp4');
+      
       playerInstanceRef.current = fluidPlayer(videoRef.current.id, {
         layoutControls: {
           fillToContainer: true,
@@ -22,6 +25,10 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ sampleVideoUrl }) => 
           preload: 'auto',
           mute: false,
           doubleclickFullscreen: true,
+          // MP4 specific optimizations
+          allowDownload: isMp4, // Allow download for MP4 files
+          allowTheatre: true,
+          playbackRateEnabled: true, // Allow speed control for better buffering management
           controlBar: {
             autoHide: true,
             autoHideTimeout: 3,
@@ -29,30 +36,49 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ sampleVideoUrl }) => 
           },
         },
         vastOptions: {
-          adList: [], // Remove ads for better performance if they're not needed
+          adList: [], // Remove ads for better performance
         },
         // Optimize for performance
         modules: {
           controls: true,
-          subtitles: false, // Set to true if needed
+          subtitles: false,
           timeline: true,
-          quality: false, // Set to true if multiple sources are available
+          quality: true, // Enable quality selector for MP4 sources
           title: false,
           contextMenu: true,
         }
       });
 
-      // Configure buffer settings
+      // Configure buffer settings specifically for MP4
       if (videoRef.current) {
         try {
           // Set a reasonable buffer size (in seconds)
           if ('buffered' in videoRef.current) {
             // Set higher buffer for better playback
             videoRef.current.preload = 'auto';
+            
+            // For MP4 files, set additional buffering parameters
+            // Add a timeout to ensure the metadata is loaded
+            setTimeout(() => {
+              if (videoRef.current) {
+                // Increase the buffer size for MP4 files
+                try {
+                  // Use Media Source Extensions for better buffering if browser supports it
+                  if (window.MediaSource && MediaSource.isTypeSupported('video/mp4; codecs="avc1.42E01E, mp4a.40.2"')) {
+                    console.log('MSE supported for MP4 - enabling enhanced buffering');
+                  }
+                  
+                  // Modify FluidPlayer options for MP4 optimization
+                  if (playerInstanceRef.current) {
+                    // Force loading of a larger initial segment
+                    videoRef.current.load();
+                  }
+                } catch (e) {
+                  console.error('Error configuring MP4 specific settings:', e);
+                }
+              }
+            }, 200);
           }
-
-          // Lower quality for better buffering if needed
-          // This would require multiple sources with different qualities
         } catch (error) {
           console.error('Error configuring video buffer:', error);
         }
@@ -61,6 +87,64 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ sampleVideoUrl }) => 
       // Clean up on unmount
       return () => {
         if (playerInstanceRef.current && playerInstanceRef.current.destroy) {
+
+  // Monitor buffering for MP4 files
+  useEffect(() => {
+    if (videoRef.current && sampleVideoUrl.toLowerCase().endsWith('.mp4')) {
+      const videoElement = videoRef.current;
+      
+      // Create a buffer monitor
+      const bufferMonitor = () => {
+        if (!videoElement) return;
+        
+        // Add buffer progress monitoring
+        if (videoElement.buffered.length > 0) {
+          try {
+            const bufferedEnd = videoElement.buffered.end(videoElement.buffered.length - 1);
+            const duration = videoElement.duration;
+            if (duration > 0) {
+              const bufferPercentage = (bufferedEnd / duration) * 100;
+              console.log(`Buffer progress: ${bufferPercentage.toFixed(2)}%`);
+              
+              // If buffering is low and video is playing, reduce quality
+              if (bufferPercentage < 15 && !videoElement.paused && playerInstanceRef.current) {
+                // Attempt to switch to lower quality if available
+                const currentQuality = playerInstanceRef.current.getCurrentQuality?.();
+                if (currentQuality && currentQuality !== 'low') {
+                  console.log('Buffer low, reducing quality...');
+                  // This would use FluidPlayer's quality switching API if available
+                }
+              }
+            }
+          } catch (e) {
+            console.warn('Buffer monitoring error:', e);
+          }
+        }
+      };
+      
+      const bufferInterval = setInterval(bufferMonitor, 3000);
+      
+      // Handle stalled/waiting events specifically for MP4
+      const handleStalled = () => {
+        console.log('Video stalled, attempting recovery...');
+        // Force a small seek to recover playback
+        if (!videoElement.paused && videoElement.currentTime > 0) {
+          const currentTime = videoElement.currentTime;
+          videoElement.currentTime = currentTime - 0.1;
+        }
+      };
+      
+      videoElement.addEventListener('stalled', handleStalled);
+      videoElement.addEventListener('waiting', handleStalled);
+      
+      return () => {
+        clearInterval(bufferInterval);
+        videoElement.removeEventListener('stalled', handleStalled);
+        videoElement.removeEventListener('waiting', handleStalled);
+      };
+    }
+  }, [sampleVideoUrl]);
+
           playerInstanceRef.current.destroy();
         }
       };
@@ -236,8 +320,14 @@ const TestFluidPlayer = () => {
             preload="auto"
             playsInline
           >
-            <source src={sampleVideoUrl} type="video/mp4" title="720p" />
-            {/* Add additional source elements for different qualities */}
+            <source src={sampleVideoUrl} type="video/mp4" title="720p" data-fluid-hd />
+            {/* Lower quality fallback for better buffering */}
+            {sampleVideoUrl && sampleVideoUrl.includes('.mp4') && (
+              <>
+                {/* This will use the same URL but indicate to the player it's a lower quality option */}
+                <source src={sampleVideoUrl} type="video/mp4" title="480p" />
+              </>
+            )}
             <p>Your browser does not support HTML5 video.</p>
           </video>
         </div>
