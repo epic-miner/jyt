@@ -161,28 +161,28 @@
     height: 40px !important;
     padding: 0 5px !important;
   }
-  
+
   #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button {
     width: 30px !important;
     height: 30px !important;
     padding: 5px !important;
     margin: 0 2px !important;
   }
-  
+
   /* Make the progress bar easier to grab on touch devices */
   #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_progress_container {
     height: 10px !important;
   }
-  
+
   #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_progress {
     height: 6px !important;
   }
-  
+
   /* Show fewer controls on mobile to prevent overcrowding */
   #fluid_video_wrapper.fluid_player_layout_default .fluid_control_theatre {
     display: none !important;
   }
-  
+
   /* Improve tap targets on mobile */
   #fluid_video_wrapper.fluid_player_layout_default .fluid_control_volume_container,
   #fluid_video_wrapper.fluid_player_layout_default .fluid_control_fullscreen,
@@ -192,12 +192,12 @@
     align-items: center !important;
     justify-content: center !important;
   }
-  
+
   /* Improve the video player container */
   .video-aspect-container {
     height: auto !important;
   }
-  
+
   /* Fix for the mini player on mobile */
   .fluid_mini_player {
     max-width: 280px !important;
@@ -235,4 +235,33 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
   border-radius: 6px !important;
   overflow: hidden !important;
+}
+
+/* Make play/pause icon look like YouTube's */
+.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button.fluid_button_play:before,
+.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button.fluid_button_pause:before {
+  background-position: center center;
+  background-size: 16px;
+  opacity: 1;
+  width: 36px;
+  height: 36px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+/* Add hover effect like YouTube */
+.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button.fluid_button_play:hover:before,
+.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button.fluid_button_pause:hover:before {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Center play/pause icon container */
+.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button.fluid_button_play,
+.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button.fluid_button_pause {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
