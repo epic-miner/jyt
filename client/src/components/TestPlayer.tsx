@@ -199,9 +199,12 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
           
           // Try one more time after a delay if there was an error
           if (attemptCount < maxAttempts) {
-          attemptCount++;
-          console.log(`Retrying player initialization (attempt ${attemptCount}/${maxAttempts})...`);
-          initTimeout = setTimeout(initPlayer, 800);
+            attemptCount++;
+            console.log(`Retrying player initialization (attempt ${attemptCount}/${maxAttempts})...`);
+            initTimeout = setTimeout(initPlayer, 800);
+          }
+        }
+      }, 100);
         }
       }
     };
