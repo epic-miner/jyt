@@ -92,11 +92,51 @@
 /* Mobile optimizations */
 @media (max-width: 768px) {
   #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container {
-    height: 42px !important;
+    height: 40px !important;
+    padding: 0 5px !important;
   }
   
   #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button {
-    width: 32px !important;
-    height: 32px !important;
+    width: 30px !important;
+    height: 30px !important;
+    padding: 5px !important;
+    margin: 0 2px !important;
+  }
+  
+  /* Make the progress bar easier to grab on touch devices */
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_progress_container {
+    height: 10px !important;
+  }
+  
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_progress {
+    height: 6px !important;
+  }
+  
+  /* Show fewer controls on mobile to prevent overcrowding */
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_control_theatre {
+    display: none !important;
+  }
+  
+  /* Improve tap targets on mobile */
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_control_volume_container,
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_control_fullscreen,
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_control_playpause {
+    min-width: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Improve the video player container */
+  .video-aspect-container {
+    height: auto !important;
+  }
+  
+  /* Fix for the mini player on mobile */
+  .fluid_mini_player {
+    max-width: 280px !important;
+    max-height: 160px !important;
+    right: 10px !important;
+    bottom: 60px !important;
   }
 }

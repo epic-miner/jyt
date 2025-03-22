@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useRoute, useLocation } from 'wouter';
 import { Skeleton } from '@/components/ui/skeleton';
 import FluidVideoPlayer from '../components/FluidVideoPlayer';
-import TestFluidPlayer from '../components/TestFluidPlayer';
 import { fetchAnimeById, fetchEpisodeById, fetchEpisodesByAnimeId } from '../lib/api';
 import { updateWatchHistory, updateRecentlyWatchedAnime } from '../lib/cookies';
 import { Episode } from '@shared/types';
@@ -161,12 +160,6 @@ const VideoPlayerPage = () => {
           hasNext={currentEpisodeIndex < episodes.length - 1}
           hasPrevious={currentEpisodeIndex > 0}
         />
-        
-        {/* Test Player for debugging */}
-        <div className="mt-6 mb-6 p-4 bg-gray-900 rounded-lg">
-          <h2 className="text-lg font-bold mb-4 text-white">Test Fluid Player</h2>
-          <TestFluidPlayer />
-        </div>
 
         <div className="p-4 space-y-4 md:space-y-6 rounded-t-xl backdrop-blur-sm bg-black/40 border-t border-white/5">
           {/* Episode Info */}

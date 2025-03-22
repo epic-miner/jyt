@@ -248,21 +248,18 @@ const FluidVideoPlayer = ({
 
   return (
     <div className="w-full flex flex-col bg-black fluid-player-container">
-      {/* Don't load CSS via Helmet since we've already added it to index.html */}
-      
-      {/* Main video container */}
-      <div className="relative w-full bg-black overflow-hidden video-aspect-container">
-        <div className="video-container">
+      {/* Main video container - optimized for mobile */}
+      <div className="relative w-full bg-black overflow-hidden aspect-video">
+        <div className="absolute top-0 left-0 w-full h-full">
           {/* Video element that Fluid Player will enhance */}
           <video 
             ref={videoRef} 
-            className="fluid-video"
+            className="w-full h-full"
             data-fluid-player 
             id="anime-player"
             controls
+            playsInline
             preload="auto"
-            width="100%"
-            style={{ width: '100%', height: '100%' }}
           >
             <source src={getVideoUrl()} type="video/mp4" />
             Your browser does not support the video tag.
@@ -270,30 +267,32 @@ const FluidVideoPlayer = ({
         </div>
       </div>
 
-      {/* Episode navigation bar */}
-      <div className="bg-black py-3 px-4 flex justify-between items-center border-t border-gray-800/30">
+      {/* Episode navigation bar - mobile optimized */}
+      <div className="bg-black py-2 px-3 sm:py-3 sm:px-4 flex justify-between items-center border-t border-gray-800/30">
         <button
-          className="bg-gray-800/70 hover:bg-gray-700/70 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          className="bg-gray-800/70 hover:bg-gray-700/70 transition px-2 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           onClick={onPreviousEpisode}
           disabled={!hasPrevious}
         >
-          <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="19 20 9 12 19 4"></polyline>
           </svg> 
-          Previous
+          <span className="sm:inline hidden">Previous</span>
+          <span className="sm:hidden inline">Prev</span>
         </button>
 
-        <div className="text-sm text-gray-300">
-          Episode <span className="font-bold">{episode.episode_number}</span>
+        <div className="text-xs sm:text-sm text-gray-300">
+          Ep <span className="font-bold">{episode.episode_number}</span>
         </div>
 
         <button
-          className="bg-gray-800/70 hover:bg-gray-700/70 transition px-4 py-2 rounded-full text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+          className="bg-gray-800/70 hover:bg-gray-700/70 transition px-2 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           onClick={onNextEpisode}
           disabled={!hasNext}
         >
-          Next 
-          <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <span className="sm:inline hidden">Next</span>
+          <span className="sm:hidden inline">Next</span>
+          <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="5 4 15 12 5 20"></polyline>
           </svg>
         </button>
