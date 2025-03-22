@@ -24,315 +24,185 @@
   height: 100%;
 }
 
-
-/* Modern Fluid Player Skin */
-.fluid_video_wrapper {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: #121212;
-}
-
-/* Custom control bar */
-.fluid_controls_container {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+/* Player UI theme overrides */
+#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0)) !important;
   border-radius: 0 0 8px 8px;
-  height: 48px !important;
+  padding: 8px 0;
+  transition: opacity 0.3s ease;
 }
 
-/* Custom control bar (Overridden by edited styles below) */
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 80%, transparent 100%);
-  height: 55px;
-  padding: 0 15px;
-  transition: all 0.3s ease;
-}
-
-
-/* Progress bar */
-.fluid_timeline_loaded, .fluid_timeline_current {
+/* Progress bar styling */
+#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container .fluid_controls_progress {
+  background-color: rgba(255, 255, 255, 0.3) !important;
   height: 6px !important;
   border-radius: 3px;
 }
 
-.fluid_timeline_loaded {
-  background-color: rgba(255, 255, 255, 0.3) !important;
-}
-
-.fluid_timeline_current {
-  background-color: rgba(0, 128, 255, 0.8) !important;
-}
-
-/* Progress bar styling (Overridden by edited styles below) */
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container {
-  height: 5px;
-  bottom: 55px;
-  transition: height 0.2s ease-in-out;
-}
-
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container:hover {
-  height: 8px;
-}
-
-/* Progress bar colors (Overridden by edited styles below) */
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container .fluid_controls_progress {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container .fluid_controls_buffered {
-  background-color: rgba(255, 255, 255, 0.3);
-}
-
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container .fluid_controls_played {
-  background: linear-gradient(to right, #9333ea, #7e22ce);
-}
-
-/* Play button */
-.fluid_control_playpause {
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 50% !important;
-  background-color: rgba(0, 128, 255, 0.8) !important;
-  transition: background-color 0.2s ease;
-}
-
-.fluid_control_playpause:hover {
-  background-color: rgba(0, 128, 255, 1) !important;
-}
-
-/* Progress button styling (Overridden by edited styles below) */
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container .fluid_controls_progress .fluid_controls_currentpos {
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background-color: #9333ea;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-  border: 2px solid white;
-  top: -5px;
-  transition: transform 0.2s ease;
-}
-
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container:hover .fluid_controls_progress .fluid_controls_currentpos {
-  transform: scale(1.2);
-}
-
-/* Button styling (Overridden by edited styles below) */
-.fluid_button {
-  transition: transform 0.2s ease !important;
-}
-
-.fluid_button:hover {
-  transform: scale(1.1) !important;
-}
-
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button {
-  width: 32px;
-  height: 32px;
-  margin: 0 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container .fluid_controls_progress .fluid_controls_currentprogress {
+  background-color: var(--primary, #ef4444) !important;
+  border-radius: 3px;
   transition: all 0.2s ease;
 }
 
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button:hover {
+#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container:hover .fluid_controls_progress {
+  height: 8px !important;
+}
+
+/* Timestamp styling */
+#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_time_display {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  color: #ffffff !important;
+}
+
+/* Button styling */
+#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button {
+  color: #fff !important;
+  opacity: 0.85;
+  transition: all 0.2s ease;
+}
+
+#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button:hover {
+  color: var(--primary, #ef4444) !important;
+  opacity: 1;
   transform: scale(1.1);
 }
 
-/* Play button styling (Overridden by edited styles below) */
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button.fluid_button_play {
-  background-color: rgba(147, 51, 234, 0.7);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
+/* Volume slider */
+#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container .fluid_control_volume .fluid_control_volume_currentvolume {
+  background-color: var(--primary, #ef4444) !important;
 }
 
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button.fluid_button_play:hover {
-  background-color: rgba(147, 51, 234, 0.9);
+/* Buffering animation */
+#fluid_video_wrapper.fluid_player_layout_default .fluid_initial_play_button_container,
+#fluid_video_wrapper.fluid_player_layout_default .fluid_initial_play {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  border: 2px solid var(--primary, #ef4444) !important;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+  transition: all 0.3s ease;
 }
 
-/* Volume control */
-.fluid_control_volume_container {
-  width: 100px !important;
+#fluid_video_wrapper.fluid_player_layout_default .fluid_initial_play:hover {
+  background-color: var(--primary, #ef4444) !important;
+  transform: scale(1.05);
 }
 
-.fluid_control_volume .fluid_control_volume_currentpos {
-  background-color: rgba(0, 128, 255, 0.8) !important;
-  height: 6px !important;
-  border-radius: 3px;
+/* Theater mode enhancements */
+#fluid_video_wrapper.fluid_player_layout_default.fluid_player_theatre_mode {
+  max-width: 100% !important;
+  width: 100% !important;
+  background-color: #000;
+  padding: 0 !important;
 }
 
-/* Volume bar styling (Overridden by edited styles below) */
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container .fluid_control_volume .fluid_control_volume_slider {
-  background-color: rgba(255, 255, 255, 0.2);
+/* Thumbnail preview */
+#fluid_video_wrapper.fluid_player_layout_default .fluid_timeline_preview_container {
   border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container .fluid_control_volume .fluid_control_volume_slider .fluid_control_volume_currentpos {
-  background: linear-gradient(to right, #9333ea, #7e22ce);
+/* Mobile optimization */
+@media (max-width: 768px) {
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container {
+    padding: 4px 0;
+  }
+
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button {
+    margin: 0 2px;
+  }
+}
+
+/* Settings menu styling */
+#fluid_video_wrapper.fluid_player_layout_default .fluid_control_video_source, 
+#fluid_video_wrapper.fluid_player_layout_default .fluid_control_playback_rate, 
+#fluid_video_wrapper.fluid_player_layout_default .fluid_control_download {
+  background-color: rgba(0, 0, 0, 0.8) !important;
   border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Full screen button */
-.fluid_control_fullscreen {
-  width: 36px !important;
-  height: 36px !important;
+/* Source menu items */
+#fluid_video_wrapper.fluid_player_layout_default .fluid_video_sources_list .fluid_video_source_list_item:hover {
+  background-color: var(--primary, #ef4444) !important;
 }
 
-/* Custom play button overlay */
-.fluid_initial_play {
-  background: rgba(0, 0, 0, 0.4) !important;
-  border-radius: 50%;
-  width: 80px !important;
-  height: 80px !important;
-  margin-left: -40px !important;
-  margin-top: -40px !important;
-  transition: transform 0.2s ease, background 0.2s ease;
+#fluid_video_wrapper.fluid_player_layout_default .fluid_video_source_list_item.source_selected {
+  color: var(--primary, #ef4444) !important;
 }
 
-.fluid_initial_play:hover {
-  transform: scale(1.1);
-  background: rgba(0, 128, 255, 0.6) !important;
+/* Fix for mini player mode */
+.fluid_mini_player {
+  z-index: 9999 !important;
 }
 
-.fluid_initial_play_button {
-  border-style: solid;
-  border-width: 20px 0 20px 40px !important;
-  border-color: transparent transparent transparent white !important;
-  margin-left: 5px !important;
+/* Ensure proper centering and sizing of the video */
+.fluid_video_wrapper {
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+
+/* Loading indicators */
+.fluid_initial_play, .fluid_initial_play_button {
+  border-color: var(--primary, #ef4444) !important;
 }
 
 /* Time display */
 .fluid_control_duration {
-  font-family: Arial, sans-serif !important;
-  font-weight: 500 !important;
+  color: white !important;
 }
 
-/* Time display styling (Overridden by edited styles below) */
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_duration {
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
-}
-
-/* Fullscreen button styling (Overridden by edited styles below) */
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button.fluid_button_fullscreen,
-.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button.fluid_button_fullscreen_exit {
-  margin-right: 0;
-}
-
-/* Add glow effect to active buttons */
-.fluid_button.fluid_button_active {
-  box-shadow: 0 0 8px rgba(0, 128, 255, 0.8) !important;
-}
-
-/* Mobile improvements */
+/* Mobile optimizations */
 @media (max-width: 768px) {
-  .fluid_controls_container {
-    height: 42px !important;
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container {
+    height: 40px !important;
+    padding: 0 5px !important;
   }
-
-  .fluid_control_playpause,
-  .fluid_control_fullscreen {
-    width: 32px !important;
-    height: 32px !important;
+  
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button {
+    width: 30px !important;
+    height: 30px !important;
+    padding: 5px !important;
+    margin: 0 2px !important;
   }
-
-  .fluid_initial_play {
-    width: 60px !important;
-    height: 60px !important;
-    margin-left: -30px !important;
-    margin-top: -30px !important;
+  
+  /* Make the progress bar easier to grab on touch devices */
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_progress_container {
+    height: 10px !important;
   }
-
-  .fluid_initial_play_button {
-    border-width: 15px 0 15px 30px !important;
+  
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_progress {
+    height: 6px !important;
   }
-  /* Responsive adjustments (Overridden by edited styles below) */
-  .fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container {
-    height: 50px;
-    padding: 0 10px;
+  
+  /* Show fewer controls on mobile to prevent overcrowding */
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_control_theatre {
+    display: none !important;
   }
-
-  .fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button {
-    margin: 0 5px;
+  
+  /* Improve tap targets on mobile */
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_control_volume_container,
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_control_fullscreen,
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_control_playpause {
+    min-width: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
-
-  .fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container {
-    width: 70px;
+  
+  /* Improve the video player container */
+  .video-aspect-container {
+    height: auto !important;
   }
-}
-
-/* Custom buffering spinner */
-.fluid_video_loading {
-  border: 3px solid rgba(255, 255, 255, 0.2);
-  border-top: 3px solid rgba(0, 128, 255, 0.8);
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: fluid_spin 1s linear infinite;
-}
-
-@keyframes fluid_spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Theatre mode improvements */
-.fluid_theatre_mode {
-  max-width: 90vw !important;
-  max-height: 80vh !important;
-  margin: 0 auto;
-}
-
-/* Subtitles styling */
-.fluid_subtitles_container {
-  bottom: 60px !important;
-}
-
-.fluid_subtitles_container div {
-  background-color: rgba(0, 0, 0, 0.6) !important;
-  padding: 6px 12px !important;
-  border-radius: 4px !important;
-  font-family: Arial, sans-serif !important;
-  font-size: 16px !important;
-  font-weight: 500 !important;
-}
-
-/* Modern hover effects on player */
-.fluid_video_wrapper:hover .fluid_controls_container {
-  opacity: 1;
-}
-
-.fluid_video_wrapper .fluid_controls_container {
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
-}
-
-/* Episode navigation styling */
-.episode-nav {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 15px;
-}
-
-.episode-nav button {
-  background-color: rgba(147, 51, 234, 0.9);
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.episode-nav button:hover {
-  background-color: rgba(147, 51, 234, 1);
-}
-
-/* Fix for currentpos in Safari */
-@supports (-webkit-appearance:none) {
-  .fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container .fluid_controls_progress .fluid_controls_currentpos {
-    top: -6px;
+  
+  /* Fix for the mini player on mobile */
+  .fluid_mini_player {
+    max-width: 280px !important;
+    max-height: 160px !important;
+    right: 10px !important;
+    bottom: 60px !important;
   }
 }
