@@ -178,7 +178,11 @@ const VideoPlayer = ({
         const bufferedEnd = videoRef.current.buffered.end(videoRef.current.buffered.length - 1);
         const duration = videoRef.current.duration;
         if (duration > 0) {
-          setBufferProgress((bufferedEnd / duration) * 100);
+          const bufferPercentage = (bufferedEnd / duration) * 100;
+          setBufferProgress(bufferPercentage);
+          
+          // Update current time again to ensure progress bar is in sync
+          setCurrentTime(videoRef.current.currentTime);
         }
       }
     };
@@ -1335,13 +1339,20 @@ const VideoPlayer = ({
                   {/* Playback progress */}
                   <div
                     className="yt-progress-filled"
-                    style={{ width: `${Math.min((currentTime / (duration || 1)) * 100, 100)}%` }}
+                    style={{ 
+                      width: `${Math.min((currentTime / (duration || 1)) * 100, 100)}%`,
+                      backgroundColor: 'var(--yt-red)',
+                      opacity: 1
+                    }}
                   ></div>
 
                   {/* Playback handle/thumb */}
                   <div
                     className="yt-progress-handle"
-                    style={{ left: `${Math.min((currentTime / (duration || 1)) * 100, 100)}%` }}
+                    style={{ 
+                      left: `${Math.min((currentTime / (duration || 1)) * 100, 100)}%`,
+                      transform: 'translate(-50%, -50%) scale(1)' 
+                    }}
                   ></div>
                 </div>
 
