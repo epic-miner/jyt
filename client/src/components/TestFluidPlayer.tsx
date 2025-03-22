@@ -44,7 +44,19 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ sampleVideoUrl }) => 
           preload: 'auto',
           mute: false,
           doubleclickFullscreen: true,
-          // Apply mobile-specific controls if detected
+          // Theater mode configuration
+          allowTheatre: true,
+          theatreSettings: {
+            width: '100%',
+            height: '100%',
+            marginTop: 0,
+            horizontalAlign: 'center'
+          },
+          // For advanced theater mode
+          theatreAdvanced: {
+            theatreElement: 'fluid-player-container',
+            classToApply: 'theater-mode'
+          },
           controlBar: {
             autoHide: true,
             autoHideTimeout: isMobile ? 2 : 3,
