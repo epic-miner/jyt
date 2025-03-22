@@ -1,3 +1,72 @@
+
+import React, { useEffect, useRef } from 'react';
+import fluidPlayer from 'fluid-player';
+
+interface TestFluidPlayerProps {
+  sampleVideoUrl: string;
+}
+
+const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ sampleVideoUrl }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const playerInstanceRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (videoRef.current && !playerInstanceRef.current) {
+      playerInstanceRef.current = fluidPlayer(videoRef.current.id, {
+        layoutControls: {
+          fillToContainer: true,
+          posterImage: '', // Add poster image URL if available
+          playButtonShowing: true,
+          playPauseAnimation: true,
+          autoPlay: false,
+          preload: 'auto',
+          mute: false,
+          doubleclickFullscreen: true,
+          controlBar: {
+            autoHide: true,
+            autoHideTimeout: 3,
+            animated: true,
+          },
+        },
+        vastOptions: {
+          adList: [], // Remove ads for better performance if they're not needed
+        },
+        // Optimize for performance
+        modules: {
+          controls: true,
+          subtitles: false, // Set to true if needed
+          timeline: true,
+          quality: false, // Set to true if multiple sources are available
+          title: false,
+          contextMenu: true,
+        }
+      });
+
+      // Configure buffer settings
+      if (videoRef.current) {
+        try {
+          // Set a reasonable buffer size (in seconds)
+          if ('buffered' in videoRef.current) {
+            // Set higher buffer for better playback
+            videoRef.current.preload = 'auto';
+          }
+
+          // Lower quality for better buffering if needed
+          // This would require multiple sources with different qualities
+        } catch (error) {
+          console.error('Error configuring video buffer:', error);
+        }
+      }
+
+      // Clean up on unmount
+      return () => {
+        if (playerInstanceRef.current && playerInstanceRef.current.destroy) {
+          playerInstanceRef.current.destroy();
+        }
+      };
+    }
+  }, []);
+
 import { useRef, useEffect } from 'react';
 
 // Define the window fluidPlayer property
@@ -164,6 +233,8 @@ const TestFluidPlayer = () => {
             className="fluid-video"
             controls
             crossOrigin="anonymous"
+            preload="auto"
+            playsInline
           >
             <source src={sampleVideoUrl} type="video/mp4" title="720p" />
             {/* Add additional source elements for different qualities */}

@@ -1,4 +1,39 @@
 
+/* Video player optimizations */
+.video-aspect-container {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
+  overflow: hidden;
+}
+
+.video-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fluid-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: #000;
+}
+
+/* Ensure the player container is properly sized */
+#fluid_video_wrapper_test-player {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Improve loading indicator visibility */
+.fluid_video_loading {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+
 /* Import Enhanced Player Styles */
 @import url('./styles/enhanced-player.css');
 
