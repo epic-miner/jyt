@@ -34,7 +34,7 @@ const VideoPlayerMobileMenu = ({
   if (!showSettingsMenu) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center settings-menu-responsive">
       {/* Overlay to close menu */}
       <div 
         className="absolute inset-0 bg-black/60" 
@@ -43,15 +43,15 @@ const VideoPlayerMobileMenu = ({
           setShowQualitySubmenu(false);
         }}
       ></div>
-      
+
       {/* Settings Panel */}
-      <div className="relative w-full md:w-96 max-h-[70vh] md:max-h-[80vh] mx-auto bg-black/95 rounded-t-xl md:rounded-xl overflow-hidden overflow-y-auto z-50 shadow-xl">
+      <div className="relative w-full md:w-96 max-h-[70vh] md:max-h-[80vh] mx-auto bg-black/95 rounded-t-xl md:rounded-xl overflow-hidden overflow-y-auto z-50 shadow-xl settings-panel-responsive">
         {/* Handle at top - YouTube mobile style */}
         <div className="w-12 h-1 bg-gray-500 rounded-full mx-auto my-2"></div>
-        
+
         {showQualitySubmenu ? (
           // Quality Submenu
-          <div className="px-2 pb-4">
+          <div className="px-2 pb-4 quality-submenu-responsive">
             {/* Header with back button */}
             <div className="flex items-center py-3 px-4 sticky top-0 bg-black/95">
               <button 
@@ -72,13 +72,13 @@ const VideoPlayerMobileMenu = ({
               </button>
               <span className="text-white text-base font-medium">Quality</span>
             </div>
-            
+
             {/* Quality options */}
             <div className="mt-1">
               {availableQualities.map(({ quality, url }) => (
                 <button
                   key={quality}
-                  className={`w-full text-left px-6 py-3 flex items-center justify-between hover:bg-white/5 transition-colors ${!url ? 'opacity-50' : ''}`}
+                  className={`w-full text-left px-6 py-3 flex items-center justify-between hover:bg-white/5 transition-colors ${!url ? 'opacity-50' : ''} quality-option-responsive`}
                   onClick={() => handleQualityChange(quality)}
                   disabled={!url}
                 >
@@ -95,7 +95,7 @@ const VideoPlayerMobileMenu = ({
                       </div>
                     )}
                   </div>
-                  
+
                   {selectedQuality === quality && (
                     <svg 
                       width="24"
@@ -115,9 +115,9 @@ const VideoPlayerMobileMenu = ({
           </div>
         ) : (
           // Main Settings Menu
-          <div className="px-2 pb-4">
+          <div className="px-2 pb-4 main-settings-menu-responsive">
             <p className="text-sm text-gray-400 px-4 pt-2 pb-1 hidden md:block">Settings</p>
-            
+
             {/* Quality option */}
             <button 
               className="w-full text-left px-4 py-3 md:py-2.5 flex items-center justify-between hover:bg-white/5 transition-colors rounded-md"
@@ -129,7 +129,7 @@ const VideoPlayerMobileMenu = ({
                 </svg>
                 <span className="text-white text-base">Quality</span>
               </div>
-              
+
               <div className="flex items-center text-gray-400">
                 <span className="mr-2 text-sm">{selectedQuality === 'auto' ? 'Auto' : selectedQuality}</span>
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -137,7 +137,7 @@ const VideoPlayerMobileMenu = ({
                 </svg>
               </div>
             </button>
-            
+
             {/* Playback speed option */}
             <button 
               className="w-full text-left px-4 py-3 md:py-2.5 flex items-center justify-between hover:bg-white/5 transition-colors mt-1 rounded-md"
@@ -149,7 +149,7 @@ const VideoPlayerMobileMenu = ({
                 </svg>
                 <span className="text-white text-base">Playback speed</span>
               </div>
-              
+
               <div className="flex items-center text-gray-400">
                 <span className="mr-2 text-sm">{playbackSpeed}x</span>
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -157,7 +157,7 @@ const VideoPlayerMobileMenu = ({
                 </svg>
               </div>
             </button>
-            
+
             {/* Captions option */}
             <button className="w-full text-left px-4 py-3 md:py-2.5 flex items-center justify-between hover:bg-white/5 transition-colors mt-1 rounded-md">
               <div className="flex items-center">
@@ -166,7 +166,7 @@ const VideoPlayerMobileMenu = ({
                 </svg>
                 <span className="text-white text-base">Captions</span>
               </div>
-              
+
               <div className="flex items-center text-gray-400">
                 <span className="mr-2 text-sm">Off</span>
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -174,10 +174,10 @@ const VideoPlayerMobileMenu = ({
                 </svg>
               </div>
             </button>
-            
+
             {/* Divider */}
             <div className="h-px bg-gray-800 mx-4 my-2"></div>
-            
+
             {/* Autoplay toggle option */}
             <button 
               className="w-full text-left px-4 py-3 md:py-2.5 flex items-center justify-between hover:bg-white/5 transition-colors rounded-md"
@@ -189,7 +189,7 @@ const VideoPlayerMobileMenu = ({
                 </svg>
                 <span className="text-white text-base">Autoplay</span>
               </div>
-              
+
               <div className="flex items-center text-gray-400">
                 <span className="mr-2 text-sm">{autoplayEnabled ? 'On' : 'Off'}</span>
                 <div className={`w-10 h-6 flex items-center rounded-full p-1 ${autoplayEnabled ? 'bg-red-600' : 'bg-gray-700'}`}>
@@ -197,7 +197,7 @@ const VideoPlayerMobileMenu = ({
                 </div>
               </div>
             </button>
-            
+
             {/* Lock screen option */}
             <button className="w-full text-left px-4 py-3 md:py-2.5 flex items-center justify-between hover:bg-white/5 transition-colors mt-1 rounded-md">
               <div className="flex items-center">

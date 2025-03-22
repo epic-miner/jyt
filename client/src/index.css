@@ -91,6 +91,71 @@
     @apply transition-all duration-300 hover:scale-[1.05] active:scale-95;
   }
 
+
+/* Video player responsive controls */
+.controls-responsive button {
+  @apply text-responsive transition-transform duration-200;
+}
+
+.controls-responsive button svg {
+  @apply w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-6 md:h-6 lg:w-7 lg:h-7;
+}
+
+.progress-bar-responsive:hover {
+  @apply h-4 sm:h-5 md:h-6;
+}
+
+/* Video player title responsiveness */
+.video-title-responsive {
+  @apply text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-medium line-clamp-1;
+}
+
+/* Volume slider responsiveness */
+.volume-slider-responsive {
+  @apply w-12 xs:w-16 sm:w-20 md:w-24;
+}
+
+/* Time display responsiveness */
+.time-display-responsive {
+  @apply text-xs xs:text-sm sm:text-base md:text-base;
+}
+
+/* Settings menu responsiveness */
+.settings-menu-responsive {
+  @apply text-xs xs:text-sm sm:text-base;
+}
+
+/* Video player controls spacing */
+@media (max-width: 640px) {
+  .video-controls-container button {
+    @apply mx-0.5;
+  }
+  
+  .video-controls-actions {
+    @apply space-x-1;
+  }
+}
+
+@media (min-width: 641px) {
+  .video-controls-container button {
+    @apply mx-1;
+  }
+  
+  .video-controls-actions {
+    @apply space-x-2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .video-controls-container button {
+    @apply mx-2;
+  }
+  
+  .video-controls-actions {
+    @apply space-x-3;
+  }
+}
+
   /* Loading animations */
   .loading-pulse {
     @apply animate-pulse bg-gradient-to-r from-black/20 via-black/30 to-black/20;

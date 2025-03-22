@@ -969,8 +969,7 @@ const VideoPlayer = ({
   };
 
 
-  return (
-    <div className="w-full flex flex-col bg-black">
+  return (<div className="w-full flex flex-col bg-black">
       {/* Main video container with 16:9 aspect ratio */}
       <div
         ref={playerContainerRef}
@@ -1201,7 +1200,7 @@ const VideoPlayer = ({
                 {isMobile && (
                   <div className="absolute inset-x-0 -top-4 -bottom-4 cursor-pointer z-0" />
                 )}
-                
+
                 {/* Progress bar track */}
                 <div
                   ref={progressBarRef}
@@ -1418,7 +1417,7 @@ const VideoPlayer = ({
                       onMouseLeave={() => setShowVolumeSlider(false)}
                     >
                       {/* YouTube-style vertical volume slider */}
-                      <div className="w-8 h-24 bg-black/95 py-3 rounded shadow-lg border border-gray-800 flex flex-col items-center relative">
+                      <div className="w-8 h-24 bg-black/95 py-3 rounded shadow-lg border border-gray-800 flex flex-col items-center relative volume-slider-responsive">
                         {/* Volume percentage display */}
                         <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-black/90 px-2 py-1 rounded text-xs text-white font-medium z-10 border border-gray-800 whitespace-nowrap pointer-events-none">
                           {Math.round((isMuted ? 0 : volume) * 100)}%
@@ -1472,12 +1471,7 @@ const VideoPlayer = ({
                   </div>
 
                   {/* Time display */}
-                  <div className={cn(
-                    "text-white font-medium",
-                    isMobile 
-                      ? "text-xs bg-black/60 px-2 py-0.5 rounded-full ml-1 shadow-sm" // Better visibility on mobile with darker background
-                      : "text-xs ml-2" 
-                  )}>
+                  <div className="text-white ml-1 xs:ml-2 time-display-responsive">
                     <span className="tabular-nums">{formatTime(videoRef.current?.currentTime || 0)}</span>
                     <span className="mx-0.5 text-white/70">/</span>
                     <span className="tabular-nums text-white/70">{formatTime(duration)}</span>
