@@ -453,6 +453,15 @@ const FluidVideoPlayer = ({
         // Store player instance for later control
         playerInstanceRef.current = fpInstance;
 
+        // Force play the video after initialization
+        setTimeout(() => {
+          if (fpInstance && videoRef.current) {
+            console.log('Forcing playback to start...');
+            fpInstance.play();
+            videoRef.current.play().catch(e => console.error('Error forcing play:', e));
+          }
+        }, 500);
+
         // Register event listeners for advanced functionality
         fpInstance.on('play', (eventInfo: PlayerEventInfo) => {
           console.log('Video played', eventInfo);
@@ -631,6 +640,22 @@ const FluidVideoPlayer = ({
             playsInline
             autoPlay
             preload="auto"
+            onLoadedData={() => {
+              // Force playback to start when the video data has loaded
+              if (videoRef.current) {
+                videoRef.current.play().catch(e => {
+                  console.error('Error auto-starting playback:', e);
+                });
+              }
+            }}
+            onCanPlay={() => {
+              // Also try to play when the video can start playing
+              if (videoRef.current) {
+                videoRef.current.play().catch(e => {
+                  console.error('Error on canplay event:', e);
+                });
+              }
+            }}
           >
             {/* Use multiple source tags with data-fluid-hd attribute for HD quality sources */}
             {/* Default to 1080p, make it the first source */}

@@ -255,6 +255,15 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
           playerInstanceRef.current.on('waiting', () => {
             setIsLoading(true);
           });
+          
+          // Force playback to start after initialization
+          setTimeout(() => {
+            if (playerInstanceRef.current && videoRef.current) {
+              console.log('Forcing TestPlayer playback to start...');
+              playerInstanceRef.current.play();
+              videoRef.current.play().catch(e => console.error('Error forcing play:', e));
+            }
+          }, 500);
         }
 
         // Add time update event listener
@@ -352,6 +361,24 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         playsInline
         poster={episode?.thumbnail_url || poster}
         preload="auto"
+        onLoadedData={() => {
+          // Force playback to start when the video data has loaded
+          if (videoRef.current) {
+            videoRef.current.play().catch(e => {
+              console.error('Error auto-starting playback:', e);
+            });
+            setIsLoading(false);
+          }
+        }}
+        onCanPlay={() => {
+          // Also try to play when the video can start playing
+          if (videoRef.current) {
+            videoRef.current.play().catch(e => {
+              console.error('Error on canplay event:', e);
+            });
+            setIsLoading(false);
+          }
+        }}
         onEnded={onEnded}
       >
         <source src={getCurrentVideoUrl()} type="video/mp4" />
