@@ -130,6 +130,10 @@ const VideoPlayerPage = () => {
     return null;
   }
 
+  // Add custom Fluid Player refs at top level
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const playerInstanceRef = useRef<any>(null);
+  
   // If no episodes available
   if (!currentEpisode || episodes.length === 0) {
     return (
@@ -147,10 +151,6 @@ const VideoPlayerPage = () => {
       </div>
     );
   }
-
-  // Add custom Fluid Player
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const playerInstanceRef = useRef<any>(null);
 
   // Initialize Fluid Player when episode is loaded
   useEffect(() => {
