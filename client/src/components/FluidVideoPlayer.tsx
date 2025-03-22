@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, memo } from 'react';
 import { Episode, Anime } from '@shared/types';
 import { updateWatchHistory } from '../lib/cookies';
+import { Helmet } from 'react-helmet-async';
 
 // Import FluidPlayer directly
 const fluidPlayer = require('fluid-player');
@@ -274,6 +275,10 @@ const FluidVideoPlayer = ({
 
   return (
     <div className="w-full flex flex-col bg-black fluid-player-container">
+      <Helmet>
+        <link rel="stylesheet" href="/assets/fluid-player/fluidplayer.css" />
+      </Helmet>
+      
       {/* Main video container */}
       <div className="relative w-full bg-black overflow-hidden video-aspect-container">
         <div className="video-container">
