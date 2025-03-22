@@ -1,0 +1,90 @@
+/* Enhanced Player Styles */
+.enhanced-player-container {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.enhanced-player-container:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Custom loading spinner */
+.loader-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  border-top-color: #ef4444;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Improve quality menu appearance */
+.quality-menu {
+  min-width: 80px;
+  transform-origin: bottom right;
+  animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Better control visibility transitions */
+.enhanced-player-container .fluid_controls_container {
+  transition: opacity 0.3s ease-in-out !important;
+}
+
+/* Improvements for Fluid Player integration */
+.fluid_video_wrapper.fluid_player_layout_default {
+  border-radius: 4px !important;
+  overflow: hidden !important;
+}
+
+/* Fix for quality selector positioning on various screen sizes */
+@media (max-width: 640px) {
+  .enhanced-player-container .quality-menu {
+    right: 0;
+    bottom: 40px;
+    left: auto;
+  }
+}
+
+/* Improve player controls on mobile */
+@media (max-width: 480px) {
+  .enhanced-player-container .fluid_control_volume {
+    display: none !important;
+  }
+  
+  .enhanced-player-container .fluid_controls_container {
+    padding: 0 8px !important;
+  }
+}
+
+/* Better button focus states for accessibility */
+.enhanced-player-container button:focus {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+}
+
+/* Theatre mode enhancements */
+.theatre-mode {
+  max-width: 100% !important;
+  width: 100% !important;
+  background-color: #000 !important;
+  transition: all 0.3s ease-in-out !important;
+}

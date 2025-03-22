@@ -1,4 +1,6 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
+import { Episode } from '@shared/types';
+import '../styles/enhanced-player.css'; // We'll create this style file later
 
 // Define available quality options
 type VideoQuality = '480p' | '720p' | '1080p' | 'max';
@@ -7,18 +9,30 @@ interface TestPlayerProps {
   videoUrl: string;
   title?: string;
   poster?: string;
-  episode?: any; 
+  episode?: Episode; 
   onTimeUpdate?: (timeData: { currentTime: number; duration: number }) => void;
 }
+
+// Add a type for Fluid Player global variable
+// This will properly extend the Window interface
+interface FluidPlayerWindow extends Window {
+  fluidPlayer: (element: string | HTMLVideoElement, options?: any) => any;
+}
+declare const window: FluidPlayerWindow;
 
 const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episode, onTimeUpdate }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerInstanceRef = useRef<any>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
   const [selectedQuality, setSelectedQuality] = useState<VideoQuality>('max');
   const [showQualityMenu, setShowQualityMenu] = useState<boolean>(false);
+  const [isPlayerReady, setIsPlayerReady] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasPlaybackStarted, setHasPlaybackStarted] = useState<boolean>(false);
+  const [showControls, setShowControls] = useState<boolean>(true);
 
-  // Get available quality options from episode
-  const getAvailableQualities = () => {
+  // Get available quality options from episode - memoize with useCallback
+  const getAvailableQualities = useCallback(() => {
     if (!episode) return [];
 
     const qualities: { quality: VideoQuality; url: string | undefined }[] = [];
@@ -36,13 +50,15 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
     }
 
     // Always include max quality
-    qualities.push({ quality: 'max', url: episode.video_url_max_quality });
+    if (episode.video_url_max_quality) {
+      qualities.push({ quality: 'max', url: episode.video_url_max_quality });
+    }
 
     return qualities;
-  };
+  }, [episode]);
 
   // Get current video URL based on selected quality
-  const getCurrentVideoUrl = () => {
+  const getCurrentVideoUrl = useCallback(() => {
     if (!episode) return videoUrl;
 
     switch (selectedQuality) {
@@ -56,15 +72,16 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
       default:
         return episode.video_url_max_quality || videoUrl;
     }
-  };
+  }, [episode, selectedQuality, videoUrl]);
 
   // Handle quality change
-  const handleQualityChange = (quality: VideoQuality) => {
+  const handleQualityChange = useCallback((quality: VideoQuality) => {
     if (videoRef.current) {
       // Save current playback time and playing state
       const currentTime = videoRef.current.currentTime;
       const isPlaying = !videoRef.current.paused;
-
+      
+      setIsLoading(true);
       // Change quality
       setSelectedQuality(quality);
 
@@ -76,6 +93,7 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
       videoRef.current.onloadeddata = () => {
         if (videoRef.current) {
           videoRef.current.currentTime = currentTime;
+          setIsLoading(false);
           if (isPlaying) {
             videoRef.current.play().catch(e => {
               console.error('Error playing video after quality change:', e);
@@ -87,32 +105,64 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
       // Hide quality menu
       setShowQualityMenu(false);
     }
-  };
+  }, [getCurrentVideoUrl]);
 
+  // Dynamically load Fluid Player script if not available
+  const loadFluidPlayerScript = useCallback(() => {
+    return new Promise<void>((resolve, reject) => {
+      if (typeof window.fluidPlayer === 'function') {
+        resolve();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://cdn.fluidplayer.com/v3/current/fluidplayer.min.js';
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = (err) => reject(new Error('Failed to load Fluid Player script'));
+      document.head.appendChild(script);
+    });
+  }, []);
+
+  // Initialize Fluid Player
   useEffect(() => {
     let initAttempts = 0;
     const MAX_ATTEMPTS = 10;
+    let attemptTimeout: NodeJS.Timeout;
     
-    const initPlayer = () => {
+    const initPlayer = async () => {
       if (initAttempts >= MAX_ATTEMPTS) {
         console.error('Failed to initialize player after multiple attempts');
+        setIsPlayerReady(true); // Fall back to native player
+        setIsLoading(false);
         return;
       }
       
       initAttempts++;
       
+      // First ensure the script is loaded
+      try {
+        await loadFluidPlayerScript();
+      } catch (error) {
+        console.error('Failed to load Fluid Player script:', error);
+        attemptTimeout = setTimeout(initPlayer, 500);
+        return;
+      }
+      
       if (!videoRef.current || typeof window.fluidPlayer !== 'function') {
         console.log(`Video element or fluidPlayer not available yet (attempt ${initAttempts}/${MAX_ATTEMPTS})`);
-        setTimeout(initPlayer, 200);
+        attemptTimeout = setTimeout(initPlayer, 300);
         return;
       }
 
       try {
+        // Clean up previous instance if it exists
         if (playerInstanceRef.current) {
           playerInstanceRef.current.destroy();
           playerInstanceRef.current = null;
         }
 
+        // Configure player with optimized settings
         const playerOptions = {
           layoutControls: {
             primaryColor: "#ef4444",
@@ -124,6 +174,7 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
             autoPlay: false,
             mute: false,
             keyboardControl: true,
+            doubleclickFullscreen: true,
             loop: false,
             allowDownload: false,
             playbackRateEnabled: true,
@@ -145,6 +196,20 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
             contextMenu: {
               controls: true,
               links: []
+            },
+            controlForwardBackward: {
+              show: true,
+              doubleTapMobile: true
+            }
+          },
+          modules: {
+            configureHls: (options: any) => {
+              return {
+                ...options,
+                enableWorker: true,
+                lowLatencyMode: true,
+                startLevel: -1
+              };
             }
           }
         };
@@ -152,9 +217,29 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         // Initialize player
         const videoId = videoRef.current.id;
         playerInstanceRef.current = window.fluidPlayer(videoId, playerOptions);
+        
+        // Register event handlers
+        if (playerInstanceRef.current) {
+          playerInstanceRef.current.on('play', () => {
+            setHasPlaybackStarted(true);
+            setIsLoading(false);
+          });
+          
+          playerInstanceRef.current.on('pause', () => {
+            setShowControls(true);
+          });
+          
+          playerInstanceRef.current.on('playing', () => {
+            setIsLoading(false);
+          });
+          
+          playerInstanceRef.current.on('waiting', () => {
+            setIsLoading(true);
+          });
+        }
 
         // Add time update event listener
-        if (onTimeUpdate) {
+        if (onTimeUpdate && videoRef.current) {
           videoRef.current.addEventListener('timeupdate', () => {
             onTimeUpdate({
               currentTime: videoRef.current?.currentTime || 0,
@@ -162,15 +247,29 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
             });
           });
         }
+        
+        setIsPlayerReady(true);
       } catch (error) {
         console.error('Error initializing Fluid Player:', error);
+        
+        // Fall back to native video player
+        setIsPlayerReady(true);
+        setIsLoading(false);
+        
+        // Try again if we haven't reached max attempts
+        if (initAttempts < MAX_ATTEMPTS) {
+          attemptTimeout = setTimeout(initPlayer, 500);
+        }
       }
     };
 
+    setIsLoading(true);
     initPlayer();
 
     // Cleanup
     return () => {
+      clearTimeout(attemptTimeout);
+      
       if (playerInstanceRef.current) {
         try {
           console.log('Destroying player instance on unmount');
@@ -181,75 +280,67 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         }
       }
       
-      // Clean up event listeners from the video element
+      // Clean up event listeners
       if (videoRef.current) {
         videoRef.current.onloadeddata = null;
       }
     };
-  }, [videoUrl, poster, episode, onTimeUpdate]);
+  }, [videoUrl, poster, episode, onTimeUpdate, loadFluidPlayerScript]);
 
-  // Update video source when quality changes
+  // Handle mouse movement for controls visibility
   useEffect(() => {
-    if (videoRef.current) {
-      const newUrl = getCurrentVideoUrl();
-      if (videoRef.current.src !== newUrl) {
-        console.log(`Updating video source to: ${newUrl}`);
-        videoRef.current.src = newUrl;
-        videoRef.current.load();
-      }
-    }
-  }, [selectedQuality, episode]);
-
-  useEffect(() => {
-    const videoElement = videoRef.current;
-    if (!videoElement) return;
-
-    const handleTimeUpdate = () => {
-      if (onTimeUpdate && videoElement.duration) {
-        onTimeUpdate({
-          currentTime: videoElement.currentTime,
-          duration: videoElement.duration
-        });
-      }
+    const container = playerContainerRef.current;
+    if (!container || !hasPlaybackStarted) return;
+    
+    let controlsTimer: NodeJS.Timeout;
+    
+    const handleMouseMove = () => {
+      setShowControls(true);
+      clearTimeout(controlsTimer);
+      
+      controlsTimer = setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
     };
-
-    // Close quality menu when clicking outside
-    const handleClickOutside = (event: MouseEvent) => {
-      if (showQualityMenu && 
-          !((event.target as HTMLElement).closest('.quality-menu') || 
-            (event.target as HTMLElement).closest('button'))) {
-        setShowQualityMenu(false);
-      }
-    };
-
-    videoElement.addEventListener('timeupdate', handleTimeUpdate);
-    document.addEventListener('click', handleClickOutside);
-
+    
+    container.addEventListener('mousemove', handleMouseMove);
+    
     return () => {
-      videoElement.removeEventListener('timeupdate', handleTimeUpdate);
-      document.removeEventListener('click', handleClickOutside);
+      container.removeEventListener('mousemove', handleMouseMove);
+      clearTimeout(controlsTimer);
     };
-  }, [onTimeUpdate, showQualityMenu]);
+  }, [hasPlaybackStarted]);
 
   return (
-    <div className="fluid-player-container">
-      <div className="relative w-full">
-        <video
-          id="test-fluid-player"
-          ref={videoRef}
-          className="w-full aspect-video"
-          controls
-          playsInline
-          poster={episode?.thumbnail_url || poster}
-        >
-          <source src={getCurrentVideoUrl()} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+    <div 
+      ref={playerContainerRef}
+      className="enhanced-player-container relative w-full bg-black overflow-hidden"
+    >
+      <video
+        id="test-fluid-player"
+        ref={videoRef}
+        className="w-full aspect-video"
+        controls
+        playsInline
+        poster={episode?.thumbnail_url || poster}
+        preload="metadata"
+      >
+        <source src={getCurrentVideoUrl()} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
 
-        {/* Quality selection button */}
-        <div className="absolute bottom-16 right-4 z-10">
+      {/* Loading indicator */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 z-20">
+          <div className="loader-spinner"></div>
+        </div>
+      )}
+
+      {/* Quality selection button */}
+      {isPlayerReady && (
+        <div className={`absolute bottom-16 right-4 z-30 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
           <button
-            className="bg-black bg-opacity-70 text-white px-3 py-1 rounded-md text-sm flex items-center"
+            className="bg-black bg-opacity-80 text-white px-3 py-1 rounded-md text-sm flex items-center hover:bg-opacity-100 transition-all"
             onClick={() => setShowQualityMenu(!showQualityMenu)}
           >
             {selectedQuality === 'max' ? 'MAX' : selectedQuality} 
@@ -260,11 +351,11 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
 
           {/* Quality menu */}
           {showQualityMenu && (
-            <div className="absolute bottom-10 right-0 bg-black bg-opacity-90 text-white rounded-md overflow-hidden">
+            <div className="absolute bottom-10 right-0 bg-black bg-opacity-90 text-white rounded-md overflow-hidden shadow-lg quality-menu">
               {getAvailableQualities().map(({ quality, url }) => (
                 <button
                   key={quality}
-                  className={`block w-full text-left px-4 py-2 hover:bg-gray-700 ${selectedQuality === quality ? 'bg-gray-700' : ''}`}
+                  className={`block w-full text-left px-4 py-2 hover:bg-gray-700 transition-colors ${selectedQuality === quality ? 'bg-gray-700' : ''}`}
                   onClick={() => handleQualityChange(quality)}
                   disabled={!url}
                 >
@@ -274,7 +365,7 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
             </div>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 };
