@@ -24,185 +24,165 @@
   height: 100%;
 }
 
-/* Player UI theme overrides */
-#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0)) !important;
-  border-radius: 0 0 8px 8px;
-  padding: 8px 0;
-  transition: opacity 0.3s ease;
+
+/* Modern Fluid Player Skin */
+.fluid_video_wrapper {
+  background-color: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Progress bar styling */
-#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container .fluid_controls_progress {
-  background-color: rgba(255, 255, 255, 0.3) !important;
+/* Custom control bar */
+.fluid_controls_container {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
+  border-radius: 0 0 8px 8px;
+  height: 48px !important;
+}
+
+/* Play button */
+.fluid_control_playpause {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background-color: rgba(0, 128, 255, 0.8) !important;
+  transition: background-color 0.2s ease;
+}
+
+.fluid_control_playpause:hover {
+  background-color: rgba(0, 128, 255, 1) !important;
+}
+
+/* Progress bar */
+.fluid_timeline_loaded, .fluid_timeline_current {
   height: 6px !important;
   border-radius: 3px;
 }
 
-#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container .fluid_controls_progress .fluid_controls_currentprogress {
-  background-color: var(--primary, #ef4444) !important;
+.fluid_timeline_loaded {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.fluid_timeline_current {
+  background-color: rgba(0, 128, 255, 0.8) !important;
+}
+
+/* Volume control */
+.fluid_control_volume_container {
+  width: 100px !important;
+}
+
+.fluid_control_volume .fluid_control_volume_currentpos {
+  background-color: rgba(0, 128, 255, 0.8) !important;
+  height: 6px !important;
   border-radius: 3px;
-  transition: all 0.2s ease;
 }
 
-#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container:hover .fluid_controls_progress {
-  height: 8px !important;
+/* Full screen button */
+.fluid_control_fullscreen {
+  width: 36px !important;
+  height: 36px !important;
 }
 
-/* Timestamp styling */
-#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_time_display {
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  color: #ffffff !important;
+/* Custom play button overlay */
+.fluid_initial_play {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border-radius: 50%;
+  width: 80px !important;
+  height: 80px !important;
+  margin-left: -40px !important;
+  margin-top: -40px !important;
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
-/* Button styling */
-#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button {
-  color: #fff !important;
-  opacity: 0.85;
-  transition: all 0.2s ease;
-}
-
-#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button:hover {
-  color: var(--primary, #ef4444) !important;
-  opacity: 1;
+.fluid_initial_play:hover {
   transform: scale(1.1);
+  background: rgba(0, 128, 255, 0.6) !important;
 }
 
-/* Volume slider */
-#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container .fluid_control_volume .fluid_control_volume_currentvolume {
-  background-color: var(--primary, #ef4444) !important;
-}
-
-/* Buffering animation */
-#fluid_video_wrapper.fluid_player_layout_default .fluid_initial_play_button_container,
-#fluid_video_wrapper.fluid_player_layout_default .fluid_initial_play {
-  background-color: rgba(0, 0, 0, 0.4) !important;
-  border: 2px solid var(--primary, #ef4444) !important;
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-  transition: all 0.3s ease;
-}
-
-#fluid_video_wrapper.fluid_player_layout_default .fluid_initial_play:hover {
-  background-color: var(--primary, #ef4444) !important;
-  transform: scale(1.05);
-}
-
-/* Theater mode enhancements */
-#fluid_video_wrapper.fluid_player_layout_default.fluid_player_theatre_mode {
-  max-width: 100% !important;
-  width: 100% !important;
-  background-color: #000;
-  padding: 0 !important;
-}
-
-/* Thumbnail preview */
-#fluid_video_wrapper.fluid_player_layout_default .fluid_timeline_preview_container {
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Mobile optimization */
-@media (max-width: 768px) {
-  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container {
-    padding: 4px 0;
-  }
-
-  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button {
-    margin: 0 2px;
-  }
-}
-
-/* Settings menu styling */
-#fluid_video_wrapper.fluid_player_layout_default .fluid_control_video_source, 
-#fluid_video_wrapper.fluid_player_layout_default .fluid_control_playback_rate, 
-#fluid_video_wrapper.fluid_player_layout_default .fluid_control_download {
-  background-color: rgba(0, 0, 0, 0.8) !important;
-  border-radius: 4px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-}
-
-/* Source menu items */
-#fluid_video_wrapper.fluid_player_layout_default .fluid_video_sources_list .fluid_video_source_list_item:hover {
-  background-color: var(--primary, #ef4444) !important;
-}
-
-#fluid_video_wrapper.fluid_player_layout_default .fluid_video_source_list_item.source_selected {
-  color: var(--primary, #ef4444) !important;
-}
-
-/* Fix for mini player mode */
-.fluid_mini_player {
-  z-index: 9999 !important;
-}
-
-/* Ensure proper centering and sizing of the video */
-.fluid_video_wrapper {
-  width: 100% !important;
-  margin: 0 auto !important;
-}
-
-
-/* Loading indicators */
-.fluid_initial_play, .fluid_initial_play_button {
-  border-color: var(--primary, #ef4444) !important;
+.fluid_initial_play_button {
+  border-style: solid;
+  border-width: 20px 0 20px 40px !important;
+  border-color: transparent transparent transparent white !important;
+  margin-left: 5px !important;
 }
 
 /* Time display */
 .fluid_control_duration {
-  color: white !important;
+  font-family: Arial, sans-serif !important;
+  font-weight: 500 !important;
 }
 
-/* Mobile optimizations */
+/* Add hover animation to all control buttons */
+.fluid_button {
+  transition: transform 0.2s ease !important;
+}
+
+.fluid_button:hover {
+  transform: scale(1.1) !important;
+}
+
+/* Mobile improvements */
 @media (max-width: 768px) {
-  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container {
-    height: 40px !important;
-    padding: 0 5px !important;
+  .fluid_controls_container {
+    height: 42px !important;
   }
-  
-  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button {
-    width: 30px !important;
-    height: 30px !important;
-    padding: 5px !important;
-    margin: 0 2px !important;
+
+  .fluid_control_playpause,
+  .fluid_control_fullscreen {
+    width: 32px !important;
+    height: 32px !important;
   }
-  
-  /* Make the progress bar easier to grab on touch devices */
-  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_progress_container {
-    height: 10px !important;
+
+  .fluid_initial_play {
+    width: 60px !important;
+    height: 60px !important;
+    margin-left: -30px !important;
+    margin-top: -30px !important;
   }
-  
-  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_progress {
-    height: 6px !important;
+
+  .fluid_initial_play_button {
+    border-width: 15px 0 15px 30px !important;
   }
-  
-  /* Show fewer controls on mobile to prevent overcrowding */
-  #fluid_video_wrapper.fluid_player_layout_default .fluid_control_theatre {
-    display: none !important;
-  }
-  
-  /* Improve tap targets on mobile */
-  #fluid_video_wrapper.fluid_player_layout_default .fluid_control_volume_container,
-  #fluid_video_wrapper.fluid_player_layout_default .fluid_control_fullscreen,
-  #fluid_video_wrapper.fluid_player_layout_default .fluid_control_playpause {
-    min-width: 40px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-  
-  /* Improve the video player container */
-  .video-aspect-container {
-    height: auto !important;
-  }
-  
-  /* Fix for the mini player on mobile */
-  .fluid_mini_player {
-    max-width: 280px !important;
-    max-height: 160px !important;
-    right: 10px !important;
-    bottom: 60px !important;
-  }
+}
+
+/* Custom buffering spinner */
+.fluid_video_loading {
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top: 3px solid rgba(0, 128, 255, 0.8);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: fluid_spin 1s linear infinite;
+}
+
+@keyframes fluid_spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Theatre mode improvements */
+.fluid_theatre_mode {
+  max-width: 90vw !important;
+  max-height: 80vh !important;
+  margin: 0 auto;
+}
+
+/* Subtitles styling */
+.fluid_subtitles_container {
+  bottom: 60px !important;
+}
+
+.fluid_subtitles_container div {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+}
+
+/* Add glow effect to active buttons */
+.fluid_button.fluid_button_active {
+  box-shadow: 0 0 8px rgba(0, 128, 255, 0.8) !important;
 }
