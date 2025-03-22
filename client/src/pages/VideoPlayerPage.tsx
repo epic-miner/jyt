@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { cn } from '../lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { useRoute, useLocation } from 'wouter';
@@ -77,19 +77,19 @@ const VideoPlayerPage = () => {
     }
   }, [anime, currentEpisode, animeId, episodeId]);
 
-  const handleNextEpisode = () => {
+  const handleNextEpisode = useCallback(() => {
     if (currentEpisodeIndex < episodes.length - 1) {
       const nextEp = episodes[currentEpisodeIndex + 1];
       setLocation(`/watch/${animeId}/${nextEp.id}`);
     }
-  };
+  }, [currentEpisodeIndex, episodes, animeId, setLocation]);
 
-  const handlePreviousEpisode = () => {
+  const handlePreviousEpisode = useCallback(() => {
     if (currentEpisodeIndex > 0) {
       const prevEp = episodes[currentEpisodeIndex - 1];
       setLocation(`/watch/${animeId}/${prevEp.id}`);
     }
-  };
+  }, [currentEpisodeIndex, episodes, animeId, setLocation]);
 
   // Handle loading state
   if (isLoadingAnime || isLoadingEpisode) {
@@ -148,18 +148,258 @@ const VideoPlayerPage = () => {
     );
   }
 
+  // Add custom Fluid Player
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const playerInstanceRef = useRef<any>(null);
+
+  // Initialize Fluid Player when episode is loaded
+  useEffect(() => {
+    if (!currentEpisode || !anime || !videoRef.current) return;
+
+    // Clean up previous player instance if it exists
+    if (playerInstanceRef.current) {
+      try {
+        playerInstanceRef.current.destroy();
+      } catch (e) {
+        console.error('Error destroying previous player:', e);
+      }
+      playerInstanceRef.current = null;
+    }
+
+    // Wait for fluidPlayer to be available
+    const initPlayer = () => {
+      if (typeof window.fluidPlayer !== 'function') {
+        console.log('Waiting for Fluid Player to load...');
+        setTimeout(initPlayer, 500);
+        return;
+      }
+
+      try {
+        console.log('Initializing enhanced Fluid Player...');
+        // Initialize with enhanced options
+        const playerInstance = window.fluidPlayer('anime-player', {
+          layoutControls: {
+            primaryColor: "#ef4444",
+            fillToContainer: true,
+            autoPlay: false,
+            playbackRateEnabled: true,
+            allowTheatre: true,
+            miniPlayer: {
+              enabled: true,
+              width: 400,
+              widthMobile: 280,
+              placeholderText: "Playing in Mini Player",
+              position: "bottom right"
+            },
+            controlBar: {
+              autoHide: true,
+              autoHideTimeout: 3,
+              animated: true
+            },
+            logo: {
+              imageUrl: null,
+              position: "top left",
+              clickUrl: null,
+              opacity: 1
+            },
+            contextMenu: {
+              controls: true,
+              links: [
+                {
+                  href: '/',
+                  label: 'Back to Home'
+                },
+                {
+                  href: `/anime/${anime.id}`,
+                  label: `View ${anime.title}`
+                }
+              ]
+            },
+            persistentSettings: {
+              volume: true,
+              quality: true,
+              speed: true,
+              theatre: true
+            },
+            controlForwardBackward: {
+              show: true,
+              doubleTapMobile: true
+            },
+            allowDownload: false,
+          },
+          modules: {
+            configureHls: (options: any) => {
+              return {
+                ...options,
+                autoLevelCapping: -1,
+                lowLatencyMode: true,
+                startLevel: -1
+              };
+            },
+            configureDash: (options: any) => {
+              return {
+                ...options,
+                streaming: {
+                  fastSwitchEnabled: true,
+                  lowLatencyEnabled: true
+                }
+              };
+            }
+          }
+        });
+
+        playerInstanceRef.current = playerInstance;
+
+        // Set up event listeners
+        playerInstance.on('play', () => {
+          console.log('Video started playing');
+        });
+
+        playerInstance.on('pause', () => {
+          console.log('Video paused');
+        });
+
+        playerInstance.on('timeupdate', (time: number) => {
+          if (!videoRef.current || !anime?.id || !currentEpisode?.id) return;
+          
+          const currentVideoTime = videoRef.current.currentTime;
+          const duration = videoRef.current.duration;
+          
+          if (isNaN(duration) || duration <= 0) return;
+          
+          // Calculate percentage progress and update watch history every 5 seconds
+          if (Math.floor(currentVideoTime) % 5 === 0) {
+            const progressPercentage = Math.floor((currentVideoTime / duration) * 100);
+            updateWatchHistory({
+              animeId: anime.id.toString(),
+              episodeId: currentEpisode.id.toString(),
+              title: currentEpisode.title,
+              episodeNumber: currentEpisode.episode_number,
+              animeThumbnail: anime.thumbnail_url,
+              animeTitle: anime.title,
+              progress: progressPercentage,
+              timestamp: new Date().getTime()
+            });
+          }
+        });
+
+        playerInstance.on('ended', () => {
+          console.log('Video ended');
+          if (currentEpisodeIndex < episodes.length - 1) {
+            setTimeout(() => {
+              handleNextEpisode();
+            }, 1500);
+          }
+        });
+
+        // Remove download button completely
+        setTimeout(() => {
+          try {
+            // Remove any download buttons that might be created
+            const downloadButtons = document.querySelectorAll('[data-player-action="download"], .fluid_control_download');
+            downloadButtons.forEach(button => {
+              if (button instanceof HTMLElement) {
+                button.style.display = 'none';
+                button.remove();
+              }
+            });
+            
+            // Remove from context menu if exists
+            const contextMenuItems = document.querySelectorAll('.fluid_context_menu li');
+            contextMenuItems.forEach(item => {
+              if (item.textContent?.includes('Download')) {
+                item.remove();
+              }
+            });
+          } catch (e) {
+            console.log('Download button removal attempt:', e);
+          }
+        }, 500);
+
+      } catch (error) {
+        console.error('Error initializing Fluid Player:', error);
+      }
+    };
+
+    initPlayer();
+
+    // Clean up on unmount
+    return () => {
+      try {
+        if (playerInstanceRef.current) {
+          playerInstanceRef.current.destroy();
+          playerInstanceRef.current = null;
+        }
+      } catch (error) {
+        console.error('Error cleaning up Fluid Player:', error);
+      }
+    };
+  }, [anime?.id, currentEpisode?.id, currentEpisodeIndex, episodes.length, handleNextEpisode]);
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-black to-dark-950">
       <div className="max-w-7xl mx-auto w-full relative z-10">
-        {/* Main Fluid Player Component */}
-        <FluidVideoPlayer 
-          anime={anime}
-          episode={currentEpisode}
-          onNextEpisode={handleNextEpisode}
-          onPreviousEpisode={handlePreviousEpisode}
-          hasNext={currentEpisodeIndex < episodes.length - 1}
-          hasPrevious={currentEpisodeIndex > 0}
-        />
+        {/* Enhanced Fluid Player Direct Implementation */}
+        <div className="w-full flex flex-col bg-black fluid-player-container">
+          <div className="relative w-full bg-black overflow-hidden aspect-video">
+            <div className="absolute top-0 left-0 w-full h-full">
+              <video 
+                ref={videoRef} 
+                className="w-full h-full"
+                id="anime-player"
+                controls
+                playsInline
+                preload="auto"
+              >
+                {/* Use multiple source tags with data-fluid-hd attribute for HD quality sources */}
+                {currentEpisode.video_url_1080p && (
+                  <source src={currentEpisode.video_url_1080p} type="video/mp4" data-fluid-hd title="1080p" />
+                )}
+                {currentEpisode.video_url_720p && (
+                  <source src={currentEpisode.video_url_720p} type="video/mp4" data-fluid-hd title="720p" />
+                )}
+                {currentEpisode.video_url_480p && (
+                  <source src={currentEpisode.video_url_480p} type="video/mp4" title="480p" />
+                )}
+                {!currentEpisode.video_url_1080p && !currentEpisode.video_url_720p && !currentEpisode.video_url_480p && (
+                  <source src={currentEpisode.video_url_max_quality} type="video/mp4" title="Auto" />
+                )}
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+
+          {/* Episode navigation bar */}
+          <div className="bg-black py-2 px-3 sm:py-3 sm:px-4 flex justify-between items-center border-t border-gray-800/30">
+            <button
+              className="bg-gray-800/70 hover:bg-gray-700/70 transition px-2 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              onClick={handlePreviousEpisode}
+              disabled={!(currentEpisodeIndex > 0)}
+            >
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="19 20 9 12 19 4"></polyline>
+              </svg> 
+              <span className="sm:inline hidden">Previous</span>
+              <span className="sm:hidden inline">Prev</span>
+            </button>
+
+            <div className="text-xs sm:text-sm text-gray-300">
+              Ep <span className="font-bold">{currentEpisode.episode_number}</span>
+            </div>
+
+            <button
+              className="bg-gray-800/70 hover:bg-gray-700/70 transition px-2 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              onClick={handleNextEpisode}
+              disabled={!(currentEpisodeIndex < episodes.length - 1)}
+            >
+              <span className="sm:inline hidden">Next</span>
+              <span className="sm:hidden inline">Next</span>
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="5 4 15 12 5 20"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
 
         <div className="p-4 space-y-4 md:space-y-6 rounded-t-xl backdrop-blur-sm bg-black/40 border-t border-white/5">
           {/* Episode Info */}
