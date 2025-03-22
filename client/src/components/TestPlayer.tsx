@@ -316,9 +316,24 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         }
       }
       
-      // Clean up event listeners
+      // Clean up event listeners and release resources
       if (videoRef.current) {
-        videoRef.current.onloadeddata = null;
+        try {
+          // Stop all video activity
+          videoRef.current.pause();
+          videoRef.current.removeAttribute('src');
+          videoRef.current.load();
+          
+          // Remove all event listeners
+          videoRef.current.onloadeddata = null;
+          videoRef.current.oncanplay = null;
+          videoRef.current.onended = null;
+          videoRef.current.ontimeupdate = null;
+          
+          console.log('Successfully cleaned up video element');
+        } catch (error) {
+          console.error('Error during video cleanup:', error);
+        }
       }
     };
   }, [videoUrl, poster, episode, onTimeUpdate, onEnded, loadFluidPlayerScript]);

@@ -78,6 +78,10 @@ const VideoPlayerPage = () => {
     }
   }, [anime, currentEpisode, animeId, episodeId]);
   
+  // Define a ref to track if we're on the first render
+  const isFirstRender = useRef(true);
+  const videoLoaded = useRef(false);
+  
   // Force a window scroll to the top when changing episodes
   // This helps trigger any lazy-loaded components to reinitialize
   useEffect(() => {
@@ -85,62 +89,152 @@ const VideoPlayerPage = () => {
       // Scroll to top
       window.scrollTo(0, 0);
       
+      // On first load, don't show loading state
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+        return;
+      }
+      
+      // Set loading state
+      setIsNavigating(true);
+      videoLoaded.current = false;
+      
       // Add a small delay before forcibly reloading any existing player elements
       const timer = setTimeout(() => {
-        // Try to access any video elements and force them to reload
-        const videoElements = document.querySelectorAll('video');
-        videoElements.forEach(video => {
-          if (video.src) {
-            // Explicitly set video source to force reload
-            const currentSrc = video.src;
-            video.src = '';
-            video.load();
-            video.src = currentSrc;
-            video.load();
-            video.play().catch(e => console.error('Error playing after episode change:', e));
-          }
-        });
-      }, 100);
+        // Force a complete reload of the player by simulating component unmount/remount
+        const videoContainer = document.querySelector('.enhanced-player-container');
+        if (videoContainer) {
+          // Hide it first to prevent black screen
+          videoContainer.classList.add('opacity-0');
+          
+          const videoElements = document.querySelectorAll('video');
+          videoElements.forEach(video => {
+            if (video.src) {
+              try {
+                // Stop any current playback
+                video.pause();
+                
+                // Explicitly clear and reset source to force complete reload
+                const currentSrc = video.src;
+                video.removeAttribute('src');
+                video.load();
+                
+                // Wait before setting new source
+                setTimeout(() => {
+                  video.src = currentSrc;
+                  video.load();
+                  
+                  // Wait for video to be ready
+                  video.onloadeddata = () => {
+                    videoLoaded.current = true;
+                    videoContainer.classList.remove('opacity-0');
+                    video.play().catch(e => console.error('Error playing after episode change:', e));
+                    setTimeout(() => setIsNavigating(false), 300);
+                  };
+                  
+                  // Fallback in case onloadeddata doesn't fire
+                  setTimeout(() => {
+                    if (!videoLoaded.current) {
+                      videoContainer.classList.remove('opacity-0');
+                      video.play().catch(e => console.error('Error playing after fallback:', e));
+                      setIsNavigating(false);
+                    }
+                  }, 2000);
+                }, 200);
+              } catch (error) {
+                console.error('Error during video element reset:', error);
+                setIsNavigating(false);
+              }
+            }
+          });
+        } else {
+          // If we can't find video container, just turn off loading state after delay
+          setTimeout(() => setIsNavigating(false), 1000);
+        }
+      }, 200);
       
       return () => clearTimeout(timer);
     }
   }, [currentEpisode?.id]);
 
+  // Store current navigation state in ref to prevent race conditions
+  const navigationInProgressRef = useRef(false);
+  
   const handleNextEpisode = useCallback(() => {
-    if (currentEpisodeIndex < episodes.length - 1 && !isNavigating) {
-      // Set navigating state to show loading and prevent multiple clicks
+    if (currentEpisodeIndex < episodes.length - 1 && !isNavigating && !navigationInProgressRef.current) {
+      // Mark navigation as in progress to prevent double calls
+      navigationInProgressRef.current = true;
       setIsNavigating(true);
       
       // Get next episode
       const nextEp = episodes[currentEpisodeIndex + 1];
       
-      // Add a small delay to allow for better user feedback
+      // Clean up any existing video players first
+      const videoElements = document.querySelectorAll('video');
+      videoElements.forEach(video => {
+        if (video.src) {
+          // Pause and reset video source
+          try {
+            video.pause();
+            video.currentTime = 0;
+            video.removeAttribute('src');
+            video.load();
+          } catch (e) {
+            console.error('Error cleaning up video before navigation:', e);
+          }
+        }
+      });
+      
+      // Force a hard navigation
       setTimeout(() => {
-        // Add timestamp to force reload and ensure autoplay works
-        setLocation(`/watch/${animeId}/${nextEp.id}?t=${Date.now()}`);
-        
-        // Reset navigating state after a delay to ensure navigation is complete
-        setTimeout(() => setIsNavigating(false), 500);
-      }, 200);
+        try {
+          window.location.href = `/watch/${animeId}/${nextEp.id}?t=${Date.now()}`;
+        } catch (e) {
+          console.error('Error during forced navigation:', e);
+          // Fallback to normal navigation if window.location fails
+          setLocation(`/watch/${animeId}/${nextEp.id}?t=${Date.now()}`);
+          navigationInProgressRef.current = false;
+        }
+      }, 300);
     }
   }, [currentEpisodeIndex, episodes, animeId, setLocation, isNavigating]);
 
   const handlePreviousEpisode = useCallback(() => {
-    if (currentEpisodeIndex > 0 && !isNavigating) {
-      // Set navigating state to show loading and prevent multiple clicks
+    if (currentEpisodeIndex > 0 && !isNavigating && !navigationInProgressRef.current) {
+      // Mark navigation as in progress to prevent double calls
+      navigationInProgressRef.current = true;
       setIsNavigating(true);
       
       // Get previous episode
       const prevEp = episodes[currentEpisodeIndex - 1];
       
-      // Add a small delay to allow for better user feedback
+      // Clean up any existing video players first
+      const videoElements = document.querySelectorAll('video');
+      videoElements.forEach(video => {
+        if (video.src) {
+          // Pause and reset video source
+          try {
+            video.pause();
+            video.currentTime = 0;
+            video.removeAttribute('src');
+            video.load();
+          } catch (e) {
+            console.error('Error cleaning up video before navigation:', e);
+          }
+        }
+      });
+      
+      // Force a hard navigation
       setTimeout(() => {
-        // Add timestamp to force reload and ensure autoplay works
-        setLocation(`/watch/${animeId}/${prevEp.id}?t=${Date.now()}`);
-        
-        // Reset navigating state after a delay to ensure navigation is complete
-        setTimeout(() => setIsNavigating(false), 500);
-      }, 200);
+        try {
+          window.location.href = `/watch/${animeId}/${prevEp.id}?t=${Date.now()}`;
+        } catch (e) {
+          console.error('Error during forced navigation:', e);
+          // Fallback to normal navigation if window.location fails
+          setLocation(`/watch/${animeId}/${prevEp.id}?t=${Date.now()}`);
+          navigationInProgressRef.current = false;
+        }
+      }, 300);
     }
   }, [currentEpisodeIndex, episodes, animeId, setLocation, isNavigating]);
 
@@ -307,14 +401,38 @@ const VideoPlayerPage = () => {
                 <button
                   key={ep.id}
                   onClick={() => {
-                    if (!isNavigating) {
+                    if (!isNavigating && !navigationInProgressRef.current) {
+                      // Mark navigation as in progress
+                      navigationInProgressRef.current = true;
                       setIsNavigating(true);
-                      // Add a slight delay for better UX
+                      
+                      // Clean up any existing video players first
+                      const videoElements = document.querySelectorAll('video');
+                      videoElements.forEach(video => {
+                        if (video.src) {
+                          // Pause and reset video source
+                          try {
+                            video.pause();
+                            video.currentTime = 0;
+                            video.removeAttribute('src');
+                            video.load();
+                          } catch (e) {
+                            console.error('Error cleaning up video before episode selection:', e);
+                          }
+                        }
+                      });
+                      
+                      // Force a hard navigation
                       setTimeout(() => {
-                        setLocation(`/watch/${animeId}/${ep.id}?t=${Date.now()}`);
-                        // Reset navigating state after navigation
-                        setTimeout(() => setIsNavigating(false), 500);
-                      }, 200);
+                        try {
+                          window.location.href = `/watch/${animeId}/${ep.id}?t=${Date.now()}`;
+                        } catch (e) {
+                          console.error('Error during forced episode selection:', e);
+                          // Fallback to normal navigation
+                          setLocation(`/watch/${animeId}/${ep.id}?t=${Date.now()}`);
+                          navigationInProgressRef.current = false;
+                        }
+                      }, 300);
                     }
                   }}
                   disabled={isNavigating}
