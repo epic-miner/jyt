@@ -236,3 +236,32 @@
   border-radius: 6px !important;
   overflow: hidden !important;
 }
+/* Custom YouTube-style play/pause buttons */
+.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button.fluid_button_play:before {
+  background: url('/assets/static/play-button.svg') no-repeat center center !important;
+  background-size: contain !important;
+  opacity: 1 !important;
+  width: 30px !important;
+  height: 30px !important;
+  top: -2px !important;
+  left: 0 !important;
+}
+
+.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button.fluid_button_pause:before {
+  background: url('/assets/static/pause-button.svg') no-repeat center center !important;
+  background-size: contain !important;
+  opacity: 1 !important;
+  width: 30px !important;
+  height: 30px !important;
+  top: -2px !important;
+  left: 0 !important;
+}
+
+/* Make hover effect more YouTube-like */
+.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button:hover {
+  opacity: 1;
+}
+
+.fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button {
+  transition: opacity 0.2s ease-in-out;
+}
