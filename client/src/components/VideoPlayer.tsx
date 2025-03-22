@@ -1375,13 +1375,13 @@ const VideoPlayer = ({
                 {/* Left controls */}
                 <div className={cn(
                   "flex items-center",
-                  isMobile ? "space-x-1" : "space-x-2" // Tighter spacing on mobile
+                  isMobile ? "space-x-2" : "space-x-2" // Adjusted spacing on mobile
                 )}>
                   {/* Play/Pause button */}
                   <button
                     className={cn(
                       "text-white hover:text-white/80 transition rounded-full",
-                      isMobile ? "p-1.5" : "p-2" // Smaller padding on mobile
+                      isMobile ? "p-1.5 mr-1" : "p-2" // Added margin-right on mobile
                     )}
                     onClick={togglePlay}
                     aria-label={isPlaying ? 'Pause' : 'Play'}

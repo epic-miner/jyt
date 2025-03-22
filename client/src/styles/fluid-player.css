@@ -183,6 +183,24 @@
     display: none !important;
   }
   
+  /* Fix time display and volume control overlap on mobile */
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_right .fluid_control_duration {
+    padding-left: 40px !important;
+    font-size: 12px !important;
+  }
+  
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_right .fluid_control_volume_container {
+    width: 30px !important;
+    margin-right: 10px !important;
+  }
+  
+  /* Hide volume slider on very small screens to prevent overlap */
+  @media (max-width: 480px) {
+    #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_right .fluid_control_volume_container .fluid_control_volume {
+      display: none !important;
+    }
+  }
+  
   /* Improve tap targets on mobile */
   #fluid_video_wrapper.fluid_player_layout_default .fluid_control_volume_container,
   #fluid_video_wrapper.fluid_player_layout_default .fluid_control_fullscreen,
