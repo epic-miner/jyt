@@ -1,8 +1,7 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import fluidPlayer from 'fluid-player';
 import '../fluid-player/fluid-player.min.css';
-import CustomQualityMenu from './CustomQualityMenu';
+//import CustomQualityMenu from './CustomQualityMenu'; // Removed as it's not used in the modified approach
 
 interface TestFluidPlayerProps {
   src: string;
@@ -27,6 +26,9 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title }) => {
   const progressBarRef = useRef<HTMLDivElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
+  const [selectedQuality, setSelectedQuality] = useState('auto'); // Added state for quality selection
+  const [showQualityMenu, setShowQualityMenu] = useState(false); // Added state for quality menu
+
 
   // Initialize FluidPlayer
   useEffect(() => {
@@ -87,11 +89,11 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title }) => {
   useEffect(() => {
     const handleMouseMove = () => {
       setShowControls(true);
-      
+
       if (controlsTimeoutRef.current) {
         clearTimeout(controlsTimeoutRef.current);
       }
-      
+
       controlsTimeoutRef.current = setTimeout(() => {
         if (isPlaying) {
           setShowControls(false);
@@ -114,7 +116,7 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title }) => {
         container.removeEventListener('mousemove', handleMouseMove);
         container.removeEventListener('mouseleave', () => {});
       }
-      
+
       if (controlsTimeoutRef.current) {
         clearTimeout(controlsTimeoutRef.current);
       }
@@ -223,13 +225,15 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title }) => {
     }
   };
 
-  // Quality options
-  const qualityOptions = [
-    { value: '1080', label: '1080p' },
-    { value: '720', label: '720p' },
-    { value: '480', label: '480p' },
-    { value: 'auto', label: 'Auto (Max)' }
-  ];
+  // Quality options -  Simplified for demonstration
+  const qualityOptions = ['auto', '1080', '720', '480'];
+
+  const handleQualityChange = (quality: string) => {
+    setSelectedQuality(quality);
+    //  Implementation to actually change the quality would go here, 
+    //  likely involving player.setQuality(quality) or a similar method from your player library.
+  };
+
 
   return (
     <div className="fluid-player-container" ref={playerContainerRef}>
@@ -312,7 +316,7 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title }) => {
                       </svg>
                     )}
                   </button>
-                  
+
                   {showVolumeSlider && (
                     <div className="volume-slider-container">
                       <input 
@@ -339,7 +343,19 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title }) => {
               {/* Right controls group */}
               <div className="controls-right">
                 {/* Quality selector */}
-                <CustomQualityMenu player={player} videoElement={videoRef.current} />
+                <button className="control-button" onClick={() => setShowQualityMenu(!showQualityMenu)}>
+                  {selectedQuality}
+                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {showQualityMenu && (
+                  <div className="quality-menu">
+                    {qualityOptions.map((quality) => (
+                      <button key={quality} onClick={() => handleQualityChange(quality)}>{quality}</button>
+                    ))}
+                  </div>
+                )}
 
                 {/* Theater Mode Button */}
                 <button className="control-button" onClick={toggleTheaterMode}>
@@ -365,7 +381,7 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title }) => {
           </div>
         </div>
       </div>
-      
+
       {title && <h2 className="video-title">{title}</h2>}
     </div>
   );
