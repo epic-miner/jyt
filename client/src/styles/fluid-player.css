@@ -147,6 +147,11 @@
   margin: 0 8px;
   opacity: 0.95;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  position: absolute;
+  right: 20px;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Volume controls */
@@ -241,8 +246,7 @@ li[data-player-action="download"],
   pointer-events: none !important;
 }
 
-/* Hide forward/backward 10s buttons
-   but keep the layout spacing intact to avoid gaps */
+/* Hide all the extra buttons except play, volume, and progress bar */
 #fluid_video_wrapper.fluid_player_layout_default .fluid_button.fluid_button_skip_forward,
 #fluid_video_wrapper.fluid_player_layout_default .fluid_button.fluid_button_skip_back,
 #fluid_video_wrapper .fluid_button.fluid_button_skip_forward,
@@ -252,11 +256,23 @@ li[data-player-action="download"],
 button[aria-label="Skip forward 10 seconds"],
 button[aria-label="Skip back 10 seconds"],
 .fluid_video_wrapper [data-player-action="skip_forward"],
-.fluid_video_wrapper [data-player-action="skip_back"] {
+.fluid_video_wrapper [data-player-action="skip_back"],
+.fluid_control_fullscreen,
+.fluid_control_theatre,
+.fluid_control_subtitle,
+.fluid_control_playback_rate,
+.fluid_control_video_source,
+.fluid_video_quality_selector,
+.fluid_control_video_quality,
+.fluid_control_settings,
+.fluid_control_duration,
+.fluid_control_volume_container,
+#fluid_video_wrapper.fluid_player_layout_default .fluid_button:not(.fluid_button_play, .fluid_button_mute),
+#fluid_video_wrapper .fluid_button:not(.fluid_button_play, .fluid_button_mute) {
+  display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
-  /* Keep display so layout stays intact */
   width: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
