@@ -59,7 +59,7 @@ const TiltCard = ({
   };
   
   // Merge user options with defaults - use either tiltOptions or options prop
-  const mergedOptions = { ...defaultOptions, ...tiltOptions, ...options };
+  const mergedOptions = { ...defaultOptions, ...tiltOptions, ...optionsProp };
   
   // Determine the shadow class based on hover state and shadow prop
   const shadowClass = shadow && isHovered
@@ -76,7 +76,7 @@ const TiltCard = ({
     {};
   
   // Determine transition class based on options
-  const transitionClass = options.transition ? 'transition-all duration-300' : '';
+  const transitionClass = mergedOptions.transition ? 'transition-all duration-300' : '';
   
   const handleMouseEnter = () => setIsHovered(true);
   const handleMouseLeave = () => setIsHovered(false);
@@ -113,12 +113,12 @@ const TiltCard = ({
       onMouseLeave={handleMouseLeave}
     >
       <Tilt
-        options={options}
+        options={mergedOptions}
         className={cn(
           transitionClass,
           shadowClass,
           'transform',
-          { 'will-change-transform': options.transition },
+          { 'will-change-transform': mergedOptions.transition },
           { 'hover:translate-y-[-5px]': hoverEffect === 'lift' },
           className
         )}

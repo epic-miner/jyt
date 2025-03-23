@@ -14,6 +14,8 @@ import ScrollReveal from '../components/ScrollReveal';
 import TiltCard from '../components/TiltCard';
 import ConfettiEffect from '../components/ConfettiEffect';
 import LottieLoader from '../components/LottieLoader';
+import ScrollableRow from '../components/ScrollableRow';
+import ScrollableCard from '../components/ScrollableCard';
 
 // Animation variants for sections
 const sectionVariants = {
