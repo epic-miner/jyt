@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { VideoQuality } from './TestFluidPlayer';
 
 interface QualityOption {
   label: string;
@@ -14,11 +15,18 @@ interface CustomQualityMenuProps {
     video_url_720p?: string;
     video_url_480p?: string;
   };
+  onQualityChange: (quality: VideoQuality) => void;
+  selectedQuality: VideoQuality;
 }
 
-const CustomQualityMenu: React.FC<CustomQualityMenuProps> = ({ player, videoElement, episode }) => {
+const CustomQualityMenu: React.FC<CustomQualityMenuProps> = ({
+  player,
+  videoElement,
+  episode,
+  onQualityChange,
+  selectedQuality
+}) => {
   const [showMenu, setShowMenu] = useState(false);
-  const [selectedQuality, setSelectedQuality] = useState('auto');
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,82 +61,45 @@ const CustomQualityMenu: React.FC<CustomQualityMenuProps> = ({ player, videoElem
     qualityOptions.push({ label: '480p', value: '480p' });
   }
 
-  const handleQualityChange = (quality: string) => {
-    setSelectedQuality(quality);
+  const handleQualityClick = (quality: VideoQuality) => {
+    onQualityChange(quality);
     setShowMenu(false);
-
-    // Apply quality change logic here
-    if (videoElement && episode) {
-      // Save current time and play state
-      const currentTime = videoElement.currentTime;
-      const wasPlaying = !videoElement.paused;
-
-      // Change source based on selected quality
-      let newSource = '';
-
-      switch (quality) {
-        case '1080p':
-          newSource = episode.video_url_1080p || '';
-          if (!newSource) {
-            console.warn('1080p quality requested but not available');
-            return;
-          }
-          break;
-        case '720p':
-          newSource = episode.video_url_720p || episode.video_url_max_quality;
-          break;
-        case '480p':
-          newSource = episode.video_url_480p || episode.video_url_max_quality; // Fallback to max if 480p unavailable
-          break;
-        default:
-          newSource = episode.video_url_max_quality;
-      }
-
-      if (newSource) {
-        videoElement.src = newSource;
-        videoElement.load();
-
-        // Add event listener to restore playback position and state
-        const handleLoaded = () => {
-          videoElement!.currentTime = currentTime;
-          if (wasPlaying) {
-            videoElement!.play().catch(e => console.error('Error playing after quality change', e));
-          }
-          videoElement!.removeEventListener('loadeddata', handleLoaded);
-        };
-
-        videoElement.addEventListener('loadeddata', handleLoaded);
-      }
-    }
   };
 
   return (
-    <div className="custom-quality-control" ref={menuRef}>
-      <button 
+    <div className="custom-quality-menu absolute bottom-14 right-4 z-40" ref={menuRef}>
+      <button
+        className="quality-button bg-black bg-opacity-70 text-white px-3 py-1 rounded-md flex items-center"
         onClick={() => setShowMenu(!showMenu)}
-        className="control-button quality-button"
-        aria-label="Video quality"
-        style={{position: 'relative', bottom: '40px', left: '0'}} 
       >
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="white">
-          <path d="M14,12H15.5V14.82L17.94,16.23L17.19,17.53L14,15.69V12M4,2H18A2,2 0 0,1 20,4V10.1C21.24,11.36 22,13.09 22,15A7,7 0 0,1 15,22C13.09,22 11.36,21.24 10.1,20H4A2,2 0 0,1 2,18V4A2,2 0 0,1 4,2M4,4V18H8.1C8.04,17.68 8,17.34 8,17A7,7 0 0,1 15,10C15.34,10 15.68,10.04 16,10.1V4H4M15,12A5,5 0 0,0 10,17A5,5 0 0,0 15,22A5,5 0 0,0 20,17A5,5 0 0,0 15,12Z" />
+        {selectedQuality === 'auto' ? 'Auto' : selectedQuality}
+        <svg
+          className="w-4 h-4 ml-1"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d={showMenu ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
+          />
         </svg>
       </button>
 
       {showMenu && (
-        <div className="quality-menu" style={{ bottom: '40px', left: '0' }}> 
-          {qualityOptions.map(option => (
+        <div className="quality-menu-dropdown absolute right-0 bottom-10 bg-black bg-opacity-90 rounded-md overflow-hidden w-32">
+          {qualityOptions.map((option) => (
             <button
               key={option.value}
-              className={`quality-option ${selectedQuality === option.value ? 'selected' : ''}`}
-              onClick={() => handleQualityChange(option.value)}
+              className={`block w-full text-left text-white px-4 py-2 hover:bg-gray-700 transition-colors ${
+                selectedQuality === option.value ? 'bg-gray-700' : ''
+              }`}
+              onClick={() => handleQualityClick(option.value as VideoQuality)}
             >
               {option.label}
-              {selectedQuality === option.value && (
-                <svg className="check-icon" viewBox="0 0 24 24" width="18" height="18">
-                  <path fill="currentColor" d="M9,16.2L4.8,12l-1.4,1.4L9,19L21,7l-1.4-1.4L9,16.2z" />
-                </svg>
-              )}
             </button>
           ))}
         </div>
