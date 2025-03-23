@@ -1,126 +1,63 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { Link, useLocation } from 'wouter';
+import { memo } from 'react';
+import { motion } from 'framer-motion';
+import { cn } from '../lib/utils';
 
-const Footer: React.FC = () => {
+const Footer = () => {
+  const [location] = useLocation();
+
   return (
-    <footer className="mt-auto py-6 bg-black/60 backdrop-blur-md border-t border-white/10">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-          {/* Logo and description */}
-          <div className="col-span-2 sm:col-span-2 md:col-span-1 mb-6 md:mb-0">
-            <Link href="/" className="block mb-4">
-              <img src="/images/logo.webp" alt="9Anime" className="h-8" />
-            </Link>
-            <p className="text-sm text-slate-400 mb-4">
-              Watch your favorite anime online for free with English subtitles in HD quality.
+    <footer className="footer-container bg-background/60 backdrop-blur-lg border-t border-border/40 p-4 w-full mt-auto">
+      <div className="container mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+          {/* Column 1 - Logo and Description */}
+          <div className="flex flex-col items-center md:items-start">
+            <h3 className="text-xl font-bold text-primary mb-2">Animeflix</h3>
+            <p className="text-sm text-muted-foreground text-center md:text-left">
+              Your ultimate destination for anime streaming. Watch your favorite anime shows and movies in HD quality.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-slate-400 hover:text-primary transition-colors">
-                <i className="fas fa-discord"></i>
+          </div>
+
+          {/* Column 2 - Quick Links */}
+          <div className="flex flex-col items-center md:items-start">
+            <h3 className="text-lg font-semibold mb-3">Quick Links</h3>
+            <nav className="flex flex-col items-center md:items-start space-y-2">
+              <Link href="/">
+                <span className="text-sm text-muted-foreground hover:text-primary transition-colors">Home</span>
+              </Link>
+              <Link href="/recently-watched">
+                <span className="text-sm text-muted-foreground hover:text-primary transition-colors">Recently Watched</span>
+              </Link>
+              <Link href="/genre/action">
+                <span className="text-sm text-muted-foreground hover:text-primary transition-colors">Action Anime</span>
+              </Link>
+              <Link href="/category/popular">
+                <span className="text-sm text-muted-foreground hover:text-primary transition-colors">Popular Anime</span>
+              </Link>
+            </nav>
+          </div>
+
+          {/* Column 3 - Social Links */}
+          <div className="flex flex-col items-center md:items-start">
+            <h3 className="text-lg font-semibold mb-3">Connect With Us</h3>
+            <div className="flex space-x-4 items-center">
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <i className="fab fa-twitter text-lg"></i>
               </a>
-              <a href="#" className="text-slate-400 hover:text-primary transition-colors">
-                <i className="fas fa-twitter"></i>
+              <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <i className="fab fa-discord text-lg"></i>
               </a>
-              <a href="#" className="text-slate-400 hover:text-primary transition-colors">
-                <i className="fas fa-instagram"></i>
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                <i className="fab fa-github text-lg"></i>
               </a>
             </div>
           </div>
-
-          {/* Quick links */}
-          <div className="col-span-1">
-            <h3 className="footer-heading">Quick Links</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/home" className="footer-link">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/trending" className="footer-link">
-                  Trending
-                </Link>
-              </li>
-              <li>
-                <Link href="/movies" className="footer-link">
-                  Movies
-                </Link>
-              </li>
-              <li>
-                <Link href="/tv-series" className="footer-link">
-                  TV Series
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Genres */}
-          <div className="col-span-1">
-            <h3 className="footer-heading">Genres</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/genre/action" className="footer-link">
-                  Action
-                </Link>
-              </li>
-              <li>
-                <Link href="/genre/adventure" className="footer-link">
-                  Adventure
-                </Link>
-              </li>
-              <li>
-                <Link href="/genre/comedy" className="footer-link">
-                  Comedy
-                </Link>
-              </li>
-              <li>
-                <Link href="/genre/drama" className="footer-link">
-                  Drama
-                </Link>
-              </li>
-              <li>
-                <Link href="/genre/fantasy" className="footer-link">
-                  Fantasy
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div className="col-span-1">
-            <h3 className="footer-heading">Legal</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/terms" className="footer-link">
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className="footer-link">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/dmca" className="footer-link">
-                  DMCA
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="footer-link">
-                  Contact Us
-                </Link>
-              </li>
-            </ul>
-          </div>
         </div>
 
-        <div className="mt-8 pt-6 border-t border-white/5 text-center">
-          <p className="text-sm text-slate-500">
-            &copy; {new Date().getFullYear()} 9Anime. All rights reserved.
-          </p>
-          <p className="text-xs text-slate-600 mt-2">
-            Disclaimer: This site does not store any files on its server. All contents are provided by non-affiliated third parties.
+        {/* Copyright */}
+        <div className="border-t border-border/40 mt-4 pt-4 text-center">
+          <p className="text-xs text-muted-foreground">
+            &copy; {new Date().getFullYear()} Animeflix. All rights reserved.
           </p>
         </div>
       </div>
