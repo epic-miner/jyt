@@ -8,7 +8,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { fetchAllAnime, fetchEpisodesByAnimeId } from '../lib/api';
 import { getRecentlyWatchedAnime, getWatchHistory } from '../lib/cookies';
 import { Anime, RecentlyWatchedAnime, WatchHistoryItem } from '@shared/types';
-import { BackgroundParticles } from '../components/BackgroundParticles';
+import ParticleBackground from '../components/ParticleBackground';
+import AnimatedTitle from '../components/AnimatedTitle';
+import ScrollReveal from '../components/ScrollReveal';
+import TiltCard from '../components/TiltCard';
+import ConfettiEffect from '../components/ConfettiEffect';
+import LottieLoader from '../components/LottieLoader';
 
 // Animation variants for sections
 const sectionVariants = {
@@ -147,8 +152,32 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-800 pb-24 md:pb-8">
-      <BackgroundParticles />
+      <ParticleBackground 
+        options={{
+          particles: {
+            number: { value: 40 },
+            color: { value: "#8257e6" },
+            opacity: { value: 0.3 },
+            size: { value: 3 },
+            move: { speed: 0.5 }
+          }
+        }}
+      />
       <div className="container mx-auto px-4 py-6 max-w-7xl">
+        {/* Welcome Banner with AnimatedTitle */}
+        <ScrollReveal>
+          <div className="mb-8 text-center">
+            <AnimatedTitle 
+              text="Welcome to AnimeStream"
+              animation="gradient"
+              className="text-4xl md:text-5xl font-bold mb-3"
+            />
+            <p className="text-slate-300 max-w-2xl mx-auto">
+              Discover and stream your favorite anime with enhanced visual experience
+            </p>
+          </div>
+        </ScrollReveal>
+        
         {continueWatching.length > 0 && (
           <motion.section 
             initial="hidden"
@@ -162,11 +191,14 @@ const Home = () => {
             <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
 
             <div className="relative">
-              <SectionTitle 
-                icon="history" 
-                title="Continue Watching" 
-                viewAllLink="/recently-watched" 
-              />
+              <AnimatedTitle 
+                text="Continue Watching"
+                animation="typewriter"
+                className="text-2xl font-bold mb-6 flex items-center"
+                tag="h2"
+              >
+                <i className="fas fa-history ml-3 text-primary"></i>
+              </AnimatedTitle>
 
               <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-3">
                 {continueWatching.slice(0, 8).map((item, index) => (
