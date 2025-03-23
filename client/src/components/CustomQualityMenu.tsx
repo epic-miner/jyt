@@ -1,13 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-
-// Define quality options similar to the screenshot
-const qualityOptions = [
-  { label: '1080p', value: '1080' },
-  { label: '720p', value: '720' },
-  { label: '480p', value: '480' },
-  { label: 'Auto (Max)', value: 'auto' }
-];
+import React, { useState, useRef, useEffect } from 'react';
 
 interface CustomQualityMenuProps {
   player: any;
@@ -49,17 +41,24 @@ const CustomQualityMenu: React.FC<CustomQualityMenuProps> = ({ player, videoElem
     }
   };
 
+  // Quality options - matching the options in the screenshot
+  const qualityOptions = [
+    { value: '1080', label: '1080p' },
+    { value: '720', label: '720p' },
+    { value: '480', label: '480p' },
+    { value: 'auto', label: 'Auto (Max)' }
+  ];
+
   return (
     <div className="custom-quality-control" ref={menuRef}>
       <button 
         onClick={() => setShowMenu(!showMenu)}
-        className="quality-button"
+        className="control-button quality-button"
         aria-label="Video quality"
       >
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="white">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="white">
           <path d="M14,12H15.5V14.82L17.94,16.23L17.19,17.53L14,15.69V12M4,2H18A2,2 0 0,1 20,4V10.1C21.24,11.36 22,13.09 22,15A7,7 0 0,1 15,22C13.09,22 11.36,21.24 10.1,20H4A2,2 0 0,1 2,18V4A2,2 0 0,1 4,2M4,4V18H8.1C8.04,17.68 8,17.34 8,17A7,7 0 0,1 15,10C15.34,10 15.68,10.04 16,10.1V4H4M15,12A5,5 0 0,0 10,17A5,5 0 0,0 15,22A5,5 0 0,0 20,17A5,5 0 0,0 15,12Z" />
         </svg>
-        <span>{selectedQuality === 'auto' ? 'Auto (Max)' : `${selectedQuality}p`}</span>
       </button>
       
       {showMenu && (
