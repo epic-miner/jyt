@@ -1,7 +1,6 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import fluidPlayer from 'fluid-player';
 import '../fluid-player/fluid-player.min.css';
-//import CustomQualityMenu from './CustomQualityMenu'; // Removed as it's not used in the modified approach
 
 interface TestFluidPlayerProps {
   src: string;
@@ -34,8 +33,8 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title, episode }
   const progressBarRef = useRef<HTMLDivElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
-  const [selectedQuality, setSelectedQuality] = useState<VideoQuality>('auto'); // Added state for quality selection
-  const [showQualityMenu, setShowQualityMenu] = useState(false); // Added state for quality menu
+  const [selectedQuality, setSelectedQuality] = useState<VideoQuality>('auto');
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
 
 
   // Initialize FluidPlayer
@@ -51,7 +50,6 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title, episode }
           preload: 'auto',
           mute: false,
           doubleclickFullscreen: true,
-          // Theater mode configuration
           allowTheatre: true,
           theatreSettings: {
             width: '100%',
@@ -59,12 +57,10 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title, episode }
             marginTop: 0,
             horizontalAlign: 'center'
           },
-          // For advanced theater mode
           theatreAdvanced: {
             theatreElement: 'fluid-player-container',
             classToApply: 'theater-mode'
           },
-          // Logo watermark configuration
           logo: {
             imageUrl: '/assets/logo/watermark.svg',
             position: 'top left',
@@ -270,25 +266,25 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title, episode }
     setSelectedQuality(quality);
 
     // Get the appropriate video URL based on selected quality
-    if (videoRef.current) {
-      let newSource = '';
+    const getQualityUrl = useCallback((quality: VideoQuality): string => {
+      if (!episode) return '';
 
-      // Match quality selection to the database schema fields
       switch (quality) {
         case '1080p':
-          newSource = episode?.video_url_1080p || episode?.video_url_max_quality || '';
-          break;
+          // Only return 1080p URL if it exists, don't fall back to max quality
+          return episode.video_url_1080p || '';
         case '720p':
-          newSource = episode?.video_url_720p || episode?.video_url_max_quality || '';
-          break;
+          return episode.video_url_720p || episode.video_url_max_quality || '';
         case '480p':
-          newSource = episode?.video_url_480p || episode?.video_url_max_quality || '';
-          break;
+          return episode.video_url_480p || episode.video_url_max_quality || '';
         default:
-          // Auto or fallback to max quality
-          newSource = episode?.video_url_max_quality || '';
+          return episode.video_url_max_quality || '';
       }
+    }, [episode]);
 
+
+    if (videoRef.current) {
+      const newSource = getQualityUrl(quality);
       if (newSource) {
         videoRef.current.src = newSource;
         videoRef.current.load();
