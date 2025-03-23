@@ -1,10 +1,9 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { Episode } from '@shared/types';
 import '../styles/enhanced-player.css'; // We'll create this style file later
-import HorizontalQualitySelector from './HorizontalQualitySelector';
-
-// Define available quality options
-type VideoQuality = '1080p' | '720p' | '480p' | '360p' | '240p' | '144p' | 'auto' | 'max';
+import HorizontalQualitySelector from './HorizontalQualitySelector'; 
+// Import the type
+import { VideoQuality } from './HorizontalQualitySelector';
 
 interface TestPlayerProps {
   videoUrl: string;

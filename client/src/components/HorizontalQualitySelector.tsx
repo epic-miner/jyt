@@ -1,6 +1,6 @@
 import React from 'react';
 
-type VideoQuality = '1080p' | '720p' | '480p' | '360p' | '240p' | '144p' | 'auto' | 'max';
+export type VideoQuality = '1080p' | '720p' | '480p' | '360p' | '240p' | '144p' | 'auto' | 'max';
 
 interface HorizontalQualitySelectorProps {
   availableQualities: { quality: VideoQuality; url: string | undefined }[];
