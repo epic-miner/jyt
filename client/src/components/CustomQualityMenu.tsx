@@ -68,11 +68,9 @@ const CustomQualityMenu: React.FC<CustomQualityMenuProps> = ({ player, videoElem
 
       switch (quality) {
         case '1080p':
-          // Only use 1080p if it exists, otherwise don't fallback to other qualities
           newSource = episode.video_url_1080p || '';
           if (!newSource) {
             console.warn('1080p quality requested but not available');
-            // If 1080p is explicitly requested but not available, don't change the source
             return;
           }
           break;
@@ -80,10 +78,9 @@ const CustomQualityMenu: React.FC<CustomQualityMenuProps> = ({ player, videoElem
           newSource = episode.video_url_720p || episode.video_url_max_quality;
           break;
         case '480p':
-          newSource = episode.video_url_480p || episode.video_url_max_quality;
+          newSource = episode.video_url_480p || episode.video_url_max_quality; // Fallback to max if 480p unavailable
           break;
         default:
-          // Auto or fallback
           newSource = episode.video_url_max_quality;
       }
 

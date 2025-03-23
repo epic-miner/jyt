@@ -265,26 +265,16 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title, episode }
   const handleQualityChange = (quality: VideoQuality) => {
     setSelectedQuality(quality);
 
-    // Get the appropriate video URL based on selected quality
-    const getQualityUrl = useCallback((quality: VideoQuality): string => {
-      if (!episode) return '';
-
-      switch (quality) {
-        case '1080p':
-          // Only return 1080p URL if it exists, don't fall back to max quality
-          return episode.video_url_1080p || '';
-        case '720p':
-          return episode.video_url_720p || episode.video_url_max_quality || '';
-        case '480p':
-          return episode.video_url_480p || episode.video_url_max_quality || '';
-        default:
-          return episode.video_url_max_quality || '';
-      }
-    }, [episode]);
+    // Get the appropriate video URL based on selected quality.  Corrected fallback logic.
+    const newSource = episode && {
+      '1080p': episode.video_url_1080p,
+      '720p': episode.video_url_720p || episode.video_url_max_quality,
+      '480p': episode.video_url_480p || episode.video_url_max_quality,
+      'auto': episode.video_url_max_quality,
+    }[quality] || '';
 
 
     if (videoRef.current) {
-      const newSource = getQualityUrl(quality);
       if (newSource) {
         videoRef.current.src = newSource;
         videoRef.current.load();
