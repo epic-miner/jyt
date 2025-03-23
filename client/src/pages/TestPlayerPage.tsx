@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { FluidPlayerOptions, FluidPlayerInstance } from '../types/fluid-player';
 import '../styles/play-button-fix.css';
+import { createDefaultAdConfiguration } from '../lib/adConfig';
 
 // Simple test page to verify Fluid Player is loading correctly
 const TestPlayerPage = () => {
@@ -157,7 +158,7 @@ const TestPlayerPage = () => {
       }
       
       try {
-        // Enhanced configuration with streaming support
+        // Enhanced configuration with streaming support and ad optimization
         const playerInstance = (window as any).fluidPlayer('test-video-player', {
           layoutControls: {
             primaryColor: "hsl(266, 100%, 64%)",
@@ -181,12 +182,15 @@ const TestPlayerPage = () => {
               imageUrl: null,
               position: "top left",
               clickUrl: null,
-              opacity: 1
+              opacity: 1,
+              showOverAds: false, // Hide logo during ad playback for better ad visibility
             },
             contextMenu: {
               controls: true
             }
           },
+          // Ad configuration using our utility
+          vastOptions: createDefaultAdConfiguration(),
           // Modules configuration to properly handle streaming/quality options
           modules: {
             configureDash: (options: any) => {
