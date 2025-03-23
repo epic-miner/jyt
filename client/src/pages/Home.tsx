@@ -169,7 +169,7 @@ const Home = () => {
         <ScrollReveal>
           <div className="mb-8 text-center">
             <AnimatedTitle 
-              text="Welcome to AnimeStream"
+              text="Welcome to 9Anime"
               animation="gradient"
               className="text-4xl md:text-5xl font-bold mb-3"
             />
