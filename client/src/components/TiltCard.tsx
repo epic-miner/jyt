@@ -2,23 +2,26 @@ import { ReactNode, useState } from 'react';
 import { Tilt } from 'react-tilt';
 import { cn } from '@/lib/utils';
 
+interface TiltOptions {
+  max?: number;
+  scale?: number;
+  speed?: number;
+  glare?: boolean;
+  maxGlare?: number;
+  perspective?: number;
+  easing?: string;
+  reset?: boolean;
+  transition?: boolean;
+  axis?: 'x' | 'y' | null;
+  gyroscope?: boolean;
+  mouse?: boolean;
+}
+
 interface TiltCardProps {
   children: ReactNode;
   className?: string;
-  tiltOptions?: {
-    max?: number;
-    scale?: number;
-    speed?: number;
-    glare?: boolean;
-    maxGlare?: number;
-    perspective?: number;
-    easing?: string;
-    reset?: boolean;
-    transition?: boolean;
-    axis?: 'x' | 'y' | null;
-    gyroscope?: boolean;
-    mouse?: boolean;
-  };
+  tiltOptions?: TiltOptions;
+  options?: TiltOptions; // Added for compatibility with ScrollableCard
   shadow?: boolean;
   hoverEffect?: 'lift' | 'glow' | 'none';
   glowColor?: string;
@@ -30,6 +33,7 @@ const TiltCard = ({
   children,
   className,
   tiltOptions = {},
+  options: optionsProp = {}, // Support options prop for compatibility
   shadow = true,
   hoverEffect = 'none',
   glowColor = 'rgba(130, 87, 230, 0.4)', // Default purple glow
@@ -54,8 +58,8 @@ const TiltCard = ({
     mouse: true,
   };
   
-  // Merge user options with defaults
-  const options = { ...defaultOptions, ...tiltOptions };
+  // Merge user options with defaults - use either tiltOptions or options prop
+  const mergedOptions = { ...defaultOptions, ...tiltOptions, ...options };
   
   // Determine the shadow class based on hover state and shadow prop
   const shadowClass = shadow && isHovered
