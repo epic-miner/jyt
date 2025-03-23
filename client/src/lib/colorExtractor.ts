@@ -7,8 +7,9 @@ import { getColorFromURL } from 'color-thief-node';
  */
 export async function extractDominantColor(imageUrl: string): Promise<string> {
   try {
-    // Fetch the dominant RGB color
-    const dominantColor = await getColorFromURL(imageUrl);
+    // Fetch the dominant RGB color - just take the first color from the palette
+    const colorPalette = await getColorFromURL(imageUrl, 1);
+    const dominantColor = colorPalette[0];
     
     // Convert RGB array to hex
     return rgbToHex(dominantColor[0], dominantColor[1], dominantColor[2]);
@@ -31,7 +32,7 @@ export async function extractColorPalette(imageUrl: string, colorCount: number =
     const palette = await getColorFromURL(imageUrl, colorCount);
     
     // Convert each RGB array to hex
-    return palette.map(color => rgbToHex(color[0], color[1], color[2]));
+    return palette.map((color: number[]) => rgbToHex(color[0], color[1], color[2]));
   } catch (error) {
     console.error('Error extracting color palette from image:', error);
     // Return default palette if extraction fails
