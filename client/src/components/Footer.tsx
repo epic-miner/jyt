@@ -56,7 +56,7 @@ const Footer = () => {
               <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <i className="fab fa-github text-lg"></i>
               </a>
-              <a href="https://t.me/nineanimeofchat" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="https://t.me/nineanimeofchat" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors bg-primary/10 p-2 rounded-full">
                 <i className="fab fa-telegram text-lg"></i>
               </a>
             </div>
