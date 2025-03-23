@@ -90,7 +90,7 @@
 
 .quality-menu {
   position: absolute;
-  right: 0;
+  left: 10px; /* Added left margin to ensure it doesn't go off-screen */
   bottom: 100%;
   background-color: rgba(28, 28, 28, 0.9);
   border-radius: 4px;
@@ -1027,7 +1027,7 @@ html {
   --yt-light-red: #ff4d4d;
   --yt-progress-color: var(--yt-red);
   --yt-buffer-color: rgba(255, 255, 255, 0.4);
-  --yt-progress-height: 3px;
+  --yt-yt-progress-height: 3px;
   --yt-progress-hover-height: 5px;
   --yt-controls-bg: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0) 100%);
 }

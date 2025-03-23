@@ -54,7 +54,7 @@ const CustomQualityMenu: React.FC<CustomQualityMenuProps> = ({ player, videoElem
         onClick={() => setShowMenu(!showMenu)}
         className="control-button quality-button"
         aria-label="Video quality"
-        style={{position: 'relative', bottom: '40px', right: '0'}} //Added style to position the button
+        style={{position: 'relative', bottom: '40px', left: '0'}} //Changed right to left to position on opposite side
       >
         <svg viewBox="0 0 24 24" width="24" height="24" fill="white">
           <path d="M14,12H15.5V14.82L17.94,16.23L17.19,17.53L14,15.69V12M4,2H18A2,2 0 0,1 20,4V10.1C21.24,11.36 22,13.09 22,15A7,7 0 0,1 15,22C13.09,22 11.36,21.24 10.1,20H4A2,2 0 0,1 2,18V4A2,2 0 0,1 4,2M4,4V18H8.1C8.04,17.68 8,17.34 8,17A7,7 0 0,1 15,10C15.34,10 15.68,10.04 16,10.1V4H4M15,12A5,5 0 0,0 10,17A5,5 0 0,0 15,22A5,5 0 0,0 20,17A5,5 0 0,0 15,12Z" />
@@ -62,7 +62,7 @@ const CustomQualityMenu: React.FC<CustomQualityMenuProps> = ({ player, videoElem
       </button>
 
       {showMenu && (
-        <div className="quality-menu" style={{ bottom: '40px', right: '0' }}> {/* Kept this change as it pertains to the menu */}
+        <div className="quality-menu" style={{ bottom: '40px', left: '0' }}> {/* Changed right to left to position menu on opposite side */}
           {qualityOptions.map(option => (
             <button
               key={option.value}
