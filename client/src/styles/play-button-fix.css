@@ -1,0 +1,97 @@
+/* Play button color override - Using more specific selectors to ensure override */
+.fluid_video_wrapper .fluid_initial_play_button,
+#fluid_video_wrapper .fluid_initial_play_button,
+.fluid_player_layout_default .fluid_initial_play_button,
+#fluid_video_wrapper.fluid_player_layout_default .fluid_initial_play_button {
+  /* Override the default play button triangle color */
+  border-color: transparent transparent transparent hsl(266, 100%, 64%) !important;
+}
+
+/* Override the CSS-generated triangle for the play button */
+.fluid_video_wrapper .fluid_initial_play_button::after,
+#fluid_video_wrapper .fluid_initial_play_button::after,
+.fluid_player_layout_default .fluid_initial_play_button::after,
+#fluid_video_wrapper.fluid_player_layout_default .fluid_initial_play_button::after {
+  border-color: transparent transparent transparent hsl(266, 100%, 64%) !important;
+}
+
+/* Make sure the play button icon is visible */
+.fluid_video_wrapper .fluid_initial_play_button i,
+#fluid_video_wrapper .fluid_initial_play_button i,
+.fluid_player_layout_default .fluid_initial_play_button i,
+#fluid_video_wrapper.fluid_player_layout_default .fluid_initial_play_button i {
+  color: hsl(266, 100%, 64%) !important;
+}
+
+/* Style the play button in the center of the video */
+.fluid_video_wrapper .fluid_initial_play,
+#fluid_video_wrapper .fluid_initial_play,
+.fluid_player_layout_default .fluid_initial_play,
+#fluid_video_wrapper.fluid_player_layout_default .fluid_initial_play {
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  border: 2px solid rgba(161, 64, 255, 0.8) !important; 
+  box-shadow: 0 0 30px rgba(161, 64, 255, 0.5) !important;
+}
+
+/* Ensure play button changes color on hover */
+.fluid_video_wrapper .fluid_initial_play:hover,
+#fluid_video_wrapper .fluid_initial_play:hover,
+.fluid_player_layout_default .fluid_initial_play:hover,
+#fluid_video_wrapper.fluid_player_layout_default .fluid_initial_play:hover {
+  background-color: hsl(266, 100%, 64%) !important; 
+}
+
+/* When hovering, make the triangle white for better contrast */
+.fluid_video_wrapper .fluid_initial_play:hover .fluid_initial_play_button,
+#fluid_video_wrapper .fluid_initial_play:hover .fluid_initial_play_button,
+.fluid_player_layout_default .fluid_initial_play:hover .fluid_initial_play_button,
+#fluid_video_wrapper.fluid_player_layout_default .fluid_initial_play:hover .fluid_initial_play_button {
+  border-color: transparent transparent transparent #ffffff !important;
+}
+
+/* Fix for the play icon in the player controls */
+.fluid_button.fluid_button_play svg path,
+.fluid_button.fluid_button_play svg polygon,
+#fluid_video_wrapper .fluid_button.fluid_button_play svg path,
+#fluid_video_wrapper .fluid_button.fluid_button_play svg polygon {
+  fill: hsl(266, 100%, 64%) !important;
+}
+
+/* Fix for the SVG icon in the central play button (if used) */
+.fluid_initial_play svg path,
+.fluid_initial_play svg polygon,
+#fluid_video_wrapper .fluid_initial_play svg path,
+#fluid_video_wrapper .fluid_initial_play svg polygon {
+  fill: hsl(266, 100%, 64%) !important;
+}
+
+/* Fix for the play button if it uses a background image */
+.fluid_initial_play_button,
+#fluid_video_wrapper .fluid_initial_play_button {
+  background-image: none !important; /* Remove any background image */
+}
+
+/* Fix live indicator to match theme */
+.fluid_button_live_indicator,
+#fluid_video_wrapper .fluid_button_live_indicator {
+  background-color: hsl(266, 100%, 64%) !important;
+}
+
+/* Fix ad timer */
+.fluid_video_wrapper .ad_countdown,
+.fluid_player_layout_default .ad_countdown,
+#fluid_video_wrapper.fluid_player_layout_default .ad_countdown {
+  color: hsl(266, 100%, 64%) !important;
+}
+
+/* Target any dynamically injected play button styles (using !important with high specificity) */
+[class*="fluid_"] [class*="play_button"] {
+  color: hsl(266, 100%, 64%) !important;
+  border-color: transparent transparent transparent hsl(266, 100%, 64%) !important;
+}
+
+/* Adding specific fix for the red play triangle that might be added as a pseudo-element */
+.fluid_initial_play_button:before,
+.fluid_initial_play_button:after {
+  border-color: transparent transparent transparent hsl(266, 100%, 64%) !important;
+}

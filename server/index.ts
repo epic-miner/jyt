@@ -56,7 +56,7 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  const port = 5001; // Using port 5001 to avoid conflicts
+  const port = 5000; // Default port for workflow
   server.listen({
     port,
     host: "0.0.0.0",

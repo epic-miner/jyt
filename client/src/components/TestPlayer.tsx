@@ -346,7 +346,7 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         // Configure player with optimized settings
         const playerOptions = {
           layoutControls: {
-            primaryColor: "#ef4444",
+            primaryColor: "hsl(266, 100%, 64%)",
             fillToContainer: true,
             posterImage: episode?.thumbnail_url || poster,
             posterImageSize: 'cover',

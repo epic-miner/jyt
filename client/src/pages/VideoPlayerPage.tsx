@@ -3,7 +3,7 @@ import { cn } from '../lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { useRoute, useLocation } from 'wouter';
 import { Skeleton } from '@/components/ui/skeleton';
-import TestPlayer from '../components/TestPlayer'; 
+import TestFluidPlayer from '../components/TestFluidPlayer'; 
 import { fetchAnimeById, fetchEpisodeById, fetchEpisodesByAnimeId } from '../lib/api';
 import { updateWatchHistory, updateRecentlyWatchedAnime } from '../lib/cookies';
 import { Episode } from '@shared/types';
@@ -281,32 +281,13 @@ const VideoPlayerPage = () => {
               </div>
             )}
             
-            <TestPlayer 
+            <TestFluidPlayer 
               key={`episode-player-${currentEpisode.id}`} 
-              videoUrl={currentEpisode.video_url_max_quality} 
               episode={currentEpisode}
-              poster={currentEpisode.thumbnail_url}
-              title={currentEpisode.title}
-              onTimeUpdate={(time) => {
-                if (!anime?.id || !currentEpisode?.id) return;
-
-                const duration = time.duration;
-
-                if (isNaN(duration) || duration <= 0) return;
-
-                const progressPercentage = Math.floor((time.currentTime / duration) * 100);
-                updateWatchHistory({
-                  animeId: anime.id.toString(),
-                  episodeId: currentEpisode.id.toString(),
-                  title: currentEpisode.title,
-                  episodeNumber: currentEpisode.episode_number,
-                  animeThumbnail: anime.thumbnail_url,
-                  animeTitle: anime.title,
-                  progress: progressPercentage,
-                  timestamp: new Date().getTime()
-                });
+              onClose={() => {
+                // Simply go back to anime details page as fallback
+                setLocation(`/anime/${animeId}`);
               }}
-              onEnded={handleNextEpisode}
             />
           </div>
 

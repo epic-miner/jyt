@@ -4,6 +4,7 @@ import { updateWatchHistory } from '../lib/cookies';
 
 // Add custom styles
 import '../styles/fluid-player.css';
+import '../styles/play-button-fix.css';
 
 // Use the type definition from fluid-player.d.ts
 import { FluidPlayerOptions, FluidPlayerInstance, PlayerEventInfo, MiniPlayerToggleEvent } from '../types/fluid-player';
@@ -104,7 +105,7 @@ const FluidVideoPlayer = ({
       const enhancedOptions: FluidPlayerOptions = {
         layoutControls: {
           // Appearance
-          primaryColor: "hsl(266, 100%, 64%)", // Primary accent color matching theme.json
+          primaryColor: "hsl(266, 100%, 64%)", // Primary accent color matching theme.json (purple)
           fillToContainer: true,
           posterImage: episode.thumbnail_url || anime.thumbnail_url,
           posterImageSize: 'cover' as 'cover', // Type assertion to match the expected type
@@ -457,6 +458,121 @@ const FluidVideoPlayer = ({
       timestamp: new Date().getTime()
     });
   };
+
+  // Inject CSS to fix play button styling and monitor for dynamic changes
+  useEffect(() => {
+    // Function to inject style to fix play button color
+    const injectPlayButtonFix = () => {
+      // Create a style element if it doesn't exist
+      let styleEl = document.getElementById('play-button-style-fix');
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = 'play-button-style-fix';
+        document.head.appendChild(styleEl);
+      }
+
+      // Add more specific CSS to override dynamically generated styles
+      styleEl.innerHTML = `
+        /* Force override for play button triangle */
+        .fluid_initial_play_button {
+          border-color: transparent transparent transparent hsl(266, 100%, 64%) !important;
+        }
+        
+        /* Target dynamically added pseudo-elements */
+        .fluid_initial_play_button:before,
+        .fluid_initial_play_button:after {
+          border-color: transparent transparent transparent hsl(266, 100%, 64%) !important;
+        }
+        
+        /* For SVG triangles or other icons */
+        .fluid_initial_play_button svg,
+        .fluid_initial_play_button i {
+          color: hsl(266, 100%, 64%) !important;
+          fill: hsl(266, 100%, 64%) !important;
+        }
+      `;
+
+      // Directly target play button elements and modify inline styles
+      const fixPlayButtonStyles = () => {
+        const playButtons = document.querySelectorAll('.fluid_initial_play_button');
+        playButtons.forEach(button => {
+          if (button instanceof HTMLElement) {
+            // Override any inline styles
+            button.style.setProperty('border-color', 'transparent transparent transparent hsl(266, 100%, 64%)', 'important');
+            
+            // Also look for any SVG or icon children
+            const svgElements = button.querySelectorAll('svg, i');
+            svgElements.forEach(svg => {
+              if (svg instanceof HTMLElement) {
+                svg.style.setProperty('color', 'hsl(266, 100%, 64%)', 'important');
+                svg.style.setProperty('fill', 'hsl(266, 100%, 64%)', 'important');
+              }
+            });
+          }
+        });
+      };
+      
+      // Run the style fix
+      fixPlayButtonStyles();
+      
+      // Set up a MutationObserver to watch for dynamically added play buttons
+      const observer = new MutationObserver((mutations) => {
+        let needsFix = false;
+        
+        mutations.forEach(mutation => {
+          if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+            mutation.addedNodes.forEach(node => {
+              if (node instanceof HTMLElement) {
+                if (node.classList.contains('fluid_initial_play_button') || 
+                    node.querySelector('.fluid_initial_play_button')) {
+                  needsFix = true;
+                }
+              }
+            });
+          }
+        });
+        
+        if (needsFix) {
+          fixPlayButtonStyles();
+        }
+      });
+      
+      // Start observing the document with the configured parameters
+      observer.observe(document.body, { 
+        childList: true, 
+        subtree: true
+      });
+      
+      // Store the observer for cleanup
+      return observer;
+    };
+
+    // Run the injection when component mounts and whenever player becomes ready
+    const observer = injectPlayButtonFix();
+    
+    // Run fixes at specific intervals to ensure styling persists
+    const fixInterval = setInterval(() => {
+      const playButtons = document.querySelectorAll('.fluid_initial_play_button');
+      playButtons.forEach(button => {
+        if (button instanceof HTMLElement) {
+          button.style.setProperty('border-color', 'transparent transparent transparent hsl(266, 100%, 64%)', 'important');
+        }
+      });
+    }, 1000);
+    
+    return () => {
+      // Cleanup
+      if (observer) {
+        observer.disconnect();
+      }
+      clearInterval(fixInterval);
+      
+      const styleEl = document.getElementById('play-button-style-fix');
+      if (styleEl) {
+        styleEl.remove();
+      }
+    };
+  }, [isPlayerReady]);
 
   // Set up previously saved progress
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { Route, Switch } from "wouter";
+import { Route, Switch, Link } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import NavBar from "./components/NavBar";
 import { MobileNavBar } from "./components/MobileNavBar";
@@ -64,6 +64,18 @@ function App() {
           <MobileNavBar />
           <ScrollToTop />
           <Toaster />
+          
+          {/* Dev Tools Fixed Button */}
+          <div className="fixed bottom-4 right-4 z-50">
+            <Link href="/test-player">
+              <div className="bg-purple-600 hover:bg-purple-500 text-white font-medium py-2 px-4 rounded-full shadow-lg transition-all cursor-pointer flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M6 4v16l15-8-15-8z" />
+                </svg>
+                Test Player
+              </div>
+            </Link>
+          </div>
         </div>
         </ColorSchemeProvider>
       </QueryClientProvider>
