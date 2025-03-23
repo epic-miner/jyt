@@ -102,6 +102,16 @@ const Footer: React.FC = () => {
 
         <Separator className="my-8 bg-gray-800" />
         
+        <div className="flex flex-col items-center mb-6">
+          <button 
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="bg-primary/10 hover:bg-primary/20 transition-all duration-300 px-6 py-3 rounded-full flex items-center hover:shadow-lg transform hover:scale-105 group mb-6"
+          >
+            <i className="fas fa-arrow-up mr-2 group-hover:animate-bounce"></i>
+            <span className="font-medium">Back to Top</span>
+          </button>
+        </div>
+        
         <div className="text-xs text-center text-muted-foreground/60">
           <p>
             All videos on this site are hosted by third parties. We are not responsible for their content.

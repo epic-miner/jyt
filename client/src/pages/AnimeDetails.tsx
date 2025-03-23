@@ -177,6 +177,7 @@ const AnimeDetails = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
+                className="flex flex-wrap gap-3"
               >
                 <Link href={`/watch/${anime.id}/${episodes[0].id}`}>
                   <button className="bg-primary hover:bg-primary/90 transition-all duration-300 px-8 py-3 rounded-full flex items-center hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.4)] transform hover:scale-105 group">
@@ -184,6 +185,14 @@ const AnimeDetails = () => {
                     <span className="font-medium">Watch First Episode</span>
                   </button>
                 </Link>
+                
+                <a 
+                  href="#episodes"
+                  className="bg-dark-800 hover:bg-dark-700 transition-all duration-300 px-8 py-3 rounded-full flex items-center hover:shadow-lg transform hover:scale-105 group border border-primary/30"
+                >
+                  <i className="fas fa-list mr-2 group-hover:animate-pulse"></i>
+                  <span className="font-medium">View Episodes</span>
+                </a>
               </motion.div>
             )}
           </div>
@@ -191,6 +200,7 @@ const AnimeDetails = () => {
 
         {/* Episodes section */}
         <motion.div
+          id="episodes"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
