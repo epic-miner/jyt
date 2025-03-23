@@ -1,5 +1,13 @@
 /* Advanced Fluid Player custom styles */
 
+/* Define theme color variables based on theme.json */
+:root {
+  --primary-color: hsl(266, 100%, 64%);
+  --primary-color-rgb: 161, 64, 255; /* RGB equivalent of hsl(266, 100%, 64%) */
+  --primary-shadow-color: rgba(161, 64, 255, 0.5);
+  --primary-glow-color: rgba(161, 64, 255, 0.4);
+}
+
 /* Base container stylings */
 .fluid-player-container {
   position: relative;
@@ -63,7 +71,7 @@
 }
 
 #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button:hover {
-  color: var(--primary, #ef4444) !important;
+  color: var(--primary-color, hsl(266, 100%, 64%)) !important;
   opacity: 1;
   transform: scale(1.15);
 }
@@ -90,10 +98,10 @@
 }
 
 #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_progress_container .fluid_controls_progress .fluid_controls_currentprogress {
-  background-color: var(--primary, #ef4444) !important;
+  background-color: var(--primary-color, hsl(266, 100%, 64%)) !important;
   border-radius: 4px;
   transition: all 0.15s ease;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 8px var(--primary-shadow-color, rgba(161, 64, 255, 0.5));
 }
 
 /* Progress bar handle (scrubber) */
@@ -101,7 +109,7 @@
   width: 14px !important;
   height: 14px !important;
   border-radius: 50% !important;
-  background-color: var(--primary, #ef4444) !important;
+  background-color: var(--primary-color, hsl(266, 100%, 64%)) !important;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
   transition: transform 0.15s ease-out;
   border: 2px solid #fff;
@@ -150,9 +158,9 @@
 }
 
 #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container .fluid_control_volume .fluid_control_volume_currentvolume {
-  background-color: var(--primary, #ef4444) !important;
+  background-color: var(--primary-color, hsl(266, 100%, 64%)) !important;
   border-radius: 2px;
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 6px var(--primary-shadow-color, rgba(161, 64, 255, 0.5));
 }
 
 /* Volume handle */
@@ -162,7 +170,7 @@
   border-radius: 50% !important;
   background-color: #fff !important;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
-  border: 2px solid var(--primary, #ef4444);
+  border: 2px solid var(--primary-color, hsl(266, 100%, 64%));
   top: -4px !important;
   transform: scale(0);
   opacity: 0;
@@ -181,12 +189,12 @@
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   border: 2px solid rgba(255, 255, 255, 0.8) !important;
-  box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 30px var(--primary-shadow-color, rgba(161, 64, 255, 0.5));
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 #fluid_video_wrapper.fluid_player_layout_default .fluid_initial_play:hover {
-  background-color: var(--primary, #ef4444) !important;
+  background-color: var(--primary-color, hsl(266, 100%, 64%)) !important;
   transform: scale(1.08);
   border-color: #fff !important;
 }
@@ -250,7 +258,7 @@ li[data-player-action="download"],
 }
 
 #fluid_video_wrapper.fluid_player_layout_default .fluid_video_sources_list .fluid_video_source_list_item:hover {
-  background-color: rgba(239, 68, 68, 0.15) !important;
+  background-color: var(--primary-light-bg, rgba(161, 64, 255, 0.15)) !important;
   color: #fff;
 }
 
@@ -259,7 +267,7 @@ li[data-player-action="download"],
   position: absolute;
   width: 4px;
   height: 100%;
-  background-color: var(--primary, #ef4444);
+  background-color: var(--primary-color, hsl(266, 100%, 64%));
   left: 0;
   top: 0;
   transform: translateX(-4px);
@@ -271,9 +279,9 @@ li[data-player-action="download"],
 }
 
 #fluid_video_wrapper.fluid_player_layout_default .fluid_video_source_list_item.source_selected {
-  color: var(--primary, #ef4444) !important;
+  color: var(--primary-color, hsl(266, 100%, 64%)) !important;
   font-weight: 600;
-  background-color: rgba(239, 68, 68, 0.08) !important;
+  background-color: var(--primary-lighter-bg, rgba(161, 64, 255, 0.08)) !important;
 }
 
 #fluid_video_wrapper.fluid_player_layout_default .fluid_video_source_list_item.source_selected::before {
@@ -444,7 +452,7 @@ li[data-player-action="download"],
 }
 
 #fluid_video_wrapper.fluid_player_layout_default .fluid_context_menu ul li:hover {
-  background-color: rgba(239, 68, 68, 0.15) !important;
+  background-color: var(--primary-light-bg, rgba(161, 64, 255, 0.15)) !important;
   color: #fff !important;
 }
 
@@ -453,7 +461,7 @@ li[data-player-action="download"],
   position: absolute;
   width: 4px;
   height: 100%;
-  background-color: var(--primary, #ef4444);
+  background-color: var(--primary-color, hsl(266, 100%, 64%));
   left: 0;
   top: 0;
   transform: translateX(-4px);

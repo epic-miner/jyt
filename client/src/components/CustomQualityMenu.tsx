@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { VideoQuality } from './TestFluidPlayer';
+import { FluidPlayerInstance } from '../types/fluid-player';
 
 interface QualityOption {
   label: string;
@@ -7,7 +8,7 @@ interface QualityOption {
 }
 
 interface CustomQualityMenuProps {
-  player: any;
+  player: FluidPlayerInstance | null;
   videoElement: HTMLVideoElement | null;
   episode?: {
     video_url_max_quality: string;

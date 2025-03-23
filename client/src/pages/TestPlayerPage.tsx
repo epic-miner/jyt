@@ -1,49 +1,10 @@
 import { useEffect, useRef } from 'react';
-
-// Import types for Fluid Player
-interface FluidPlayerTestOptions {
-  layoutControls?: {
-    primaryColor?: string;
-    fillToContainer?: boolean;
-    autoPlay?: boolean;
-    playbackRateEnabled?: boolean; 
-    allowTheatre?: boolean;
-    miniPlayer?: {
-      enabled?: boolean;
-      width?: number;
-      widthMobile?: number;
-      placeholderText?: string;
-      position?: string;
-    };
-    controlBar?: {
-      autoHide?: boolean;
-      autoHideTimeout?: number;
-      animated?: boolean;
-    };
-    logo?: {
-      imageUrl?: string | null;
-      position?: string;
-      clickUrl?: string | null;
-      opacity?: number;
-    };
-    contextMenu?: {
-      controls?: boolean;
-    };
-  };
-  modules?: {
-    configureDash?: (options: any) => any;
-    configureHls?: (options: any) => any;
-    onBeforeInitDash?: (dash: any) => void;
-    onAfterInitDash?: (dash: any) => void;
-    onBeforeInitHls?: (hls: any) => void;
-    onAfterInitHls?: (hls: any) => void;
-  };
-}
+import { FluidPlayerOptions, FluidPlayerInstance } from '../types/fluid-player';
 
 // Simple test page to verify Fluid Player is loading correctly
 const TestPlayerPage = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const playerInstanceRef = useRef<any>(null);
+  const playerInstanceRef = useRef<FluidPlayerInstance | null>(null);
 
   useEffect(() => {
     console.log('TestPlayerPage - Component mounted');
@@ -77,7 +38,7 @@ const TestPlayerPage = () => {
         // Enhanced configuration with streaming support
         const playerInstance = window.fluidPlayer('test-video-player', {
           layoutControls: {
-            primaryColor: "#ef4444",
+            primaryColor: "hsl(266, 100%, 64%)",
             fillToContainer: true,
             autoPlay: false,
             playbackRateEnabled: true, // Enable playback speed control
