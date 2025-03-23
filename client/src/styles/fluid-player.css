@@ -144,6 +144,7 @@
 #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container {
   margin-right: 5px;
   transition: width 0.3s ease;
+  width: 150px !important; /* Expanded width to fill space from removed skip buttons */
 }
 
 #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container .fluid_control_volume {
@@ -172,14 +173,14 @@
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
   border: 2px solid var(--primary-color, hsl(266, 100%, 64%));
   top: -4px !important;
-  transform: scale(0);
-  opacity: 0;
+  transform: scale(1); /* Keep visible by default */
+  opacity: 1; /* Keep visible by default */
   transition: all 0.15s ease;
 }
 
+/* Add subtle hover effect to make it slightly larger */
 #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container .fluid_control_volume:hover .fluid_control_volume_currentpos {
-  transform: scale(1);
-  opacity: 1;
+  transform: scale(1.1);
 }
 
 /* Enhanced play button */
@@ -538,11 +539,11 @@ button[aria-label="Skip back 10 seconds"],
   
   /* Fix volume control on tablets */
   #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container {
-    width: 28px !important;
+    width: 80px !important;
   }
   
   #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container .fluid_control_volume {
-    display: none;
+    display: block !important;
   }
   
   /* Adjust time display */
@@ -595,6 +596,15 @@ button[aria-label="Skip back 10 seconds"],
   #fluid_video_wrapper.fluid_player_layout_default .fluid_control_playback_rate,
   #fluid_video_wrapper.fluid_player_layout_default .fluid_control_download {
     display: none !important;
+  }
+  
+  /* Expand volume control for mobile too */
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container {
+    width: 70px !important;
+  }
+  
+  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container .fluid_control_volume {
+    display: block !important;
   }
   
   /* Fix time display on mobile */
