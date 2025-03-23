@@ -140,7 +140,7 @@ const TestPlayerPage = () => {
       console.log('window.fluidPlayer exists:', typeof window.fluidPlayer !== 'undefined' ? 'YES' : 'NO');
       console.log('window.fluidPlayer type:', typeof window.fluidPlayer);
       
-      if (typeof window.fluidPlayer === 'function') {
+      if (typeof (window as any).fluidPlayer === 'function') {
         console.log('Fluid Player is available, initializing test player...');
         initFluidPlayer();
       } else {

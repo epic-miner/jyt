@@ -19,6 +19,7 @@ const SearchResults = lazy(() => import("./pages/SearchResults"));
 const RecentlyWatched = lazy(() => import("./pages/RecentlyWatched"));
 const GenrePage = lazy(() => import("./pages/GenrePage"));
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
+const TestPlayerPage = lazy(() => import("./pages/TestPlayerPage"));
 
 const NotFound = lazy(() => import("./pages/not-found"));
 
@@ -55,6 +56,7 @@ function App() {
                   <Route path="/recently-watched" component={RecentlyWatched} />
                   <Route path="/genre/:genre" component={GenrePage} />
                   <Route path="/category/:type" component={CategoryPage} />
+                  <Route path="/test-player" component={TestPlayerPage} />
                   <Route component={NotFound} />
                 </Switch>
               </PageTransition>
