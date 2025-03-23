@@ -43,7 +43,29 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title }) => {
           preload: 'auto',
           mute: false,
           doubleclickFullscreen: true,
-          subtitlesEnabled: false,
+          // Theater mode configuration
+          allowTheatre: true,
+          theatreSettings: {
+            width: '100%',
+            height: '100%',
+            marginTop: 0,
+            horizontalAlign: 'center'
+          },
+          // For advanced theater mode
+          theatreAdvanced: {
+            theatreElement: 'fluid-player-container',
+            classToApply: 'theater-mode'
+          },
+          // Logo watermark configuration
+          logo: {
+            imageUrl: '/assets/logo/watermark.svg',
+            position: 'top left',
+            clickUrl: '',
+            opacity: 0.8,
+            imageMargin: '15px',
+            hideWithControls: false,
+            showOverAds: true
+          },
           controlBar: {
             autoHide: true,
             autoHideTimeout: 3,
