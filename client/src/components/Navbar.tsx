@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaHome } from 'react-icons/fa';
@@ -44,7 +43,7 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Mobile Navigation */}
       <div className="md:hidden bg-background-secondary">
         <div className="flex justify-around py-2">
