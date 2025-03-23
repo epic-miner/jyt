@@ -117,24 +117,93 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
     }
   }, [episode, selectedQuality, videoUrl]);
 
-  // Handle quality change with improved error handling and state management
+  // Handle quality change with direct quality application
   const handleQualityChange = useCallback((quality: VideoQuality) => {
     if (videoRef.current) {
       // Save current playback state
       const currentTime = videoRef.current.currentTime;
       const isPlaying = !videoRef.current.paused;
-      const volume = videoRef.current.volume;
+      const currentVolume = videoRef.current.volume;
       
-      // Show loading state
+      // Show loading state first
       setIsLoading(true);
       
-      // Update quality selection state
-      setSelectedQuality(quality);
+      console.log(`Starting quality change to: ${quality}`);
+      console.log(`Player state - Time: ${currentTime}, Playing: ${isPlaying}, Volume: ${currentVolume}`);
+      
+      // Determine the source URL directly rather than relying on state updates
+      let newSource = '';
+      
+      // Directly determine source URL based on selected quality
+      if (!episode) {
+        // Fallback to the videoUrl prop if no episode data
+        newSource = videoUrl;
+        console.log('No episode data, using default URL:', newSource);
+      } else {
+        // Determine URL based on requested quality with fallbacks
+        switch (quality) {
+          case '1080p':
+            if (episode.video_url_1080p) {
+              newSource = episode.video_url_1080p;
+              console.log('Using 1080p source:', newSource);
+            } else {
+              newSource = episode.video_url_720p || 
+                         episode.video_url_480p || 
+                         episode.video_url_max_quality || 
+                         videoUrl;
+              console.log('1080p not available, using fallback:', newSource);
+            }
+            break;
+            
+          case '720p':
+            if (episode.video_url_720p) {
+              newSource = episode.video_url_720p;
+              console.log('Using 720p source:', newSource);
+            } else {
+              newSource = episode.video_url_480p || 
+                         episode.video_url_1080p || 
+                         episode.video_url_max_quality || 
+                         videoUrl;
+              console.log('720p not available, using fallback:', newSource);
+            }
+            break;
+            
+          case '480p':
+            if (episode.video_url_480p) {
+              newSource = episode.video_url_480p;
+              console.log('Using 480p source:', newSource);
+            } else {
+              newSource = episode.video_url_720p || 
+                         episode.video_url_1080p || 
+                         episode.video_url_max_quality || 
+                         videoUrl;
+              console.log('480p not available, using fallback:', newSource);
+            }
+            break;
+            
+          case 'max':
+          default:
+            newSource = episode.video_url_max_quality || 
+                       episode.video_url_1080p || 
+                       episode.video_url_720p || 
+                       episode.video_url_480p || 
+                       videoUrl;
+            console.log('Using max quality source:', newSource);
+        }
+      }
       
       try {
-        // Get the new source URL based on selected quality
-        const newSource = getCurrentVideoUrl();
-        console.log(`Switching to quality: ${quality}, URL: ${newSource}`);
+        console.log(`Applying quality change to ${quality}, URL: ${newSource}`);
+        
+        if (!newSource) {
+          console.error('No valid source URL found for quality:', quality);
+          setIsLoading(false);
+          setShowQualityMenu(false);
+          return;
+        }
+        
+        // Update quality state (do this immediately)
+        setSelectedQuality(quality);
         
         // Update source and reload the player
         videoRef.current.src = newSource;
@@ -143,22 +212,24 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         // After loading new source, restore playback position and state
         videoRef.current.onloadeddata = () => {
           if (videoRef.current) {
+            console.log(`Video loaded, restoring time to ${currentTime} and volume to ${currentVolume}`);
+            
             // Restore playback position and volume
             videoRef.current.currentTime = currentTime;
-            videoRef.current.volume = volume;
+            videoRef.current.volume = currentVolume;
             
             // Hide loading spinner
             setIsLoading(false);
             
             // Resume playback if it was playing before
             if (isPlaying) {
+              console.log('Resuming playback');
               const playPromise = videoRef.current.play();
               
               // Handle play promise properly
               if (playPromise !== undefined) {
                 playPromise.catch(error => {
                   console.error('Error resuming playback after quality change:', error);
-                  // Show error message to user if needed
                 });
               }
             }
@@ -197,7 +268,7 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
       // Hide quality menu regardless of success/failure
       setShowQualityMenu(false);
     }
-  }, [getCurrentVideoUrl, episode]);
+  }, [episode, videoUrl]);
 
   // Dynamically load Fluid Player script if not available
   const loadFluidPlayerScript = useCallback(() => {
