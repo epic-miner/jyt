@@ -569,26 +569,58 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         </div>
       )}
 
-      {/* Quality selection button */}
+      {/* Quality selection button - Responsive */}
       {isPlayerReady && (
-        <div className={`absolute bottom-16 right-4 z-30 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'}`}>
+        <div 
+          className={`absolute z-30 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'}`}
+          style={{
+            bottom: 'clamp(10px, 5vh, 60px)', 
+            right: 'clamp(10px, 3vw, 30px)'
+          }}
+        >
           <button
-            className="bg-black bg-opacity-80 text-white px-3 py-1 rounded-md text-sm flex items-center hover:bg-opacity-100 transition-all"
+            className="bg-black bg-opacity-80 text-white rounded-md flex items-center hover:bg-opacity-100 transition-all transform active:scale-95"
+            style={{
+              padding: 'clamp(0.25rem, 1vw, 0.75rem) clamp(0.5rem, 2vw, 1rem)',
+              fontSize: 'clamp(0.75rem, 3vw, 1rem)'
+            }}
             onClick={() => setShowQualityMenu(!showQualityMenu)}
           >
             {selectedQuality === 'max' ? 'MAX' : selectedQuality} 
-            <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg 
+              className="ml-1" 
+              style={{
+                width: 'clamp(0.75rem, 3vw, 1rem)',
+                height: 'clamp(0.75rem, 3vw, 1rem)'
+              }} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
 
-          {/* Quality menu */}
+          {/* Quality menu - Responsive */}
           {showQualityMenu && (
-            <div className="absolute bottom-10 right-0 bg-black bg-opacity-90 text-white rounded-md overflow-hidden shadow-lg quality-menu">
+            <div 
+              className="absolute right-0 bg-black bg-opacity-90 text-white rounded-md overflow-hidden shadow-lg quality-menu"
+              style={{
+                bottom: 'calc(100% + 0.5rem)',
+                width: 'clamp(80px, 25vw, 150px)',
+                maxHeight: 'clamp(120px, 30vh, 300px)',
+                overflowY: 'auto'
+              }}
+            >
               {getAvailableQualities().map(({ quality, url }) => (
                 <button
                   key={quality}
-                  className={`block w-full text-left px-4 py-2 hover:bg-gray-700 transition-colors ${selectedQuality === quality ? 'bg-gray-700' : ''}`}
+                  className={`block w-full text-left hover:bg-gray-700 transition-colors ${selectedQuality === quality ? 'bg-gray-700' : ''}`}
+                  style={{
+                    padding: 'clamp(0.4rem, 1.5vw, 0.7rem) clamp(0.7rem, 2vw, 1.2rem)',
+                    fontSize: 'clamp(0.7rem, 2.5vw, 0.9rem)'
+                  }}
                   onClick={() => handleQualityChange(quality)}
                   disabled={!url}
                 >
