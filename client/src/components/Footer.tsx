@@ -12,7 +12,13 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
           {/* Column 1 - Logo and Description */}
           <div className="flex flex-col items-center md:items-start">
-            <h3 className="text-xl font-bold text-primary mb-2">Animeflix</h3>
+            <div className="flex items-center mb-2">
+              <img src="/images/logo.webp" alt="9Anime Logo" className="h-8 w-8 mr-2" />
+              <h3 className="text-xl font-bold">
+                <span className="text-primary">9</span>
+                <span className="bg-gradient-to-r from-primary to-purple-500 text-transparent bg-clip-text">Anime</span>
+              </h3>
+            </div>
             <p className="text-sm text-muted-foreground text-center md:text-left">
               Your ultimate destination for anime streaming. Watch your favorite anime shows and movies in HD quality.
             </p>
@@ -57,7 +63,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="border-t border-border/40 mt-4 pt-4 text-center">
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} Animeflix. All rights reserved.
+            &copy; {new Date().getFullYear()} 9Anime. All rights reserved.
           </p>
         </div>
       </div>
