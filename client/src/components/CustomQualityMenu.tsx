@@ -218,14 +218,29 @@ const CustomQualityMenu: React.FC<CustomQualityMenuProps> = ({
   };
 
   return (
-    <div className="custom-quality-menu absolute bottom-14 right-4 z-40" ref={menuRef}>
+    <div 
+      className="custom-quality-menu absolute z-40" 
+      style={{
+        bottom: 'clamp(10px, 5vh, 60px)', 
+        right: 'clamp(10px, 3vw, 30px)'
+      }}
+      ref={menuRef}
+    >
       <button
-        className="quality-button bg-black bg-opacity-70 text-white px-3 py-1 rounded-md flex items-center"
+        className="quality-button bg-black bg-opacity-70 text-white rounded-md flex items-center transition-all transform hover:bg-opacity-90 active:scale-95"
+        style={{
+          padding: 'clamp(0.25rem, 1vw, 0.75rem) clamp(0.5rem, 2vw, 1rem)',
+          fontSize: 'clamp(0.75rem, 3vw, 1rem)'
+        }}
         onClick={() => setShowMenu(!showMenu)}
       >
         {selectedQuality === 'auto' ? 'Auto' : selectedQuality}
         <svg
-          className="w-4 h-4 ml-1"
+          className="ml-1"
+          style={{
+            width: 'clamp(0.75rem, 3vw, 1rem)',
+            height: 'clamp(0.75rem, 3vw, 1rem)'
+          }}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -241,13 +256,25 @@ const CustomQualityMenu: React.FC<CustomQualityMenuProps> = ({
       </button>
 
       {showMenu && (
-        <div className="quality-menu-dropdown absolute right-0 bottom-10 bg-black bg-opacity-90 rounded-md overflow-hidden w-32">
+        <div 
+          className="quality-menu-dropdown absolute right-0 bg-black bg-opacity-90 rounded-md overflow-hidden shadow-lg"
+          style={{
+            bottom: 'calc(100% + 0.5rem)',
+            width: 'clamp(80px, 25vw, 150px)',
+            maxHeight: 'clamp(120px, 30vh, 300px)',
+            overflowY: 'auto'
+          }}
+        >
           {qualityOptions.map((option) => (
             <button
               key={option.value}
-              className={`block w-full text-left text-white px-4 py-2 hover:bg-gray-700 transition-colors ${
+              className={`block w-full text-left text-white hover:bg-gray-700 transition-colors ${
                 selectedQuality === option.value ? 'bg-gray-700' : ''
               }`}
+              style={{
+                padding: 'clamp(0.4rem, 1.5vw, 0.7rem) clamp(0.7rem, 2vw, 1.2rem)',
+                fontSize: 'clamp(0.7rem, 2.5vw, 0.9rem)'
+              }}
               onClick={() => handleQualityClick(option.value as VideoQuality)}
             >
               {option.label}
