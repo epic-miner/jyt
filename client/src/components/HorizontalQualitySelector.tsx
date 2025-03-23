@@ -65,10 +65,10 @@ const HorizontalQualitySelector: React.FC<HorizontalQualitySelectorProps> = ({
 
   return (
     <div 
-      className="quality-selector flex items-center justify-between bg-black/80 rounded border border-gray-700"
+      className="quality-selector flex items-center justify-between bg-black/50 rounded border border-gray-700"
       style={{
-        padding: 'clamp(0.25rem, 1vw, 0.5rem)',
-        minWidth: 'clamp(100px, 25vw, 160px)',
+        padding: 'clamp(0.15rem, 0.6vw, 0.3rem)',
+        minWidth: 'clamp(80px, 20vw, 120px)',
       }}
     >
       <button 
@@ -81,8 +81,8 @@ const HorizontalQualitySelector: React.FC<HorizontalQualitySelectorProps> = ({
           fill="none" 
           stroke="currentColor" 
           style={{
-            width: 'clamp(16px, 5vw, 24px)',
-            height: 'clamp(16px, 5vw, 24px)',
+            width: 'clamp(12px, 4vw, 18px)',
+            height: 'clamp(12px, 4vw, 18px)',
           }}
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -92,8 +92,8 @@ const HorizontalQualitySelector: React.FC<HorizontalQualitySelectorProps> = ({
       <div 
         className="quality-label text-white text-center font-medium mx-1"
         style={{
-          fontSize: 'clamp(0.85rem, 3vw, 1rem)',
-          minWidth: 'clamp(60px, 12vw, 90px)',
+          fontSize: 'clamp(0.7rem, 2.5vw, 0.85rem)',
+          minWidth: 'clamp(40px, 10vw, 70px)',
         }}
       >
         {getDisplayLabel(selectedQuality)}
@@ -109,8 +109,8 @@ const HorizontalQualitySelector: React.FC<HorizontalQualitySelectorProps> = ({
           fill="none" 
           stroke="currentColor"
           style={{
-            width: 'clamp(16px, 5vw, 24px)',
-            height: 'clamp(16px, 5vw, 24px)',
+            width: 'clamp(12px, 4vw, 18px)',
+            height: 'clamp(12px, 4vw, 18px)',
           }}
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
