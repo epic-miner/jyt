@@ -36,13 +36,13 @@ const AnimeCard = memo(({
   
   // Memoize class names to avoid recomputing on every render
   const containerClasses = useMemo(() => cn(
-    "relative group cursor-pointer glass-effect transition-all duration-300",
+    "relative group cursor-pointer glass-effect transition-all duration-300 rounded-2xl",
     "hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20 hover:ring-2 hover:ring-primary/30",
     isContinueWatching && "border-primary/30"
   ), [isContinueWatching]);
 
   const imageContainerClasses = useMemo(() => cn(
-    "rounded-xl overflow-hidden relative",
+    "rounded-2xl overflow-hidden relative",
     isContinueWatching ? "aspect-[3/4]" : "aspect-[2/3]"
   ), [isContinueWatching]);
 
