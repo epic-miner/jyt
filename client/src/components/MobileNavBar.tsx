@@ -1,6 +1,6 @@
+import React, { useMemo, memo } from "react";
 import { Home, Search, LibraryBig, History, MessageCircle } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { memo, useMemo } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
