@@ -613,13 +613,52 @@ const VideoPlayer = ({
 
 
   const handleQualityChange = (quality: VideoQuality) => {
-    setSelectedQuality(quality);
-    setShowQualitySubmenu(false);
-    setShowSettingsMenu(false);
-
-    // Workaround for React bug with video source changes
+    // Store current playback state before changing quality
     if (videoRef.current) {
-      videoRef.current.load();
+      const currentTime = videoRef.current.currentTime;
+      const wasPlaying = !videoRef.current.paused;
+      
+      // Update quality selection
+      setSelectedQuality(quality);
+      setShowQualitySubmenu(false);
+      setShowSettingsMenu(false);
+      
+      // Set loading state
+      setIsLoading(true);
+      
+      // Use setTimeout to allow state updates to process
+      setTimeout(() => {
+        if (videoRef.current) {
+          // Get the new source URL based on selected quality
+          const newSource = getVideoUrl();
+          
+          // Update source and reload the player
+          videoRef.current.src = newSource;
+          videoRef.current.load();
+          
+          // After loading new source, restore playback position
+          videoRef.current.onloadeddata = () => {
+            if (videoRef.current) {
+              // Restore playback position
+              videoRef.current.currentTime = currentTime;
+              
+              // Restore play state if it was playing
+              if (wasPlaying) {
+                videoRef.current.play()
+                  .catch(error => console.error('Error resuming playback after quality change:', error));
+              }
+              
+              // Reset loading state
+              setIsLoading(false);
+            }
+          };
+        }
+      }, 100);
+    } else {
+      // Just update quality if video ref isn't available
+      setSelectedQuality(quality);
+      setShowQualitySubmenu(false);
+      setShowSettingsMenu(false);
     }
   };
 
@@ -655,29 +694,64 @@ const VideoPlayer = ({
     setShowQualitySubmenu(false);
   };
 
-  // Determine video URL to use based on selected quality
+  // Determine video URL to use based on selected quality with smart fallbacks
   const getVideoUrl = (): string => {
+    // Check if the episode data is available
+    if (!episode) return '';
+    
+    // Smart fallback system - if selected quality isn't available, try the next best option
     if (selectedQuality === 'auto') {
+      // In auto mode, use max quality first, then fall back through available qualities
       return episode.video_url_max_quality ||
              episode.video_url_1080p ||
              episode.video_url_720p ||
              episode.video_url_480p || '';
     }
-
-    if (selectedQuality === '1080p' && episode.video_url_1080p) {
-      return episode.video_url_1080p;
+    
+    // For specific quality selections with fallbacks
+    if (selectedQuality === '1080p') {
+      // If 1080p is selected but not available, fall back through lower qualities
+      if (episode.video_url_1080p) {
+        return episode.video_url_1080p;
+      } else {
+        console.log('1080p not available, falling back to next best quality');
+        return episode.video_url_720p || 
+               episode.video_url_480p || 
+               episode.video_url_max_quality || '';
+      }
     }
-
-    if (selectedQuality === '720p' && episode.video_url_720p) {
-      return episode.video_url_720p;
+    
+    if (selectedQuality === '720p') {
+      // If 720p is selected but not available, fall back to next best options
+      if (episode.video_url_720p) {
+        return episode.video_url_720p;
+      } else {
+        console.log('720p not available, falling back to next best quality');
+        // Try lower quality first, then higher if lower isn't available
+        return episode.video_url_480p || 
+               episode.video_url_1080p || 
+               episode.video_url_max_quality || '';
+      }
     }
-
-    if (selectedQuality === '480p' && episode.video_url_480p) {
-      return episode.video_url_480p;
+    
+    if (selectedQuality === '480p') {
+      // If 480p is selected but not available, fall back to higher qualities
+      if (episode.video_url_480p) {
+        return episode.video_url_480p;
+      } else {
+        console.log('480p not available, falling back to next best quality');
+        return episode.video_url_720p || 
+               episode.video_url_1080p || 
+               episode.video_url_max_quality || '';
+      }
     }
-
-    // Fallback to max quality if selected quality isn't available
-    return episode.video_url_max_quality || '';
+    
+    // Fallback to max quality if no match or if something unexpected happens
+    console.log('Using default max quality');
+    return episode.video_url_max_quality || 
+           episode.video_url_1080p || 
+           episode.video_url_720p || 
+           episode.video_url_480p || '';
   };
 
   // Additional player functions

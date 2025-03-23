@@ -58,55 +58,146 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
     return qualities;
   }, [episode]);
 
-  // Get current video URL based on selected quality
+  // Get current video URL based on selected quality with smart fallbacks
   const getCurrentVideoUrl = useCallback(() => {
+    // If no episode data, fall back to the main videoUrl prop
     if (!episode) return videoUrl;
-
+    
+    // Smart quality selection with fallbacks
     switch (selectedQuality) {
       case '480p':
-        return episode.video_url_480p || videoUrl;
+        if (episode.video_url_480p) {
+          return episode.video_url_480p;
+        } else {
+          // If 480p isn't available, try higher qualities in ascending order
+          console.log('480p not available, trying alternative qualities');
+          return episode.video_url_720p || 
+                 episode.video_url_1080p || 
+                 episode.video_url_max_quality || 
+                 videoUrl;
+        }
+        
       case '720p':
-        return episode.video_url_720p || videoUrl;
+        if (episode.video_url_720p) {
+          return episode.video_url_720p;
+        } else {
+          // If 720p isn't available, try other qualities (first lower, then higher)
+          console.log('720p not available, trying alternative qualities');
+          return episode.video_url_480p || 
+                 episode.video_url_1080p || 
+                 episode.video_url_max_quality || 
+                 videoUrl;
+        }
+        
       case '1080p':
-        return episode.video_url_1080p || videoUrl;
+        if (episode.video_url_1080p) {
+          return episode.video_url_1080p;
+        } else {
+          // If 1080p isn't available, try lower qualities in descending order
+          console.log('1080p not available, trying alternative qualities');
+          return episode.video_url_720p || 
+                 episode.video_url_480p || 
+                 episode.video_url_max_quality || 
+                 videoUrl;
+        }
+        
       case 'max':
       default:
-        return episode.video_url_max_quality || videoUrl;
+        // For max or auto quality, use the best available quality
+        if (episode.video_url_max_quality) {
+          return episode.video_url_max_quality;
+        } else {
+          // If max quality isn't specifically available, try the highest resolution
+          console.log('Max quality not available, using highest available resolution');
+          return episode.video_url_1080p || 
+                 episode.video_url_720p || 
+                 episode.video_url_480p || 
+                 videoUrl;
+        }
     }
   }, [episode, selectedQuality, videoUrl]);
 
-  // Handle quality change
+  // Handle quality change with improved error handling and state management
   const handleQualityChange = useCallback((quality: VideoQuality) => {
     if (videoRef.current) {
-      // Save current playback time and playing state
+      // Save current playback state
       const currentTime = videoRef.current.currentTime;
       const isPlaying = !videoRef.current.paused;
+      const volume = videoRef.current.volume;
       
+      // Show loading state
       setIsLoading(true);
-      // Change quality
+      
+      // Update quality selection state
       setSelectedQuality(quality);
-
-      // Apply new source
-      videoRef.current.src = getCurrentVideoUrl();
-      videoRef.current.load();
-
-      // Restore playback position
-      videoRef.current.onloadeddata = () => {
-        if (videoRef.current) {
-          videoRef.current.currentTime = currentTime;
-          setIsLoading(false);
-          if (isPlaying) {
-            videoRef.current.play().catch(e => {
-              console.error('Error playing video after quality change:', e);
-            });
+      
+      try {
+        // Get the new source URL based on selected quality
+        const newSource = getCurrentVideoUrl();
+        console.log(`Switching to quality: ${quality}, URL: ${newSource}`);
+        
+        // Update source and reload the player
+        videoRef.current.src = newSource;
+        videoRef.current.load();
+        
+        // After loading new source, restore playback position and state
+        videoRef.current.onloadeddata = () => {
+          if (videoRef.current) {
+            // Restore playback position and volume
+            videoRef.current.currentTime = currentTime;
+            videoRef.current.volume = volume;
+            
+            // Hide loading spinner
+            setIsLoading(false);
+            
+            // Resume playback if it was playing before
+            if (isPlaying) {
+              const playPromise = videoRef.current.play();
+              
+              // Handle play promise properly
+              if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                  console.error('Error resuming playback after quality change:', error);
+                  // Show error message to user if needed
+                });
+              }
+            }
           }
-        }
-      };
-
-      // Hide quality menu
+        };
+        
+        // Add error handling for source loading failures
+        videoRef.current.onerror = () => {
+          console.error('Failed to load video with selected quality:', quality);
+          setIsLoading(false);
+          
+          // If the new quality fails, try falling back to max quality
+          if (quality !== 'max' && episode?.video_url_max_quality) {
+            console.log('Falling back to max quality after quality selection error');
+            videoRef.current!.src = episode.video_url_max_quality;
+            videoRef.current!.load();
+            
+            // Restore playback state after fallback
+            videoRef.current!.onloadeddata = () => {
+              if (videoRef.current) {
+                videoRef.current.currentTime = currentTime;
+                if (isPlaying) {
+                  videoRef.current.play().catch(e => {
+                    console.error('Error playing fallback quality:', e);
+                  });
+                }
+              }
+            };
+          }
+        };
+      } catch (error) {
+        console.error('Error during quality change:', error);
+        setIsLoading(false);
+      }
+      
+      // Hide quality menu regardless of success/failure
       setShowQualityMenu(false);
     }
-  }, [getCurrentVideoUrl]);
+  }, [getCurrentVideoUrl, episode]);
 
   // Dynamically load Fluid Player script if not available
   const loadFluidPlayerScript = useCallback(() => {
