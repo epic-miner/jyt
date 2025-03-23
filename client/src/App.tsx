@@ -9,6 +9,7 @@ import { initializeGlobalSecurity } from "./lib/security";
 import { useConsoleProtection } from './hooks/useConsoleProtection';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
+import { ColorSchemeProvider } from './contexts/ColorSchemeContext';
 
 // Lazy load page components for better performance and code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -31,12 +32,13 @@ function App() {
   }, []);
 
   return (
-    <HelmetProvider> {/* Added HelmetProvider */}
+    <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <div className="min-h-screen flex flex-col bg-gradient-to-b from-black via-dark-950 to-dark-900 text-slate-50 font-sans">
-          <NavBar />
-          <main className="flex-grow relative">
-            <Suspense fallback={
+        <ColorSchemeProvider>
+          <div className="min-h-screen flex flex-col bg-gradient-to-b from-black via-dark-950 to-dark-900 text-slate-50 font-sans">
+            <NavBar />
+            <main className="flex-grow relative">
+              <Suspense fallback={
               <div className="w-full h-screen flex items-center justify-center">
                 <div className="animate-pulse flex flex-col items-center">
                   <div className="h-10 w-10 rounded-full bg-primary/60 mb-4"></div>
@@ -63,6 +65,7 @@ function App() {
           <ScrollToTop />
           <Toaster />
         </div>
+        </ColorSchemeProvider>
       </QueryClientProvider>
     </HelmetProvider>
   );
