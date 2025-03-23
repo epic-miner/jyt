@@ -739,6 +739,23 @@
   @apply m-3 xs:m-4 sm:m-5 md:m-6 lg:m-8;
 }
 
+/* Mobile Back to Top button animation */
+.back-to-top-btn {
+  animation: pulse-shadow 2s infinite;
+}
+
+@keyframes pulse-shadow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(var(--primary-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0);
+  }
+}
+
 .padding-sm {
   @apply p-1 xs:p-2 sm:p-3;
 }

@@ -105,10 +105,24 @@ const Footer: React.FC = () => {
         <div className="flex flex-col items-center mb-6">
           <button 
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="bg-primary/10 hover:bg-primary/20 transition-all duration-300 px-6 py-3 rounded-full flex items-center hover:shadow-lg transform hover:scale-105 group mb-6"
+            className="bg-primary/10 hover:bg-primary/20 transition-all duration-300 px-6 py-3 sm:px-6 sm:py-3 rounded-full flex items-center hover:shadow-lg transform hover:scale-105 group mb-6 active:scale-95"
+            aria-label="Scroll to top of page"
+            style={{ touchAction: 'manipulation' }} // Improves touch response
           >
             <i className="fas fa-arrow-up mr-2 group-hover:animate-bounce"></i>
             <span className="font-medium">Back to Top</span>
+          </button>
+        </div>
+        
+        {/* Fixed mobile back-to-top button */}
+        <div className="md:hidden fixed bottom-20 right-4 z-50">
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="bg-primary text-white shadow-lg rounded-full w-12 h-12 flex items-center justify-center transform hover:scale-110 transition-all active:scale-95 back-to-top-btn"
+            aria-label="Scroll to top of page"
+            style={{ touchAction: 'manipulation' }} // Improves touch response
+          >
+            <i className="fas fa-arrow-up animate-bounce"></i>
           </button>
         </div>
         

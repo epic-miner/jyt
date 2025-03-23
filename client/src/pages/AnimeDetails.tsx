@@ -14,6 +14,7 @@ import ScrollReveal from '../components/ScrollReveal';
 import AnimeLazyImage from '../components/AnimeLazyImage';
 import ParallaxSection from '../components/ParallaxSection';
 import TiltCard from '../components/TiltCard';
+import SmoothScroll from '../components/SmoothScroll';
 
 const AnimeDetails = () => {
   const [, params] = useRoute('/anime/:id');
@@ -186,13 +187,16 @@ const AnimeDetails = () => {
                   </button>
                 </Link>
                 
-                <a 
-                  href="#episodes"
+                <SmoothScroll
+                  to="episodes"
+                  duration={800}
+                  offset={30}
+                  mobileOffset={60} 
                   className="bg-dark-800 hover:bg-dark-700 transition-all duration-300 px-8 py-3 rounded-full flex items-center hover:shadow-lg transform hover:scale-105 group border border-primary/30"
                 >
                   <i className="fas fa-list mr-2 group-hover:animate-pulse"></i>
                   <span className="font-medium">View Episodes</span>
-                </a>
+                </SmoothScroll>
               </motion.div>
             )}
           </div>
