@@ -67,7 +67,16 @@
   transform-origin: center;
   width: 28px !important;
   height: 28px !important;
-  margin: 0 4px;
+  margin: 0 2px; /* Reduced side margins to close gaps */
+}
+
+/* Adjust controls container spacing */
+#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_left,
+#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_right {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 0 !important; /* Remove gap between buttons */
 }
 
 #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button:hover {
@@ -232,7 +241,8 @@ li[data-player-action="download"],
   pointer-events: none !important;
 }
 
-/* Hide forward/backward 10s buttons */
+/* Hide forward/backward 10s buttons
+   but keep the layout spacing intact to avoid gaps */
 #fluid_video_wrapper.fluid_player_layout_default .fluid_button.fluid_button_skip_forward,
 #fluid_video_wrapper.fluid_player_layout_default .fluid_button.fluid_button_skip_back,
 #fluid_video_wrapper .fluid_button.fluid_button_skip_forward,
@@ -243,10 +253,14 @@ button[aria-label="Skip forward 10 seconds"],
 button[aria-label="Skip back 10 seconds"],
 .fluid_video_wrapper [data-player-action="skip_forward"],
 .fluid_video_wrapper [data-player-action="skip_back"] {
-  display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
+  /* Keep display so layout stays intact */
+  width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
 }
 
 /* Settings menus - glass effect styling */
