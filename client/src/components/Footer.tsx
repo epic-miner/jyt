@@ -45,8 +45,8 @@ const Footer = () => {
 
           {/* Column 3 - Social Links */}
           <div className="flex flex-col items-center md:items-start">
-            <h3 className="text-lg font-semibold mb-3">Connect With Us</h3>
-            <div className="flex space-x-4 items-center">
+            <h3 className="text-lg font-semibold mb-2 text-primary">Connect With Us</h3>
+            <div className="flex items-center gap-4">
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                 <i className="fab fa-twitter text-lg"></i>
               </a>
