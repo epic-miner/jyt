@@ -16,6 +16,7 @@ interface AnimatedTitleProps {
   direction?: 'up' | 'down';
   inline?: boolean;
   animation?: 'text-transition' | 'typewriter' | 'gradient' | 'fade-in';
+  gradient?: string; // Custom gradient for Tailwind classes (from-x via-y to-z)
   children?: ReactNode;
 }
 
@@ -28,6 +29,7 @@ const AnimatedTitle = ({
   direction = 'up',
   inline = false,
   animation = 'text-transition',
+  gradient,
   children,
 }: AnimatedTitleProps) => {
   // Determine if text is an array or single string
@@ -107,6 +109,18 @@ const AnimatedTitle = ({
   }
   
   if (effectiveAnimation === 'gradient') {
+    // Use either custom gradient via Tailwind classes or CSS style gradient
+    if (gradient) {
+      return (
+        <Tag 
+          className={cn('bg-gradient-to-r bg-clip-text text-transparent', gradient, className)}
+        >
+          {textArray[0]}
+          {children}
+        </Tag>
+      );
+    }
+    
     return (
       <Tag 
         className={cn('animate-gradient-x', className)} 

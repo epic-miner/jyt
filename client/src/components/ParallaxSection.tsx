@@ -27,6 +27,7 @@ const ParallaxSection = ({
   blur = false,
   disabled = false,
   contentClassName,
+  speed = 0.5,
 }: ParallaxSectionProps) => {
   // Calculate blur amount
   const blurAmount = typeof blur === 'number' ? `${blur}px` : blur ? '4px' : '0';
@@ -55,20 +56,20 @@ const ParallaxSection = ({
     alignItems: 'center',
   };
 
-  // If parallax is disabled, render a simpler version with background image
-  if (disabled) {
+  // If parallax is disabled or no background image, render a simpler version
+  if (disabled || !bgImage) {
     return (
       <div 
         className={cn('relative', className)}
         style={{ 
-          backgroundImage: `url(${bgImage})`,
+          backgroundImage: bgImage ? `url(${bgImage})` : 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           height,
-          filter: `blur(${blurAmount})`,
+          filter: bgImage ? `blur(${blurAmount})` : 'none',
         }}
       >
-        <div style={overlayStyle} />
+        {bgImage && <div style={overlayStyle} />}
         <div 
           style={contentStyle}
           className={cn(contentClassName)}
@@ -94,6 +95,7 @@ const ParallaxSection = ({
             position: 'absolute',
             width: '100%',
             height: '100%',
+            transform: `translateY(${percentage * speed * 100}px)`,
           }}
         />
       )}

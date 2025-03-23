@@ -130,29 +130,24 @@ const AnimeDetails = () => {
           transition={{ duration: 0.6 }}
           className="flex flex-col md:flex-row gap-6"
         >
-          {/* Anime poster */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="w-40 md:w-60 mx-auto md:mx-0 rounded-lg overflow-hidden shadow-lg ring-1 ring-white/10 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)] transition-all duration-300 group"
-          >
-            <img
+          {/* Anime poster with Tilt effect */}
+          <TiltCard className="w-40 md:w-60 mx-auto md:mx-0 rounded-lg overflow-hidden shadow-lg ring-1 ring-white/10 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)] transition-all duration-300">
+            <AnimeLazyImage
               src={anime.thumbnail_url}
               alt={anime.title}
-              className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+              className="w-full h-full object-cover transform transition-transform duration-500 hover:scale-110"
+              effect="blur"
             />
-          </motion.div>
+          </TiltCard>
 
           {/* Anime details */}
           <div className="flex-1 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5">
-            <motion.h1
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="text-2xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary via-white to-primary bg-clip-text text-transparent hover:scale-[1.01] transition-transform duration-300"
-            >
-              {anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')}
-            </motion.h1>
+            <AnimatedTitle
+              text={anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')}
+              className="text-2xl md:text-4xl font-bold mb-2 hover:scale-[1.01] transition-transform duration-300"
+              gradient="from-primary via-white to-primary"
+              delay={0.1}
+            />
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -203,12 +198,17 @@ const AnimeDetails = () => {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-10 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-primary/10 hover:border-primary/20 transition-all duration-300"
         >
-          <h2 className="text-xl font-bold mb-6 relative inline-block">
-            <span className="bg-gradient-to-r from-primary to-white bg-clip-text text-transparent">
-              Episodes
-            </span>
+          <ScrollReveal>
+            <AnimatedTitle
+              text="Episodes"
+              className="text-xl font-bold mb-6 relative inline-block"
+              tag="h2"
+              animation="gradient"
+              gradient="from-primary to-white"
+              delay={0.1}
+            />
             <div className="absolute -bottom-2 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-          </h2>
+          </ScrollReveal>
 
           {isLoadingEpisodes ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -225,17 +225,14 @@ const AnimeDetails = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {episodes.map((episode, index) => (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  key={episode.id}
-                >
-                  <EpisodeCard
-                    episode={episode}
-                    animeId={anime.id.toString()}
-                  />
-                </motion.div>
+                <ScrollReveal key={episode.id} delay={index * 0.05}>
+                  <TiltCard options={{ max: 10, scale: 1.02 }}>
+                    <EpisodeCard
+                      episode={episode}
+                      animeId={anime.id.toString()}
+                    />
+                  </TiltCard>
+                </ScrollReveal>
               ))}
             </div>
           )}
