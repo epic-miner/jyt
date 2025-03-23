@@ -33,61 +33,60 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ episode, onClose }) =
 
   // Handle quality change
   const handleQualityChange = (quality: VideoQuality) => {
-    if (!episode || !videoRef.current) return;
-
-    // Save current time and play state
-    const currentTime = videoRef.current.currentTime;
-    const wasPlaying = !videoRef.current.paused;
-
-    // Set the quality selection state
     setSelectedQuality(quality);
 
-    // Get the appropriate URL based on the selected quality
-    let newSource = '';
+    console.log(`TestFluidPlayer: Quality changed to ${quality}`);
 
-    switch (quality) {
-      case '1080p':
-        if (episode.video_url_1080p) {
-          newSource = episode.video_url_1080p;
-        } else {
-          console.warn('1080p quality requested but not available');
-          return; // Don't change if not available
-        }
-        break;
-      case '720p':
-        if (episode.video_url_720p) {
-          newSource = episode.video_url_720p;
-        } else {
-          newSource = episode.video_url_max_quality;
-        }
-        break;
-      case '480p':
-        if (episode.video_url_480p) {
-          newSource = episode.video_url_480p;
-        } else {
-          newSource = episode.video_url_max_quality;
-        }
-        break;
-      default: // 'auto'
-        newSource = episode.video_url_max_quality;
+    // Get the specific URL for the selected quality without fallbacks
+    let videoUrl = '';
+
+    if (episode) {
+      switch(quality) {
+        case '1080p':
+          videoUrl = episode.video_url_1080p || '';
+          break;
+        case '720p':
+          videoUrl = episode.video_url_720p || '';
+          break;
+        case '480p':
+          videoUrl = episode.video_url_480p || '';
+          break;
+        case 'auto':
+          videoUrl = episode.video_url_max_quality || '';
+          break;
+      }
+
+      console.log(`URL for ${quality}: ${videoUrl}`);
+
+      // Only use fallbacks if the specific quality URL is not available
+      if (!videoUrl) {
+        console.log(`${quality} not available, falling back to max quality`);
+        videoUrl = episode.video_url_max_quality || '';
+      }
     }
 
-    if (newSource) {
+    if (videoRef.current && videoUrl) {
+      // Store current playback position and state
+      const currentTime = videoRef.current.currentTime;
+      const wasPlaying = !videoRef.current.paused;
+
       // Update video source
-      videoRef.current.src = newSource;
+      videoRef.current.src = videoUrl;
       videoRef.current.load();
 
-      // Restore time and play state
-      videoRef.current.addEventListener('loadedmetadata', function onceLoaded() {
-        if (videoRef.current) {
+        // Restore playback position and state after source change
+        videoRef.current.onloadeddata = () => {
           videoRef.current.currentTime = currentTime;
+
           if (wasPlaying) {
-            videoRef.current.play().catch(err => console.error('Failed to resume playback:', err));
+            videoRef.current.play().catch(error => {
+              console.error("Error playing video after quality change:", error);
+            });
           }
-          videoRef.current.removeEventListener('loadedmetadata', onceLoaded);
-        }
-      });
-    }
+        };
+      } else {
+        console.warn(`No video URL available for quality: ${quality}`);
+      }
   };
 
   // Log player events for debugging

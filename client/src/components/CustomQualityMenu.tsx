@@ -62,7 +62,58 @@ const CustomQualityMenu: React.FC<CustomQualityMenuProps> = ({
   }
 
   const handleQualityClick = (quality: VideoQuality) => {
-    onQualityChange(quality);
+    // Log the quality selection for debugging
+    console.log(`Quality selected: ${quality}`);
+    
+    // Get the correct URL based on quality
+    let newSource = '';
+    if (episode) {
+      switch (quality) {
+        case '1080p':
+          newSource = episode.video_url_1080p || '';
+          console.log(`1080p URL: ${newSource}`);
+          break;
+        case '720p':
+          newSource = episode.video_url_720p || '';
+          console.log(`720p URL: ${newSource}`);
+          break;
+        case '480p':
+          newSource = episode.video_url_480p || '';
+          console.log(`480p URL: ${newSource}`);
+          break;
+        case 'auto':
+        default:
+          newSource = episode.video_url_max_quality || '';
+          console.log(`Auto/Max URL: ${newSource}`);
+      }
+    }
+
+    // Only change quality if URL exists
+    if (newSource) {
+      if (videoElement) {
+        // Store current playback state
+        const currentTime = videoElement.currentTime;
+        const wasPlaying = !videoElement.paused;
+        
+        // Set the new source
+        videoElement.src = newSource;
+        videoElement.load();
+        
+        // Restore playback state after source change
+        videoElement.onloadeddata = () => {
+          videoElement.currentTime = currentTime;
+          if (wasPlaying) {
+            videoElement.play().catch(e => console.error("Error playing after quality change:", e));
+          }
+        };
+      }
+      
+      // Update quality state
+      onQualityChange(quality);
+    } else {
+      console.warn(`No video URL available for quality: ${quality}`);
+    }
+    
     setShowMenu(false);
   };
 
