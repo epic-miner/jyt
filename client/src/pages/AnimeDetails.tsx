@@ -100,15 +100,14 @@ const AnimeDetails = () => {
         }}
       />
       {/* Hero section with enhanced parallax banner */}
-      <ParallaxSection
-        speed={0.5}
+      <div
         className="relative h-[300px] md:h-[400px] overflow-hidden group"
       >
-        <AnimeLazyImage
+        <img
           src={bannerImage}
           alt={anime.title}
           className="w-full h-full object-cover object-center opacity-75 transform-gpu will-change-transform transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:opacity-85"
-          effect="blur"
+          loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/60 to-transparent/30">
           {/* Animated neon lines */}
@@ -120,7 +119,7 @@ const AnimeDetails = () => {
             <i className="fas fa-arrow-left"></i>
           </button>
         </Link>
-      </ParallaxSection>
+      </div>
 
       {/* Anime info section */}
       <div className="container mx-auto px-4 -mt-32 relative z-10">
@@ -130,15 +129,14 @@ const AnimeDetails = () => {
           transition={{ duration: 0.6 }}
           className="flex flex-col md:flex-row gap-6"
         >
-          {/* Anime poster with Tilt effect */}
-          <TiltCard className="w-40 md:w-60 mx-auto md:mx-0 rounded-lg overflow-hidden shadow-lg ring-1 ring-white/10 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)] transition-all duration-300">
-            <AnimeLazyImage
+          {/* Anime poster with basic effect */}
+          <div className="w-40 md:w-60 mx-auto md:mx-0 rounded-lg overflow-hidden shadow-lg ring-1 ring-white/10 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)] transition-all duration-300 group">
+            <img
               src={anime.thumbnail_url}
               alt={anime.title}
-              className="w-full h-full object-cover transform transition-transform duration-500 hover:scale-110"
-              effect="blur"
+              className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
             />
-          </TiltCard>
+          </div>
 
           {/* Anime details */}
           <div className="flex-1 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5">
@@ -226,12 +224,12 @@ const AnimeDetails = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {episodes.map((episode, index) => (
                 <ScrollReveal key={episode.id} delay={index * 0.05}>
-                  <TiltCard options={{ max: 10, scale: 1.02 }}>
+                  <div className="transform transition-all duration-300 hover:scale-[1.02]">
                     <EpisodeCard
                       episode={episode}
                       animeId={anime.id.toString()}
                     />
-                  </TiltCard>
+                  </div>
                 </ScrollReveal>
               ))}
             </div>
