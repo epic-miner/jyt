@@ -53,9 +53,10 @@ const AnimeCard = memo(({
   ), [isContinueWatching]);
 
   const buttonClasses = useMemo(() => cn(
-    "bg-primary/90 hover:bg-primary text-white p-2.5 rounded-full",
-    "transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:scale-110",
-    isContinueWatching && "shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)]"
+    "bg-primary/90 hover:bg-primary text-white p-3 rounded-full",
+    "transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:scale-125",
+    "shadow-lg backdrop-blur-sm",
+    isContinueWatching && "shadow-[0_0_20px_rgba(var(--primary-rgb),0.4)]"
   ), [isContinueWatching]);
 
   const progressBarClasses = useMemo(() => cn(
@@ -115,7 +116,7 @@ const AnimeCard = memo(({
                   className={buttonClasses}
                   aria-label="Play"
                 >
-                  <PlayCircle className="w-5 h-5 md:w-6 md:h-6" />
+                  <PlayCircle className="w-6 h-6 md:w-7 md:h-7 drop-shadow-lg animate-pulse" />
                 </button>
               </div>
             )}
@@ -123,15 +124,16 @@ const AnimeCard = memo(({
 
           {/* Episode count badge */}
           {episodeCount !== undefined && (
-            <div className="absolute top-2 right-2 bg-black/80 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-full">
+            <div className="absolute top-2 right-2 bg-black/80 backdrop-blur-sm text-white text-[10px] md:text-xs px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-full shadow-md flex items-center">
+              <i className="fas fa-film mr-1 text-primary"></i>
               {episodeCount} {episodeCount === 1 ? 'EP' : 'EPS'}
             </div>
           )}
 
           {/* Rating badge */}
           {rating && (
-            <div className="absolute top-2 left-2 bg-primary/80 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded-full flex items-center">
-              <i className="fas fa-star mr-1 text-yellow-400"></i>
+            <div className="absolute top-2 left-2 bg-primary/80 backdrop-blur-sm text-white text-[10px] md:text-xs px-1.5 md:px-2.5 py-0.5 md:py-1 rounded-full shadow-md flex items-center">
+              <i className="fas fa-star mr-1 text-yellow-400 animate-pulse"></i>
               {rating.toFixed(1)}
             </div>
           )}

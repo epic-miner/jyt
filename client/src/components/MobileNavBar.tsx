@@ -12,11 +12,11 @@ interface NavItemProps {
 }
 
 const NavItem = memo(({ href, icon, label, isActive }: NavItemProps) => {
-  const className = useMemo(() => 
+  const className = useMemo(() =>
     cn(
       "flex flex-col items-center justify-center space-y-1",
       isActive ? "text-primary" : "text-slate-400 hover:text-slate-200"
-    ), 
+    ),
     [isActive]
   );
 
@@ -27,18 +27,24 @@ const NavItem = memo(({ href, icon, label, isActive }: NavItemProps) => {
     }
   };
 
+  const iconContainerClass = useMemo(() =>
+    cn(
+      "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300",
+      isActive ? "bg-primary text-white shadow-lg scale-110" : "text-slate-400 hover:bg-black/30"
+    ),
+    [isActive]
+  );
+
+
   return (
     <Link href={href}>
       <motion.span
-        className={className} 
+        className={className}
         onClick={handleClick}
         whileTap={{ scale: 0.9 }}
       >
-        <div className={cn(
-          "flex items-center justify-center rounded-full w-10 h-10",
-          isActive ? "bg-primary text-primary-foreground" : "text-slate-400"
-        )}>
-          {icon}
+        <div className={iconContainerClass}>
+          {React.cloneElement(icon, { className: "w-6 h-6" })} {/* Increased icon size */}
         </div>
         <span className="text-[10px] font-medium tracking-tight">
           {label}
@@ -54,33 +60,33 @@ export const MobileNavBar = memo(() => {
   const [location] = useLocation();
 
   const navItems = useMemo(() => [
-    { 
-      href: "/", 
-      icon: <Home className="w-5 h-5" />,
+    {
+      href: "/",
+      icon: <Home />,
       label: "Home",
       isActive: location === "/"
     },
     {
       href: "/search",
-      icon: <Search className="w-5 h-5" />,
+      icon: <Search />,
       label: "Search",
       isActive: location.startsWith("/search")
     },
     {
       href: "/genre/all",
-      icon: <LibraryBig className="w-5 h-5" />,
+      icon: <LibraryBig />,
       label: "Genres",
       isActive: location.startsWith("/genre")
     },
     {
       href: "/recently-watched",
-      icon: <History className="w-5 h-5" />,
+      icon: <History />,
       label: "History",
       isActive: location === "/recently-watched"
     },
     {
       href: "https://t.me/nineanimeofchat",
-      icon: <MessageCircle className="w-5 h-5" />,
+      icon: <MessageCircle />,
       label: "Contact",
       isActive: false
     }

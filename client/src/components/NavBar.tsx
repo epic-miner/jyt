@@ -23,7 +23,7 @@ const NavLink = memo(({ href, icon, label, isActive, isMobile = false }: NavLink
         : "text-slate-300 hover:text-white",
       isMobile && "py-2",
       !isMobile && "hover:scale-105",
-      "text-xs sm:text-base" // Added responsiveness here
+      "text-xs sm:text-base flex items-center gap-1.5" // Added flex layout and gap for icons
     ),
     [isActive, isMobile]
   );
