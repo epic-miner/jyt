@@ -488,6 +488,15 @@
   .controls-responsive button {
     @apply transition-transform duration-200;
   }
+  
+  /* Footer styles */
+  .footer-link {
+    @apply text-slate-400 hover:text-primary transition-colors text-sm;
+  }
+  
+  .footer-heading {
+    @apply text-white font-medium mb-4 text-lg;
+  }
 
   .controls-responsive button svg {
     @apply w-5 h-5 xs:w-6 xs:h-6 sm:w-6 sm:h-6 md:w-7 md:h-7 lg:w-7 lg:h-7;

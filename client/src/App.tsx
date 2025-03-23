@@ -10,6 +10,7 @@ import { useConsoleProtection } from './hooks/useConsoleProtection';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { ColorSchemeProvider } from './contexts/ColorSchemeContext';
+import Footer from './components/Footer'; // Added import for Footer component
 
 // Lazy load page components for better performance and code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -68,6 +69,7 @@ function App() {
           <MobileNavBar />
           <ScrollToTop />
           <Toaster />
+          <Footer /> {/* Added Footer component */}
         </div>
         </ColorSchemeProvider>
       </QueryClientProvider>
