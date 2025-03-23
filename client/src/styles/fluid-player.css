@@ -231,6 +231,23 @@ li[data-player-action="download"],
   pointer-events: none !important;
 }
 
+/* Hide forward/backward 10s buttons */
+#fluid_video_wrapper.fluid_player_layout_default .fluid_button.fluid_button_skip_forward,
+#fluid_video_wrapper.fluid_player_layout_default .fluid_button.fluid_button_skip_back,
+#fluid_video_wrapper .fluid_button.fluid_button_skip_forward,
+#fluid_video_wrapper .fluid_button.fluid_button_skip_back,
+.fluid_button_skip_forward,
+.fluid_button_skip_back,
+button[aria-label="Skip forward 10 seconds"],
+button[aria-label="Skip back 10 seconds"],
+.fluid_video_wrapper [data-player-action="skip_forward"],
+.fluid_video_wrapper [data-player-action="skip_back"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
 /* Settings menus - glass effect styling */
 #fluid_video_wrapper.fluid_player_layout_default .fluid_control_video_source, 
 #fluid_video_wrapper.fluid_player_layout_default .fluid_control_playback_rate {
