@@ -491,11 +491,22 @@
   
   /* Footer styles */
   .footer-link {
-    @apply text-slate-400 hover:text-primary transition-colors text-sm;
+    @apply text-slate-400 hover:text-primary transition-colors text-xs sm:text-sm block py-0.5;
   }
   
   .footer-heading {
-    @apply text-white font-medium mb-4 text-lg;
+    @apply text-white font-medium mb-2 sm:mb-3 text-base sm:text-lg;
+  }
+
+  /* Footer responsive optimizations */
+  @media (max-width: 640px) {
+    footer .container {
+      @apply px-3;
+    }
+    
+    footer h3 {
+      @apply text-sm font-medium mb-1.5;
+    }
   }
 
   .controls-responsive button svg {
