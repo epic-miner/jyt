@@ -6,9 +6,17 @@ import '../fluid-player/fluid-player.min.css';
 interface TestFluidPlayerProps {
   src: string;
   title?: string;
+  episode?: {
+    video_url_480p?: string;
+    video_url_720p?: string;
+    video_url_1080p?: string;
+    video_url_max_quality?: string;
+  };
 }
 
-const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title }) => {
+type VideoQuality = 'auto' | '480p' | '720p' | '1080p';
+
+const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title, episode }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [player, setPlayer] = useState<any>(null);
   const [isTheaterMode, setIsTheaterMode] = useState<boolean>(false);
@@ -26,7 +34,7 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title }) => {
   const progressBarRef = useRef<HTMLDivElement>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
-  const [selectedQuality, setSelectedQuality] = useState('auto'); // Added state for quality selection
+  const [selectedQuality, setSelectedQuality] = useState<VideoQuality>('auto'); // Added state for quality selection
   const [showQualityMenu, setShowQualityMenu] = useState(false); // Added state for quality menu
 
 
@@ -247,13 +255,45 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title }) => {
     }
   };
 
-  // Quality options -  Simplified for demonstration
-  const qualityOptions = ['auto', '1080', '720', '480'];
+  // Determine available qualities based on episode data
+  const availableQualities: { quality: VideoQuality; url: string | null }[] = [
+    { quality: 'auto', url: episode?.video_url_max_quality || null },
+    { quality: '1080p', url: episode?.video_url_1080p || null },
+    { quality: '720p', url: episode?.video_url_720p || null },
+    { quality: '480p', url: episode?.video_url_480p || null },
+  ];
 
-  const handleQualityChange = (quality: string) => {
+  const filteredQualities = availableQualities.filter(item => item.url !== null);
+
+  // Handle quality change
+  const handleQualityChange = (quality: VideoQuality) => {
     setSelectedQuality(quality);
-    //  Implementation to actually change the quality would go here, 
-    //  likely involving player.setQuality(quality) or a similar method from your player library.
+
+    // Get the appropriate video URL based on selected quality
+    if (videoRef.current) {
+      let newSource = '';
+
+      // Match quality selection to the database schema fields
+      switch (quality) {
+        case '1080p':
+          newSource = episode?.video_url_1080p || episode?.video_url_max_quality || '';
+          break;
+        case '720p':
+          newSource = episode?.video_url_720p || episode?.video_url_max_quality || '';
+          break;
+        case '480p':
+          newSource = episode?.video_url_480p || episode?.video_url_max_quality || '';
+          break;
+        default:
+          // Auto or fallback to max quality
+          newSource = episode?.video_url_max_quality || '';
+      }
+
+      if (newSource) {
+        videoRef.current.src = newSource;
+        videoRef.current.load();
+      }
+    }
   };
 
 
@@ -373,8 +413,8 @@ const TestFluidPlayer: React.FC<TestFluidPlayerProps> = ({ src, title }) => {
                 </button>
                 {showQualityMenu && (
                   <div className="quality-menu">
-                    {qualityOptions.map((quality) => (
-                      <button key={quality} onClick={() => handleQualityChange(quality)}>{quality}</button>
+                    {filteredQualities.map((quality) => (
+                      <button key={quality.quality} onClick={() => handleQualityChange(quality.quality)}>{quality.quality}</button>
                     ))}
                   </div>
                 )}
