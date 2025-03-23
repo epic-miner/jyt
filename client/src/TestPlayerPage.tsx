@@ -1,0 +1,1 @@
+// All ad-related imports and functionality removed
