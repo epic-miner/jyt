@@ -301,31 +301,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer utilities {
-  /* Hide scrollbar but keep functionality */
-  .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
-  }
-  
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari, Opera */
-  }
-  
-  /* Horizontal snap scrolling */
-  .snap-x {
-    scroll-snap-type: x mandatory;
-  }
-  
-  .snap-start {
-    scroll-snap-align: start;
-  }
-  
-  .snap-center {
-    scroll-snap-align: center;
-  }
-}
-
 @layer base {
   /* Global responsive text styles */
   html {

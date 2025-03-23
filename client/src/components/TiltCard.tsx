@@ -2,26 +2,23 @@ import { ReactNode, useState } from 'react';
 import { Tilt } from 'react-tilt';
 import { cn } from '@/lib/utils';
 
-interface TiltOptions {
-  max?: number;
-  scale?: number;
-  speed?: number;
-  glare?: boolean;
-  maxGlare?: number;
-  perspective?: number;
-  easing?: string;
-  reset?: boolean;
-  transition?: boolean;
-  axis?: 'x' | 'y' | null;
-  gyroscope?: boolean;
-  mouse?: boolean;
-}
-
 interface TiltCardProps {
   children: ReactNode;
   className?: string;
-  tiltOptions?: TiltOptions;
-  options?: TiltOptions; // Added for compatibility with ScrollableCard
+  tiltOptions?: {
+    max?: number;
+    scale?: number;
+    speed?: number;
+    glare?: boolean;
+    maxGlare?: number;
+    perspective?: number;
+    easing?: string;
+    reset?: boolean;
+    transition?: boolean;
+    axis?: 'x' | 'y' | null;
+    gyroscope?: boolean;
+    mouse?: boolean;
+  };
   shadow?: boolean;
   hoverEffect?: 'lift' | 'glow' | 'none';
   glowColor?: string;
@@ -33,7 +30,6 @@ const TiltCard = ({
   children,
   className,
   tiltOptions = {},
-  options: optionsProp = {}, // Support options prop for compatibility
   shadow = true,
   hoverEffect = 'none',
   glowColor = 'rgba(130, 87, 230, 0.4)', // Default purple glow
@@ -58,8 +54,8 @@ const TiltCard = ({
     mouse: true,
   };
   
-  // Merge user options with defaults - use either tiltOptions or options prop
-  const mergedOptions = { ...defaultOptions, ...tiltOptions, ...optionsProp };
+  // Merge user options with defaults
+  const options = { ...defaultOptions, ...tiltOptions };
   
   // Determine the shadow class based on hover state and shadow prop
   const shadowClass = shadow && isHovered
@@ -76,7 +72,7 @@ const TiltCard = ({
     {};
   
   // Determine transition class based on options
-  const transitionClass = mergedOptions.transition ? 'transition-all duration-300' : '';
+  const transitionClass = options.transition ? 'transition-all duration-300' : '';
   
   const handleMouseEnter = () => setIsHovered(true);
   const handleMouseLeave = () => setIsHovered(false);
@@ -113,12 +109,12 @@ const TiltCard = ({
       onMouseLeave={handleMouseLeave}
     >
       <Tilt
-        options={mergedOptions}
+        options={options}
         className={cn(
           transitionClass,
           shadowClass,
           'transform',
-          { 'will-change-transform': mergedOptions.transition },
+          { 'will-change-transform': options.transition },
           { 'hover:translate-y-[-5px]': hoverEffect === 'lift' },
           className
         )}
