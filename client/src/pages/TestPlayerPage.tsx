@@ -137,8 +137,8 @@ const TestPlayerPage = () => {
     // Wait for window.fluidPlayer to be available
     const checkForFluidPlayer = () => {
       console.log('Checking for window.fluidPlayer availability');
-      console.log('window.fluidPlayer exists:', typeof window.fluidPlayer !== 'undefined' ? 'YES' : 'NO');
-      console.log('window.fluidPlayer type:', typeof window.fluidPlayer);
+      console.log('window.fluidPlayer exists:', typeof (window as any).fluidPlayer !== 'undefined' ? 'YES' : 'NO');
+      console.log('window.fluidPlayer type:', typeof (window as any).fluidPlayer);
       
       if (typeof (window as any).fluidPlayer === 'function') {
         console.log('Fluid Player is available, initializing test player...');
@@ -158,7 +158,7 @@ const TestPlayerPage = () => {
       
       try {
         // Enhanced configuration with streaming support
-        const playerInstance = window.fluidPlayer('test-video-player', {
+        const playerInstance = (window as any).fluidPlayer('test-video-player', {
           layoutControls: {
             primaryColor: "hsl(266, 100%, 64%)",
             fillToContainer: true,
