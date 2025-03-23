@@ -163,7 +163,6 @@ const NavBar = memo(() => {
     { href: '/', icon: <Home className="w-5 h-5" />, label: 'Home' },
     { href: '/genre/all', icon: <BookOpen className="w-5 h-5" />, label: 'Genres' },
     { href: '/recently-watched', icon: <History className="w-5 h-5" />, label: 'Recently Watched' },
-    { href: '/ad-optimization', icon: <DollarSign className="w-5 h-5" />, label: 'Ad Testing' },
     { href: 'https://t.me/nineanimeofchat', icon: <MessageCircle className="w-5 h-5" />, label: 'Contact' },
   ], []);
 
