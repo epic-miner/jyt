@@ -67,16 +67,7 @@
   transform-origin: center;
   width: 28px !important;
   height: 28px !important;
-  margin: 0 2px; /* Reduced side margins to close gaps */
-}
-
-/* Adjust controls container spacing */
-#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_left,
-#fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_controls_right {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 0 !important; /* Remove gap between buttons */
+  margin: 0 4px;
 }
 
 #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button:hover {
@@ -147,18 +138,12 @@
   margin: 0 8px;
   opacity: 0.95;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  position: absolute;
-  right: 20px;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
 }
 
 /* Volume controls */
 #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container {
   margin-right: 5px;
   transition: width 0.3s ease;
-  width: 150px !important; /* Expanded width to fill space from removed skip buttons */
 }
 
 #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container .fluid_control_volume {
@@ -187,14 +172,14 @@
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
   border: 2px solid var(--primary-color, hsl(266, 100%, 64%));
   top: -4px !important;
-  transform: scale(1); /* Keep visible by default */
-  opacity: 1; /* Keep visible by default */
+  transform: scale(0);
+  opacity: 0;
   transition: all 0.15s ease;
 }
 
-/* Add subtle hover effect to make it slightly larger */
 #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container .fluid_control_volume:hover .fluid_control_volume_currentpos {
-  transform: scale(1.1);
+  transform: scale(1);
+  opacity: 1;
 }
 
 /* Enhanced play button */
@@ -244,39 +229,6 @@ li[data-player-action="download"],
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
-}
-
-/* Hide all the extra buttons except play, volume, and progress bar */
-#fluid_video_wrapper.fluid_player_layout_default .fluid_button.fluid_button_skip_forward,
-#fluid_video_wrapper.fluid_player_layout_default .fluid_button.fluid_button_skip_back,
-#fluid_video_wrapper .fluid_button.fluid_button_skip_forward,
-#fluid_video_wrapper .fluid_button.fluid_button_skip_back,
-.fluid_button_skip_forward,
-.fluid_button_skip_back,
-button[aria-label="Skip forward 10 seconds"],
-button[aria-label="Skip back 10 seconds"],
-.fluid_video_wrapper [data-player-action="skip_forward"],
-.fluid_video_wrapper [data-player-action="skip_back"],
-.fluid_control_fullscreen,
-.fluid_control_theatre,
-.fluid_control_subtitle,
-.fluid_control_playback_rate,
-.fluid_control_video_source,
-.fluid_video_quality_selector,
-.fluid_control_video_quality,
-.fluid_control_settings,
-.fluid_control_duration,
-.fluid_control_volume_container,
-#fluid_video_wrapper.fluid_player_layout_default .fluid_button:not(.fluid_button_play, .fluid_button_mute),
-#fluid_video_wrapper .fluid_button:not(.fluid_button_play, .fluid_button_mute) {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  width: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
 }
 
 /* Settings menus - glass effect styling */
@@ -569,11 +521,11 @@ button[aria-label="Skip back 10 seconds"],
   
   /* Fix volume control on tablets */
   #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container {
-    width: 80px !important;
+    width: 28px !important;
   }
   
   #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container .fluid_control_volume {
-    display: block !important;
+    display: none;
   }
   
   /* Adjust time display */
@@ -626,15 +578,6 @@ button[aria-label="Skip back 10 seconds"],
   #fluid_video_wrapper.fluid_player_layout_default .fluid_control_playback_rate,
   #fluid_video_wrapper.fluid_player_layout_default .fluid_control_download {
     display: none !important;
-  }
-  
-  /* Expand volume control for mobile too */
-  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container {
-    width: 70px !important;
-  }
-  
-  #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_control_volume_container .fluid_control_volume {
-    display: block !important;
   }
   
   /* Fix time display on mobile */
