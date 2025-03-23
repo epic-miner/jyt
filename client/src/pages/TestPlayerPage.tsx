@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { FluidPlayerOptions, FluidPlayerInstance } from '../types/fluid-player';
 import '../styles/play-button-fix.css';
-import { createDefaultAdConfiguration } from '../lib/adConfig';
+//import { createDefaultAdConfiguration } from '../lib/adConfig'; // Removed import as adConfig is no longer needed
 
 // Simple test page to verify Fluid Player is loading correctly
 const TestPlayerPage = () => {
@@ -28,7 +28,7 @@ const TestPlayerPage = () => {
         .fluid_video_wrapper .fluid_initial_play_button {
           border-color: transparent transparent transparent hsl(266, 100%, 64%) !important;
         }
-        
+
         /* Target dynamically added pseudo-elements */
         #test-video-player + .fluid_video_wrapper .fluid_initial_play_button:before,
         #test-video-player + .fluid_video_wrapper .fluid_initial_play_button:after,
@@ -38,7 +38,7 @@ const TestPlayerPage = () => {
         .fluid_video_wrapper .fluid_initial_play_button:after {
           border-color: transparent transparent transparent hsl(266, 100%, 64%) !important;
         }
-        
+
         /* For SVG triangles or other icons */
         .fluid_initial_play_button svg,
         .fluid_initial_play_button i {
@@ -54,7 +54,7 @@ const TestPlayerPage = () => {
           if (button instanceof HTMLElement) {
             // Override any inline styles
             button.style.setProperty('border-color', 'transparent transparent transparent hsl(266, 100%, 64%)', 'important');
-            
+
             // Also look for any SVG or icon children
             const svgElements = button.querySelectorAll('svg, i');
             svgElements.forEach(svg => {
@@ -66,14 +66,14 @@ const TestPlayerPage = () => {
           }
         });
       };
-      
+
       // Run the style fix
       fixPlayButtonStyles();
-      
+
       // Set up a MutationObserver to watch for dynamically added play buttons
       const observer = new MutationObserver((mutations) => {
         let needsFix = false;
-        
+
         mutations.forEach(mutation => {
           if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
             mutation.addedNodes.forEach(node => {
@@ -86,25 +86,25 @@ const TestPlayerPage = () => {
             });
           }
         });
-        
+
         if (needsFix) {
           fixPlayButtonStyles();
         }
       });
-      
+
       // Start observing the document with the configured parameters
       observer.observe(document.body, { 
         childList: true, 
         subtree: true
       });
-      
+
       // Store the observer for cleanup
       return observer;
     };
 
     // Run the injection when component mounts
     const observer = injectPlayButtonFix();
-    
+
     // Run fixes at specific intervals to ensure styling persists
     const fixInterval = setInterval(() => {
       const playButtons = document.querySelectorAll('.fluid_initial_play_button');
@@ -114,14 +114,14 @@ const TestPlayerPage = () => {
         }
       });
     }, 1000);
-    
+
     return () => {
       // Cleanup
       if (observer) {
         observer.disconnect();
       }
       clearInterval(fixInterval);
-      
+
       const styleEl = document.getElementById('test-page-play-button-fix');
       if (styleEl) {
         styleEl.remove();
@@ -131,16 +131,16 @@ const TestPlayerPage = () => {
 
   useEffect(() => {
     console.log('TestPlayerPage - Component mounted');
-    
+
     // Sample demo video URL
     const sampleVideoUrl = 'https://cdn.fluidplayer.com/videos/valerian-480p.mkv';
-    
+
     // Wait for window.fluidPlayer to be available
     const checkForFluidPlayer = () => {
       console.log('Checking for window.fluidPlayer availability');
       console.log('window.fluidPlayer exists:', typeof (window as any).fluidPlayer !== 'undefined' ? 'YES' : 'NO');
       console.log('window.fluidPlayer type:', typeof (window as any).fluidPlayer);
-      
+
       if (typeof (window as any).fluidPlayer === 'function') {
         console.log('Fluid Player is available, initializing test player...');
         initFluidPlayer();
@@ -149,14 +149,14 @@ const TestPlayerPage = () => {
         setTimeout(checkForFluidPlayer, 500);
       }
     };
-    
+
     // Initialize the player
     const initFluidPlayer = () => {
       if (!videoRef.current) {
         console.error('Video element reference is not available');
         return;
       }
-      
+
       try {
         // Enhanced configuration with streaming support and ad optimization
         const playerInstance = (window as any).fluidPlayer('test-video-player', {
@@ -189,8 +189,8 @@ const TestPlayerPage = () => {
               controls: true
             }
           },
-          // Ad configuration using our utility
-          vastOptions: createDefaultAdConfiguration(),
+          // Ad configuration removed
+          //vastOptions: createDefaultAdConfiguration(),
           // Modules configuration to properly handle streaming/quality options
           modules: {
             configureDash: (options: any) => {
@@ -201,15 +201,15 @@ const TestPlayerPage = () => {
             }
           }
         });
-        
+
         console.log('Fluid Player instance created successfully:', playerInstance);
         playerInstanceRef.current = playerInstance;
-        
+
         // Add event listeners
         playerInstance.on('play', () => {
           console.log('Test player: Video played');
         });
-        
+
         playerInstance.on('pause', () => {
           console.log('Test player: Video paused');
         });
@@ -217,10 +217,10 @@ const TestPlayerPage = () => {
         console.error('Error initializing Fluid Player in test page:', error);
       }
     };
-    
+
     // Start checking for Fluid Player
     checkForFluidPlayer();
-    
+
     // Cleanup
     return () => {
       try {
@@ -234,11 +234,11 @@ const TestPlayerPage = () => {
       }
     };
   }, []);
-  
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black p-4">
       <h1 className="text-2xl font-bold mb-6">Fluid Player Test Page</h1>
-      
+
       <div className="w-full max-w-4xl mx-auto bg-gray-900 rounded-lg overflow-hidden">
         <video 
           ref={videoRef}
@@ -254,7 +254,7 @@ const TestPlayerPage = () => {
           Your browser does not support the video tag.
         </video>
       </div>
-      
+
       <div className="mt-6 text-gray-300">
         <p>This is a test page for Fluid Player. Check the console for detailed logs.</p>
       </div>
