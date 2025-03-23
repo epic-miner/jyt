@@ -58,7 +58,8 @@ function App() {
                   <Route path="/genre/:genre" component={GenrePage} />
                   <Route path="/category/:type" component={CategoryPage} />
                   <Route path="/test-player" component={TestPlayerPage} />
-                  <Route path="/ad-optimization" component={AdOptimizationTestPage} />
+                  {/* Commented out route with invalid component */}
+                  {/* <Route path="/ad-optimization" component={AdOptimizationTestPage} /> */}
                   <Route component={NotFound} />
                 </Switch>
               </PageTransition>
