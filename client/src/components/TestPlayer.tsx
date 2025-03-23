@@ -1,9 +1,10 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { Episode } from '@shared/types';
 import '../styles/enhanced-player.css'; // We'll create this style file later
+import HorizontalQualitySelector from './HorizontalQualitySelector';
 
 // Define available quality options
-type VideoQuality = '480p' | '720p' | '1080p' | 'max';
+type VideoQuality = '1080p' | '720p' | '480p' | '360p' | '240p' | '144p' | 'auto' | 'max';
 
 interface TestPlayerProps {
   videoUrl: string;
@@ -569,66 +570,24 @@ const TestPlayer: React.FC<TestPlayerProps> = ({ videoUrl, title, poster, episod
         </div>
       )}
 
-      {/* Quality selection button - Responsive */}
+      {/* Import and use the new HorizontalQualitySelector component */}
       {isPlayerReady && (
         <div 
           className={`absolute z-30 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'}`}
           style={{
-            bottom: 'clamp(10px, 5vh, 60px)', 
+            bottom: 'clamp(60px, 12vh, 90px)', // Positioned higher to not overlap seek bar
             right: 'clamp(10px, 3vw, 30px)'
           }}
         >
-          <button
-            className="bg-black bg-opacity-80 text-white rounded-md flex items-center hover:bg-opacity-100 transition-all transform active:scale-95"
-            style={{
-              padding: 'clamp(0.25rem, 1vw, 0.75rem) clamp(0.5rem, 2vw, 1rem)',
-              fontSize: 'clamp(0.75rem, 3vw, 1rem)'
-            }}
-            onClick={() => setShowQualityMenu(!showQualityMenu)}
-          >
-            {selectedQuality === 'max' ? 'MAX' : selectedQuality} 
-            <svg 
-              className="ml-1" 
-              style={{
-                width: 'clamp(0.75rem, 3vw, 1rem)',
-                height: 'clamp(0.75rem, 3vw, 1rem)'
-              }} 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-
-          {/* Quality menu - Responsive */}
-          {showQualityMenu && (
-            <div 
-              className="absolute right-0 bg-black bg-opacity-90 text-white rounded-md overflow-hidden shadow-lg quality-menu"
-              style={{
-                bottom: 'calc(100% + 0.5rem)',
-                width: 'clamp(80px, 25vw, 150px)',
-                maxHeight: 'clamp(120px, 30vh, 300px)',
-                overflowY: 'auto'
-              }}
-            >
-              {getAvailableQualities().map(({ quality, url }) => (
-                <button
-                  key={quality}
-                  className={`block w-full text-left hover:bg-gray-700 transition-colors ${selectedQuality === quality ? 'bg-gray-700' : ''}`}
-                  style={{
-                    padding: 'clamp(0.4rem, 1.5vw, 0.7rem) clamp(0.7rem, 2vw, 1.2rem)',
-                    fontSize: 'clamp(0.7rem, 2.5vw, 0.9rem)'
-                  }}
-                  onClick={() => handleQualityChange(quality)}
-                  disabled={!url}
-                >
-                  {quality === 'max' ? 'MAX' : quality}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="flex items-center">
+            {/* Using the new Horizontal Quality Selector */}
+            <HorizontalQualitySelector
+              availableQualities={getAvailableQualities()}
+              selectedQuality={selectedQuality}
+              onQualityChange={handleQualityChange}
+              isVisible={true}
+            />
+          </div>
         </div>
       )}
     </div>
