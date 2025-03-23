@@ -1,80 +1,140 @@
-import { useEffect, useState } from 'react';
+import { ReactNode } from 'react';
 import TextTransition, { presets } from 'react-text-transition';
-import { TypeAnimation } from 'react-type-animation';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface AnimatedTitleProps {
-  text: string;
+  text: string | string[];
   className?: string;
-  preset?: 'default' | 'typewriter' | 'gradient' | 'sliding';
-  typeSpeed?: number;
-  slideTexts?: string[];
-  slideDuration?: number;
+  tag?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
+  springConfig?: {
+    stiffness?: number;
+    damping?: number;
+    mass?: number;
+  };
+  delay?: number;
+  direction?: 'up' | 'down';
+  inline?: boolean;
+  animation?: 'text-transition' | 'typewriter' | 'gradient' | 'fade-in';
+  children?: ReactNode;
 }
 
 const AnimatedTitle = ({
   text,
   className,
-  preset = 'default',
-  typeSpeed = 50,
-  slideTexts = [],
-  slideDuration = 3000,
+  tag = 'h1',
+  springConfig = {},
+  delay = 0,
+  direction = 'up',
+  inline = false,
+  animation = 'text-transition',
+  children,
 }: AnimatedTitleProps) => {
-  const [index, setIndex] = useState(0);
+  // Determine if text is an array or single string
+  const textArray = Array.isArray(text) ? text : [text];
   
-  useEffect(() => {
-    if (preset === 'sliding' && slideTexts.length > 0) {
-      const intervalId = setInterval(
-        () => setIndex((i) => (i + 1) % slideTexts.length),
-        slideDuration
-      );
-      return () => clearInterval(intervalId);
+  // If text is not an array and animation is text-transition, use fade-in instead
+  const effectiveAnimation = Array.isArray(text) || textArray.length > 1 
+    ? animation 
+    : animation === 'text-transition' ? 'fade-in' : animation;
+
+  const Tag = tag;
+  
+  // Custom spring configuration
+  const { 
+    stiffness = 100, 
+    damping = 10,
+    mass = 1
+  } = springConfig;
+  
+  const springProps = { stiffness, damping, mass };
+  
+  // For typewriter animation
+  const typewriterVariants = {
+    hidden: { width: 0, opacity: 0 },
+    visible: { 
+      width: "100%", 
+      opacity: 1,
+      transition: { 
+        delay,
+        duration: 1, 
+        ease: "easeInOut" 
+      }
     }
-  }, [preset, slideTexts, slideDuration]);
-
-  if (preset === 'typewriter') {
+  };
+  
+  // For gradient animation
+  const gradientStyle = {
+    background: 'linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 50%, hsl(var(--primary)) 100%)',
+    backgroundSize: '200% auto',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    backgroundClip: 'text',
+    textFillColor: 'transparent',
+  };
+  
+  if (effectiveAnimation === 'text-transition') {
     return (
-      <TypeAnimation
-        sequence={[text]}
-        wrapper="h2"
-        speed={typeSpeed}
-        className={className}
-        cursor={false}
-      />
-    );
-  }
-
-  if (preset === 'sliding' && slideTexts.length > 0) {
-    return (
-      <h2 className={className}>
-        <TextTransition springConfig={presets.wobbly}>
-          {slideTexts[index]}
+      <Tag className={cn('inline-flex overflow-hidden', className)}>
+        <TextTransition 
+          springConfig={presets.gentle} 
+          direction={direction === 'up' ? 'up' : 'down'} 
+          delay={delay * 1000}
+          inline={inline}
+          className="overflow-hidden"
+        >
+          {textArray[0]}
         </TextTransition>
-      </h2>
+        {children}
+      </Tag>
     );
   }
-
-  if (preset === 'gradient') {
+  
+  if (effectiveAnimation === 'typewriter') {
     return (
-      <h2 
-        className={cn(
-          'bg-gradient-to-r from-primary via-purple-500 to-blue-500 bg-clip-text text-transparent bg-size-200 animate-gradient-x', 
-          className
-        )}
-      >
-        {text}
-      </h2>
+      <Tag className={cn('relative inline-block overflow-hidden', className)}>
+        <motion.span
+          variants={typewriterVariants}
+          initial="hidden"
+          animate="visible"
+          className="inline-block whitespace-nowrap"
+        >
+          {textArray[0]}
+        </motion.span>
+        {children}
+      </Tag>
     );
   }
-
-  // Default animation with subtle fade
+  
+  if (effectiveAnimation === 'gradient') {
+    return (
+      <Tag 
+        className={cn('animate-gradient-x', className)} 
+        style={gradientStyle}
+      >
+        {textArray[0]}
+        {children}
+      </Tag>
+    );
+  }
+  
+  // Default fade-in animation
   return (
-    <h2 
-      className={cn('animate-fadein', className)} 
-      style={{ animationDuration: '0.8s' }}
-    >
-      {text}
-    </h2>
+    <Tag className={cn('', className)}>
+      <motion.span
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          delay,
+          duration: 0.6,
+          ease: "easeOut"
+        }}
+        className="inline-block"
+      >
+        {textArray[0]}
+      </motion.span>
+      {children}
+    </Tag>
   );
 };
 

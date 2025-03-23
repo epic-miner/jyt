@@ -3,55 +3,108 @@ import { Parallax } from 'react-parallax';
 import { cn } from '@/lib/utils';
 
 interface ParallaxSectionProps {
-  children: ReactNode;
   bgImage: string;
   strength?: number;
-  blur?: number;
   className?: string;
-  bgClassName?: string;
-  overlay?: ReactNode;
+  overlayColor?: string;
+  overlayOpacity?: number;
+  height?: string;
+  children: ReactNode;
+  blur?: boolean | number;
+  disabled?: boolean;
+  contentClassName?: string;
 }
 
 const ParallaxSection = ({
-  children,
   bgImage,
   strength = 300,
-  blur = 0,
   className,
-  bgClassName,
-  overlay
+  overlayColor = 'rgba(0, 0, 0, 0.6)',
+  overlayOpacity = 0.6,
+  height = '500px',
+  children,
+  blur = false,
+  disabled = false,
+  contentClassName,
 }: ParallaxSectionProps) => {
+  // Calculate blur amount
+  const blurAmount = typeof blur === 'number' ? `${blur}px` : blur ? '4px' : '0';
+  
+  // Create overlay style with specified color and opacity
+  const overlayStyle = {
+    position: 'absolute' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: overlayColor,
+    opacity: overlayOpacity,
+    zIndex: 1,
+  };
+  
+  // Create content style for positioning
+  const contentStyle = {
+    position: 'relative' as const,
+    height: '100%',
+    width: '100%',
+    zIndex: 2,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    justifyContent: 'center',
+    alignItems: 'center',
+  };
+
+  // If parallax is disabled, render a simpler version with background image
+  if (disabled) {
+    return (
+      <div 
+        className={cn('relative', className)}
+        style={{ 
+          backgroundImage: `url(${bgImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          height,
+          filter: `blur(${blurAmount})`,
+        }}
+      >
+        <div style={overlayStyle} />
+        <div 
+          style={contentStyle}
+          className={cn(contentClassName)}
+        >
+          {children}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Parallax
       bgImage={bgImage}
       strength={strength}
-      bgImageStyle={{
-        objectFit: 'cover',
-        width: '100%',
-        height: '100%',
-        filter: blur ? `blur(${blur}px)` : 'none',
+      className={cn('', className)}
+      bgImageStyle={{ 
+        objectFit: 'cover', 
+        filter: `blur(${blurAmount})`,
       }}
-      className={cn('overflow-hidden', bgClassName)}
-      renderLayer={(percentage) => (
+      renderLayer={percentage => (
         <div
           style={{
             position: 'absolute',
-            background: `rgba(0, 0, 0, ${0.2 + percentage * 0.3})`,
-            left: '0',
-            top: '0',
             width: '100%',
             height: '100%',
           }}
         />
       )}
     >
-      {overlay && (
-        <div className="absolute inset-0 z-10">
-          {overlay}
+      <div style={{ height }}>
+        <div style={overlayStyle} />
+        <div 
+          style={contentStyle}
+          className={cn(contentClassName)}
+        >
+          {children}
         </div>
-      )}
-      <div className={cn('relative z-20', className)}>
-        {children}
       </div>
     </Parallax>
   );
