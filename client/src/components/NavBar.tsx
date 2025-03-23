@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Link, useLocation } from 'wouter';
 import SearchBar from './SearchBar';
-import { Search, X, Home, BookOpen, History, MessageCircle, Menu } from 'lucide-react';
+import { Search, X, Home, BookOpen, History, MessageCircle, Menu, Video, DollarSign } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 // Memoized NavLink component to prevent unnecessary renders
@@ -163,6 +163,7 @@ const NavBar = memo(() => {
     { href: '/', icon: <Home className="w-5 h-5" />, label: 'Home' },
     { href: '/genre/all', icon: <BookOpen className="w-5 h-5" />, label: 'Genres' },
     { href: '/recently-watched', icon: <History className="w-5 h-5" />, label: 'Recently Watched' },
+    { href: '/ad-optimization', icon: <DollarSign className="w-5 h-5" />, label: 'Ad Testing' },
     { href: 'https://t.me/nineanimeofchat', icon: <MessageCircle className="w-5 h-5" />, label: 'Contact' },
   ], []);
 

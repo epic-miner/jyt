@@ -20,6 +20,7 @@ const RecentlyWatched = lazy(() => import("./pages/RecentlyWatched"));
 const GenrePage = lazy(() => import("./pages/GenrePage"));
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
 const TestPlayerPage = lazy(() => import("./pages/TestPlayerPage"));
+const AdOptimizationTestPage = lazy(() => import("./pages/AdOptimizationTestPage"));
 
 const NotFound = lazy(() => import("./pages/not-found"));
 
@@ -57,6 +58,7 @@ function App() {
                   <Route path="/genre/:genre" component={GenrePage} />
                   <Route path="/category/:type" component={CategoryPage} />
                   <Route path="/test-player" component={TestPlayerPage} />
+                  <Route path="/ad-optimization" component={AdOptimizationTestPage} />
                   <Route component={NotFound} />
                 </Switch>
               </PageTransition>
