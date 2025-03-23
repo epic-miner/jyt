@@ -1,6 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const ParticleBackground = () => {
+interface ParticleOptions {
+  particles?: {
+    number?: { value?: number };
+    color?: { value?: string };
+    opacity?: { value?: number };
+    size?: { value?: number };
+    move?: { speed?: number };
+  };
+}
+
+interface ParticleBackgroundProps {
+  options?: ParticleOptions;
+}
+
+const ParticleBackground = ({ options }: ParticleBackgroundProps) => {
   // Using a simpler implementation with vanilla JS for particles
   const [particlesInitialized, setParticlesInitialized] = useState(false);
 
@@ -10,7 +24,7 @@ const ParticleBackground = () => {
     
     // Create canvas
     const canvas = document.createElement('canvas');
-    canvas.classList.add('fixed', 'inset-0', '-z-10', 'opacity-20');
+    canvas.classList.add('fixed', 'inset-0', '-z-10');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     document.body.appendChild(canvas);
@@ -26,17 +40,26 @@ const ParticleBackground = () => {
       dirY: number;
       size: number;
       color: string;
+      opacity: number;
     }> = [];
     
+    // Apply custom options or defaults
+    const particleCount = options?.particles?.number?.value || 50;
+    const particleColor = options?.particles?.color?.value || '#ffffff';
+    const particleOpacity = options?.particles?.opacity?.value || 0.2;
+    const particleSize = options?.particles?.size?.value || 2;
+    const moveSpeed = options?.particles?.move?.speed || 0.5;
+    
     // Create particles
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        dirX: (Math.random() - 0.5) * 0.5,
-        dirY: (Math.random() - 0.5) * 0.5,
-        size: Math.random() * 2 + 1,
-        color: '#ffffff',
+        dirX: (Math.random() - 0.5) * moveSpeed,
+        dirY: (Math.random() - 0.5) * moveSpeed,
+        size: Math.random() * particleSize + 1,
+        color: particleColor,
+        opacity: particleOpacity,
       });
     }
     
@@ -50,7 +73,9 @@ const ParticleBackground = () => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.opacity;
         ctx.fill();
+        ctx.globalAlpha = 1.0;
         
         // Move particle
         p.x += p.dirX;
@@ -65,7 +90,13 @@ const ParticleBackground = () => {
           const distance = Math.sqrt(Math.pow(p.x - p2.x, 2) + Math.pow(p.y - p2.y, 2));
           if (distance < 150) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 * (1 - distance / 150)})`;
+            // Extract color values from hex
+            const hex = p.color.replace('#', '');
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${p.opacity * 0.5 * (1 - distance / 150)})`;
             ctx.lineWidth = 0.5;
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(p2.x, p2.y);

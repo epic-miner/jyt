@@ -8,7 +8,12 @@ import GenrePill from '../components/GenrePill';
 import EpisodeCard from '../components/EpisodeCard';
 import { fetchAnimeById, fetchEpisodesByAnimeId } from '../lib/api';
 import { updateRecentlyWatchedAnime } from '../lib/cookies';
-import { BackgroundParticles } from '../components/BackgroundParticles';
+import ParticleBackground from '../components/ParticleBackground';
+import AnimatedTitle from '../components/AnimatedTitle';
+import ScrollReveal from '../components/ScrollReveal';
+import AnimeLazyImage from '../components/AnimeLazyImage';
+import ParallaxSection from '../components/ParallaxSection';
+import TiltCard from '../components/TiltCard';
 
 const AnimeDetails = () => {
   const [, params] = useRoute('/anime/:id');
@@ -83,23 +88,27 @@ const AnimeDetails = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-dark-950 to-dark-800">
-      <BackgroundParticles />
-      {/* Hero section with episode banner */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}
+      <ParticleBackground 
+        options={{
+          particles: {
+            number: { value: 30 },
+            color: { value: "#4a3aff" },
+            opacity: { value: 0.2 },
+            size: { value: 2 },
+            move: { speed: 0.3 }
+          }
+        }}
+      />
+      {/* Hero section with enhanced parallax banner */}
+      <ParallaxSection
+        speed={0.5}
         className="relative h-[300px] md:h-[400px] overflow-hidden group"
       >
-        <motion.img
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
+        <AnimeLazyImage
           src={bannerImage}
           alt={anime.title}
           className="w-full h-full object-cover object-center opacity-75 transform-gpu will-change-transform transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:opacity-85"
-          loading="eager"
-          decoding="sync"
+          effect="blur"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-dark-900 via-dark-900/60 to-transparent/30">
           {/* Animated neon lines */}
@@ -111,7 +120,7 @@ const AnimeDetails = () => {
             <i className="fas fa-arrow-left"></i>
           </button>
         </Link>
-      </motion.div>
+      </ParallaxSection>
 
       {/* Anime info section */}
       <div className="container mx-auto px-4 -mt-32 relative z-10">

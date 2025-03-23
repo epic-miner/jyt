@@ -152,6 +152,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-800 pb-24 md:pb-8">
+      {/* Enhanced particle background */}
       <ParticleBackground 
         options={{
           particles: {

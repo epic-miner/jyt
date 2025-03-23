@@ -3,7 +3,7 @@ import { Parallax } from 'react-parallax';
 import { cn } from '@/lib/utils';
 
 interface ParallaxSectionProps {
-  bgImage: string;
+  bgImage?: string;
   strength?: number;
   className?: string;
   overlayColor?: string;
@@ -13,6 +13,7 @@ interface ParallaxSectionProps {
   blur?: boolean | number;
   disabled?: boolean;
   contentClassName?: string;
+  speed?: number; // Added for scrolling speed control
 }
 
 const ParallaxSection = ({
