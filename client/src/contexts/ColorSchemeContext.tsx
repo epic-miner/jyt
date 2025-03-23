@@ -40,7 +40,9 @@ const ColorSchemeContext = createContext<ColorSchemeContextType>({
 });
 
 // Hook for using the color scheme context
-export const useColorScheme = () => useContext(ColorSchemeContext);
+export function useColorScheme() {
+  return useContext(ColorSchemeContext);
+}
 
 // Provider component
 export const ColorSchemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
