@@ -85,7 +85,7 @@ const Footer: React.FC = () => {
                 className="bg-gray-800 hover:bg-primary p-3 rounded-full text-gray-300 hover:text-white transition-all duration-200 transform hover:scale-110"
                 whileHover={{ y: -3 }}
               >
-                <FaInstagram size={20} />>
+                <FaInstagram size={20} />
               </motion.a>
               <motion.a 
                 href="https://discord.gg/q9D44eGeES" 
