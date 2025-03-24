@@ -44,8 +44,8 @@ const SectionTitle = ({ icon, title, viewAllLink, viewAllText = 'View All' }: {
     </h2>
     {viewAllLink && (
       <Link href={viewAllLink}>
-        <span className="text-sm text-primary hover:text-primary/80 transition-all duration-300 font-medium flex items-center cursor-pointer hover:translate-x-1">
-          {viewAllText} <i className="fas fa-chevron-right ml-1 text-xs"></i>
+        <span className="text-sm bg-primary text-white py-2 px-4 rounded-full hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all duration-300 font-medium flex items-center cursor-pointer hover:translate-x-1 hover:shadow-primary/40 transform hover:scale-105 font-bold">
+          {viewAllText} <i className="fas fa-chevron-right ml-1.5 text-xs animate-pulse"></i>
         </span>
       </Link>
     )}
