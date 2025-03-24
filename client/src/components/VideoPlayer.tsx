@@ -19,6 +19,7 @@ import { useIsMobile } from '../hooks/use-mobile';
 import VideoPlayerDesktopMenu from './VideoPlayerDesktopMenu';
 import VideoPlayerMobileMenu from './VideoPlayerMobileMenu';
 import { initializeSecurity } from '../lib/security';
+import { cleanAnimeTitle } from '../utils/titleFormatter';
 
 // Type definitions for Web APIs that TypeScript doesn't fully recognize
 interface WakeLockSentinel extends EventTarget {
@@ -146,7 +147,7 @@ const VideoPlayer = ({
             title: episode.title || '',
             episodeNumber: episode.episode_number,
             animeThumbnail: anime.thumbnail_url || '',
-            animeTitle: anime.title,
+            animeTitle: cleanAnimeTitle(anime.title),
             progress: progressPercent,
             timestamp: new Date().getTime()
           });
@@ -1337,7 +1338,7 @@ const VideoPlayer = ({
               !showControls && "opacity-0"
             )}>
               <h2 className="text-base font-semibold">{episode.title || `Episode ${episode.episode_number}`}</h2>
-              <p className="text-sm text-gray-300">{anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')}</p>
+              <p className="text-sm text-gray-300">{cleanAnimeTitle(anime.title)}</p>
             </div>
 
             {/* Settings gear for quality selection (YouTube style) */}

@@ -15,6 +15,7 @@ import AnimeLazyImage from '../components/AnimeLazyImage';
 import ParallaxSection from '../components/ParallaxSection';
 import TiltCard from '../components/TiltCard';
 import SmoothScroll from '../components/SmoothScroll';
+import { cleanAnimeTitle } from '../utils/titleFormatter';
 
 const AnimeDetails = () => {
   const [, params] = useRoute('/anime/:id');
