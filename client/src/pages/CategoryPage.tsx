@@ -8,6 +8,12 @@ import { Anime } from '@shared/types';
 import { motion } from 'framer-motion';
 import { SEO } from '../components/SEO';
 
+// Helper function to clean anime titles by removing category and ranking tags
+const cleanAnimeTitle = (title: string): string => {
+  // Remove all category tags like (T), (P), (LR) with optional ranking like (T)-(1)
+  return title.replace(/\(T\)(?:-\(\d+\))?|\(LR\)(?:-\(\d+\))?|\(P\)(?:-\(\d+\))?/g, '').trim();
+};
+
 const CategoryPage = () => {
   const [, params] = useRoute('/category/:type');
   const categoryType = params?.type || '';
@@ -34,6 +40,26 @@ const CategoryPage = () => {
         case 'trending':
           // Filter anime with (T) tag in the title for trending
           filtered = allAnime.filter(anime => anime.title.includes('(T)'));
+          
+          // Sort by rank if possible
+          filtered = filtered.sort((a, b) => {
+            // Try to extract ranking numbers from titles
+            const aMatch = a.title.match(/\(T\)-\((\d+)\)/);
+            const bMatch = b.title.match(/\(T\)-\((\d+)\)/);
+            
+            // If both have ranking numbers, sort by them
+            if (aMatch && bMatch) {
+              return parseInt(aMatch[1]) - parseInt(bMatch[1]);
+            }
+            
+            // If only one has a ranking number, prioritize the one with ranking
+            if (aMatch) return -1;
+            if (bMatch) return 1;
+            
+            // Otherwise keep original order
+            return 0;
+          });
+          
           title = 'Trending Anime';
           description = 'The hottest and most popular anime right now';
           rating = 4.8; // Same as home page
@@ -42,6 +68,26 @@ const CategoryPage = () => {
         case 'popular':
           // Filter anime with (P) tag in the title for popular
           filtered = allAnime.filter(anime => anime.title.includes('(P)'));
+          
+          // Sort by rank if possible
+          filtered = filtered.sort((a, b) => {
+            // Try to extract ranking numbers from titles
+            const aMatch = a.title.match(/\(P\)-\((\d+)\)/);
+            const bMatch = b.title.match(/\(P\)-\((\d+)\)/);
+            
+            // If both have ranking numbers, sort by them
+            if (aMatch && bMatch) {
+              return parseInt(aMatch[1]) - parseInt(bMatch[1]);
+            }
+            
+            // If only one has a ranking number, prioritize the one with ranking
+            if (aMatch) return -1;
+            if (bMatch) return 1;
+            
+            // Otherwise keep original order
+            return 0;
+          });
+          
           title = 'Popular Anime';
           description = 'The most watched anime series of all time';
           rating = 4.5; // Same as home page
@@ -50,6 +96,26 @@ const CategoryPage = () => {
         case 'recent':
           // Filter anime with (LR) tag in the title for latest released
           filtered = allAnime.filter(anime => anime.title.includes('(LR)'));
+          
+          // Sort by rank if possible
+          filtered = filtered.sort((a, b) => {
+            // Try to extract ranking numbers from titles
+            const aMatch = a.title.match(/\(LR\)-\((\d+)\)/);
+            const bMatch = b.title.match(/\(LR\)-\((\d+)\)/);
+            
+            // If both have ranking numbers, sort by them
+            if (aMatch && bMatch) {
+              return parseInt(aMatch[1]) - parseInt(bMatch[1]);
+            }
+            
+            // If only one has a ranking number, prioritize the one with ranking
+            if (aMatch) return -1;
+            if (bMatch) return 1;
+            
+            // Otherwise keep original order
+            return 0;
+          });
+          
           title = 'Latest Released';
           description = 'Fresh new anime added to our collection';
           rating = 4.6; // Same as home page
@@ -136,7 +202,7 @@ const CategoryPage = () => {
                 <AnimeCard 
                   anime={{
                     ...anime,
-                    title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '') // Remove tags for display
+                    title: cleanAnimeTitle(anime.title)
                   }}
                   episodeCount={anime.episode_count}
                   rating={categoryRating}
