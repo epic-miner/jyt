@@ -10,7 +10,9 @@ import { useConsoleProtection } from './hooks/useConsoleProtection';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { ColorSchemeProvider } from './contexts/ColorSchemeContext';
-import Footer from './components/Footer'; // Added import for Footer component
+import Footer from './components/Footer';
+import { initScrollDetection } from './utils/scrollDetection';
+import { initSmoothScrollLinks } from './utils/smoothScrollLinks';
 
 // Lazy load page components for better performance and code splitting
 const Home = lazy(() => import("./pages/Home"));

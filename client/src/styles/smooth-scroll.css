@@ -1,43 +1,63 @@
-/* Smooth scrolling for the whole page */
+/* Smooth scrolling styles */
 html {
   scroll-behavior: smooth;
 }
 
-/* For Safari and older browsers that don't support scroll-behavior */
-@supports not (scroll-behavior: smooth) {
-  html, body {
-    overflow-y: auto;
-    overflow-x: hidden;
-    scroll-snap-type: y proximity;
-  }
-  
-  section {
-    scroll-snap-align: start;
-  }
+/* Add extra padding/margin to section targets for better positioning */
+.scroll-mt-16 {
+  scroll-margin-top: 4rem;
 }
 
-/* Mobile specific scroll behavior tweaks */
-@media (max-width: 768px) {
-  html {
-    scroll-padding-top: 70px; /* Adjust based on your header height */
-  }
-  
-  /* Smoother scrolling for touch devices */
-  body {
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  /* Optimize performance during scrolling to prevent janky scrolling */
-  .optimize-scroll {
-    will-change: transform;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-  }
-}
-
-/* Disable smooth scrolling for users who prefer reduced motion */
+/* For devices that prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
+}
+
+/* Optimize scrolling performance on mobile devices */
+.optimize-scroll {
+  -webkit-overflow-scrolling: touch; /* For older iOS */
+  overscroll-behavior: contain;  /* Prevent scroll chaining */
+  scroll-snap-type: y proximity; /* Subtle scroll snapping for sections */
+}
+
+/* Optimize scrolling of nested containers */
+.optimize-scroll > section {
+  scroll-snap-align: start;
+}
+
+/* Improved touch handling for mobile scrolling */
+@media (max-width: 768px) {
+  .optimize-scroll {
+    backface-visibility: hidden; /* Reduce repaint during scroll */
+    transform: translateZ(0); /* Hardware acceleration */
+  }
+  
+  /* Reduce transition complexity during scrolling to improve performance */
+  html.is-scrolling * {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+
+/* Style for the back to top button */
+.back-to-top-btn {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transform: scale(1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.back-to-top-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.back-to-top-btn:active {
+  transform: scale(0.95);
+}
+
+/* Add scroll detection for performance optimizations */
+html.is-scrolling .gradient-animated {
+  animation-play-state: paused;
 }

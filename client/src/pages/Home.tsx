@@ -219,6 +219,8 @@ const Home = () => {
     <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-800 pb-24 md:pb-8">
       {/* Replaced particles with a simpler gradient background for better performance */}
       <div className="gradient-animated absolute inset-0 z-[-1]" style={{ opacity: 0.7 }} />
+      {/* Back to Top Button */}
+      <BackToTop showAfterScrollY={500} />
       <div className="container mx-auto px-4 py-6 max-w-7xl optimize-scroll">
         {/* Welcome Banner with AnimatedTitle */}
         <ScrollReveal>
