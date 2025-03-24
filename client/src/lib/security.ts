@@ -3,7 +3,7 @@
 // Console protection
 const disableConsole = () => {
   const noop = () => undefined;
-  const methods = ['log', 'debug', 'info', 'warn', 'error', 'table', 'trace'];
+  const methods = ['log', 'debug', 'info', 'warn', 'error', 'table', 'trace'] as const;
 
   // Save original console methods for our own use
   const originalConsole = {
@@ -13,7 +13,14 @@ const disableConsole = () => {
 
   // Override all console methods
   methods.forEach(method => {
-    console[method] = noop;
+    // Type-safe way to override console methods
+    if (method === 'log') console.log = noop;
+    if (method === 'debug') console.debug = noop;
+    if (method === 'info') console.info = noop;
+    if (method === 'warn') console.warn = noop;
+    if (method === 'error') console.error = noop;
+    if (method === 'table') console.table = noop;
+    if (method === 'trace') console.trace = noop;
   });
 
   // Add warning for console access
@@ -115,8 +122,24 @@ export const preventKeyboardShortcuts = () => {
       return false;
     }
 
-    // Prevent Ctrl+Shift+I/J (Dev tools)
-    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) {
+    // Prevent Ctrl+Shift+I/J/C/K (Dev tools variations)
+    if (e.ctrlKey && e.shiftKey && (
+      e.key === 'I' || e.key === 'i' || 
+      e.key === 'J' || e.key === 'j' || 
+      e.key === 'C' || e.key === 'c' ||
+      e.key === 'K' || e.key === 'k'
+    )) {
+      e.preventDefault();
+      return false;
+    }
+    
+    // Prevent Cmd+Option+I/J/C/K (Mac dev tools)
+    if (e.metaKey && e.altKey && (
+      e.key === 'I' || e.key === 'i' || 
+      e.key === 'J' || e.key === 'j' || 
+      e.key === 'C' || e.key === 'c' ||
+      e.key === 'K' || e.key === 'k'
+    )) {
       e.preventDefault();
       return false;
     }
@@ -255,10 +278,17 @@ export const initializeSecurity = (videoPlayerContainer: HTMLElement) => {
 // Initialize global security measures
 export const initializeGlobalSecurity = () => {
   try {
-    document.addEventListener('contextmenu', (e) => {
-      e.preventDefault();
-      return false;
-    });
+    // Apply keyboard shortcut prevention
+    preventKeyboardShortcuts();
+    
+    // Prevent right-click
+    initializeGlobalRightClickPrevention();
+    
+    // Prevent iframe embedding
+    preventIframeEmbedding();
+    
+    // For additional protection, add a more comprehensive console protection
+    disableConsole();
   } catch (error) {
     console.warn('Some security features could not be initialized:', error);
   }
