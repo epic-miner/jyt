@@ -1,4 +1,3 @@
-
 @import url('./styles/enhanced-player.css');
 @import url('./styles/mobile-optimizations.css');
 @import url('./styles/gradient-background.css');
@@ -12,7 +11,7 @@
   html {
     scroll-behavior: smooth; /* Enable smooth scrolling on the entire page */
   }
-  
+
   body {
     @apply bg-dark-950 text-white overscroll-none;
   }
@@ -23,7 +22,7 @@
   .smooth-scroll {
     scroll-behavior: smooth;
   }
-  
+
   /* Optimized animation for the back-to-top button */
   .back-to-top-btn {
     transform: translateY(0);
@@ -31,7 +30,6 @@
     will-change: transform, opacity;
   }
 }
-
 
 /* Add smooth scrolling to the entire page */
 html {
@@ -55,31 +53,22 @@ body {
   :root {
     --thumb-color: rgba(128, 128, 128, 0.5);
   }
-  
+
   /* Custom scrollbar for touch devices */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
-  
+
   ::-webkit-scrollbar-thumb {
     background-color: var(--thumb-color);
     border-radius: 4px;
   }
-  
+
   ::-webkit-scrollbar-track {
     background-color: transparent;
   }
 }
-
-/* Import Enhanced Player Styles - moved to top to fix CSS warning */
-@import url('./styles/enhanced-player.css');
-/* Import Mobile Optimization Styles - addresses performance issues on mobile devices */
-@import url('./styles/mobile-optimizations.css');
-/* Import Gradient Background Styles - fallback for low-power devices */
-@import url('./styles/gradient-background.css');
-/* Import Smooth Scrolling Styles - improves navigation experience */
-@import url('./styles/smooth-scroll.css');
 
 /* Theater mode button fix */
 .fluid_video_wrapper .fluid_controls_container .fluid_button.fluid_button_theatre {
@@ -231,12 +220,12 @@ body {
   .drop-shadow-glow {
     filter: drop-shadow(0 0 4px rgba(139, 92, 246, 0.5));
   }
-  
+
   /* Footer specific animations */
   .social-icon-link:hover i {
     animation: pulse 1.5s infinite;
   }
-  
+
   @keyframes pulse {
     0% {
       transform: scale(1);
@@ -294,7 +283,6 @@ body {
     transition: opacity 0.2s ease;
     pointer-events: none;
   }
-
 
 /* MP4 Video Optimizations */
 .fluid_video_wrapper.fluid_player_layout_default video {
@@ -389,39 +377,39 @@ body {
     /* We'll handle smooth scrolling with JS for better control */
     scroll-behavior: auto;
     overscroll-behavior-y: none; /* Prevents bounce effects on some browsers */
-    
+
     /* YouTube-like scrollbar on Firefox */
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.24) rgba(0, 0, 0, 0);
   }
-  
+
   /* YouTube-like scrollbar styles for Webkit browsers */
   ::-webkit-scrollbar {
     width: 8px;
     background: transparent;
   }
-  
+
   ::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.24);
     border-radius: 4px;
   }
-  
+
   ::-webkit-scrollbar-thumb:hover {
     background-color: rgba(255, 255, 255, 0.36);
   }
-  
+
   /* Layer-based performance optimizations */
   body {
     background-color: #0f0f0f; /* YouTube dark theme background */
     will-change: scroll-position;
     transform: translateZ(0); /* GPU acceleration */
   }
-  
+
   /* Performance optimizations during scrolling */
   html.is-scrolling * {
     pointer-events: none !important; /* Disable interactions during scroll */
   }
-  
+
   html.is-scrolling .preserve-events {
     pointer-events: auto !important; /* Re-enable for specific elements */
   }
@@ -501,9 +489,9 @@ body {
   }
 
   /* Better tap target sizing for mobile */
-  button, 
-  a, 
-  input[type="button"], 
+  button,
+  a,
+  input[type="button"],
   input[type="submit"] {
     @apply min-h-[44px] xs:min-h-[40px];
     touch-action: manipulation;
@@ -628,12 +616,12 @@ body {
   .controls-responsive button {
     @apply transition-transform duration-200;
   }
-  
+
   /* Footer styles */
   .footer-link {
     @apply text-slate-400 hover:text-primary transition-colors text-xs sm:text-sm block py-0.5;
   }
-  
+
   .footer-heading {
     @apply text-white font-medium mb-2 sm:mb-3 text-base sm:text-lg;
   }
@@ -643,7 +631,7 @@ body {
     footer .container {
       @apply px-3;
     }
-    
+
     footer h3 {
       @apply text-sm font-medium mb-1.5;
     }
@@ -815,7 +803,7 @@ body {
   background-color: #000 !important;
 }
 
-:fullscreen {
+::fullscreen {
   background-color: black !important;
   display: flex !important;
   justify-content: center !important;
@@ -1041,7 +1029,7 @@ html {
   background: transparent;
 }
 
-.settings-menu-scrollable::-webkit-scrollbar-thumb {
+..settings-menu-scrollable::-webkit-scrollbar-thumb {
   background-color: rgba(255, 255, 255, 0.3);
   border-radius: 4px;
 }
