@@ -1,7 +1,62 @@
-
 /**
  * SEO optimization utilities for dynamic page updates
  */
+
+import { Anime } from '@shared/types';
+
+/**
+ * Generates metadata title with consistent branding
+ */
+export const generatePageTitle = (title: string): string => {
+  const siteName = '9Anime';
+  return title.includes(siteName) ? title : `${title} - ${siteName}`;
+};
+
+/**
+ * Generates keywords based on anime properties
+ */
+export const generateAnimeKeywords = (anime: Anime): string => {
+  const baseKeywords = 'anime, streaming, watch anime, free anime, anime episodes, anime movies';
+  const specificKeywords = [
+    anime.title,
+    ...anime.genres,
+    anime.type,
+    `${anime.title} anime`,
+    `watch ${anime.title}`,
+    `${anime.title} online`,
+    `${anime.title} episodes`
+  ].join(', ');
+
+  return `${baseKeywords}, ${specificKeywords}`;
+};
+
+/**
+ * Generates proper canonical URL
+ */
+export const getCanonicalUrl = (path: string): string => {
+  const baseDomain = 'https://9anime.to';
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${baseDomain}${cleanPath}`;
+};
+
+/**
+ * Formats description for SEO with optimal length
+ */
+export const formatSEODescription = (description: string): string => {
+  // Optimal meta description is around 150-160 characters
+  if (description.length <= 160) return description;
+
+  // Truncate to last complete sentence under 160 chars
+  const truncated = description.substring(0, 157);
+  const lastPeriodIndex = truncated.lastIndexOf('.');
+
+  if (lastPeriodIndex > 100) {
+    return truncated.substring(0, lastPeriodIndex + 1);
+  }
+
+  return truncated + '...';
+};
+
 
 interface SEOMetadata {
   title: string;
@@ -94,5 +149,9 @@ export function optimizeContent(content: string): string {
 export default {
   updatePageSEO,
   generateBreadcrumbData,
-  optimizeContent
+  optimizeContent,
+  generatePageTitle,
+  generateAnimeKeywords,
+  getCanonicalUrl,
+  formatSEODescription
 };

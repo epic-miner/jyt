@@ -16,7 +16,7 @@
   html {
     scroll-behavior: auto !important;
   }
-  
+
   .animate-on-scroll {
     animation: none !important;
     opacity: 1 !important;
@@ -29,7 +29,7 @@
   -webkit-overflow-scrolling: touch; /* For older iOS */
   overscroll-behavior: contain;  /* Prevent scroll chaining */
   scroll-snap-type: y proximity; /* Subtle scroll snapping for sections */
-  
+
   /* Performance optimizations for better Core Web Vitals */
   contain: content; /* Containment for better performance */
   content-visibility: auto; /* Prioritize visible content rendering - SEO boost */
@@ -72,7 +72,7 @@
     backface-visibility: hidden; /* Reduce repaint during scroll */
     transform: translateZ(0); /* Hardware acceleration */
   }
-  
+
   /* Reduce transition complexity during scrolling to improve performance */
   html.is-scrolling * {
     transition-duration: 0ms !important;
@@ -99,4 +99,50 @@
 /* Add scroll detection for performance optimizations */
 html.is-scrolling .gradient-animated {
   animation-play-state: paused;
+}
+
+/* 
+ * Smooth scrolling for improved user experience
+ * This can help with better page engagement metrics which indirectly affect SEO 
+ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Disable smooth scrolling for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Optimize scrolling for mobile */
+body {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Scroll margin for better anchor positioning */
+h1, h2, h3, h4, h5, h6, [id] {
+  scroll-margin-top: 2rem;
+}
+
+/* Scroll snap for key sections - use sparingly */
+.scroll-snap-container {
+  scroll-snap-type: y proximity;
+}
+
+.scroll-snap-item {
+  scroll-snap-align: start;
+}
+
+/* Scroll progress indicator styles */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(to right, #ff6b6b, #ff9e7d);
+  z-index: 1000;
+  transition: width 0.1s;
 }

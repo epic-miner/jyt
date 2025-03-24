@@ -7,7 +7,9 @@ import { fetchAllAnime } from '../lib/api';
 import { Anime } from '@shared/types';
 import { motion } from 'framer-motion';
 import { SEO } from '../components/SEO';
+import { WebsiteStructuredData } from '../components/SEOStructuredData';
 import { cleanAnimeTitle } from '../utils/titleFormatter';
+import '../styles/smooth-scroll.css';
 
 const CategoryPage = () => {
   const [, params] = useRoute('/category/:type');

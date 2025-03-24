@@ -16,6 +16,10 @@ import ParallaxSection from '../components/ParallaxSection';
 import TiltCard from '../components/TiltCard';
 import SmoothScroll from '../components/SmoothScroll';
 import { cleanAnimeTitle } from '../utils/titleFormatter';
+import { SEO } from '../components/SEO';
+import { AnimeStructuredData } from '../components/SEOStructuredData';
+import { generateAnimeKeywords } from '../lib/seo';
+import '../styles/smooth-scroll.css';
 
 const AnimeDetails = () => {
   const [, params] = useRoute('/anime/:id');
