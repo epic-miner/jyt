@@ -2,6 +2,14 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import "./styles/smooth-scroll.css"; // Added based on changes
+
+import { preventKeyboardShortcuts } from './lib/security';
+
+// Activate keyboard shortcut prevention when the app starts
+document.addEventListener('DOMContentLoaded', () => {
+  preventKeyboardShortcuts();
+});
+
 import { initScrollReveal } from "./utils/scrollReveal"; // Added based on changes
 import { initScrollDetection } from "./utils/scrollDetection"; // Added based on changes
 import { QueryClientProvider } from "@tanstack/react-query";
