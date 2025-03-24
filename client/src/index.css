@@ -1,4 +1,9 @@
 
+@import url('./styles/enhanced-player.css');
+@import url('./styles/mobile-optimizations.css');
+@import url('./styles/gradient-background.css');
+@import url('./styles/smooth-scroll.css');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
