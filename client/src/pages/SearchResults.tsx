@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import AnimeCard from '../components/AnimeCard';
 import { searchAnime } from '../lib/api';
+import { cleanAnimeTitle } from '../utils/titleFormatter';
 
 const SearchResults = () => {
   const [location] = useLocation();
@@ -56,7 +57,7 @@ const SearchResults = () => {
               key={anime.id} 
               anime={{
                 ...anime,
-                title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '') // Remove tags from title
+                title: cleanAnimeTitle(anime.title) // Remove tags from title
               }}
               rating={4.5}
               episodeCount={anime.episode_count}

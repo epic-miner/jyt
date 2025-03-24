@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Anime } from '@shared/types';
+import { cleanAnimeTitle } from '../utils/titleFormatter';
 
 interface SearchBarProps {
   autoFocus?: boolean;
@@ -22,7 +23,7 @@ const SearchResultItem = memo(({
 }) => {
   // Memoize sanitized title
   const sanitizedTitle = useMemo(() => 
-    result.title.replace(/\(T\)|\(LR\)|\(P\)/g, ''), 
+    cleanAnimeTitle(result.title), 
     [result.title]
   );
 

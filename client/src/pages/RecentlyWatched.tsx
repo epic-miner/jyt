@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import AnimeCard from '../components/AnimeCard';
 import { getRecentlyWatchedAnime, getWatchHistory } from '../lib/cookies';
 import { WatchHistoryItem, RecentlyWatchedAnime } from '@shared/types';
+import { cleanAnimeTitle } from '../utils/titleFormatter';
 
 const RecentlyWatched = () => {
   const [continueWatching, setContinueWatching] = useState<WatchHistoryItem[]>([]);
@@ -52,7 +53,7 @@ const RecentlyWatched = () => {
                   <div className="relative h-40">
                     <img 
                       src={item.animeThumbnail} 
-                      alt={item.animeTitle.replace(/\(T\)|\(LR\)|\(P\)/g, '')} 
+                      alt={cleanAnimeTitle(item.animeTitle)} 
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
