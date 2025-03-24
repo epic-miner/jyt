@@ -1,4 +1,33 @@
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth; /* Enable smooth scrolling on the entire page */
+  }
+  
+  body {
+    @apply bg-dark-950 text-white overscroll-none;
+  }
+}
+
+@layer components {
+  /* YouTube-like smooth scrolling animation class */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+  }
+  
+  /* Optimized animation for the back-to-top button */
+  .back-to-top-btn {
+    transform: translateY(0);
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    will-change: transform, opacity;
+  }
+}
+
+
 /* Add smooth scrolling to the entire page */
 html {
   scroll-behavior: smooth;
