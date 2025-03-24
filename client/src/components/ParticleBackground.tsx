@@ -1,183 +1,215 @@
-import { useCallback, useEffect, useState, useRef, memo } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { loadSlim } from 'tsparticles-slim';
+import type { Engine } from 'tsparticles-engine';
+import Particles from 'react-particles';
+import { getDevicePerformanceTier, DevicePerformanceTier } from '../utils/deviceDetection';
 
-interface ParticleOptions {
-  particles?: {
-    number?: { value?: number };
-    color?: { value?: string };
-    opacity?: { value?: number };
-    size?: { value?: number };
-    move?: { speed?: number };
-  };
+// Define our own MoveDirection enum to avoid dependency on tsparticles-engine exports
+enum MoveDirection {
+  NONE = "none",
+  TOP = "top",
+  TOP_RIGHT = "top-right",
+  RIGHT = "right",
+  BOTTOM_RIGHT = "bottom-right",
+  BOTTOM = "bottom",
+  BOTTOM_LEFT = "bottom-left",
+  LEFT = "left",
+  TOP_LEFT = "top-left"
 }
 
 interface ParticleBackgroundProps {
-  options?: ParticleOptions;
+  className?: string;
+  color?: string;
+  secondaryColor?: string;
+  style?: React.CSSProperties;
+  particleDensity?: 'none' | 'low' | 'medium' | 'high';
+  backgroundColor?: string;
+  disableOnMobile?: boolean;
 }
 
-// Detect if we're on a mobile device
-const isMobileDevice = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    typeof navigator !== 'undefined' ? navigator.userAgent : ''
+/**
+ * A performance-optimized background particle effect
+ * Uses tsparticles-slim for better mobile performance and adapts to device capabilities
+ */
+const ParticleBackground = ({
+  className = '',
+  color = '#6d28d9',
+  secondaryColor = '#8b5cf6',
+  style,
+  particleDensity = 'medium',
+  backgroundColor = 'transparent',
+  disableOnMobile = true
+}: ParticleBackgroundProps) => {
+  const [performanceTier, setPerformanceTier] = useState<DevicePerformanceTier>(
+    DevicePerformanceTier.MEDIUM
   );
-};
-
-const ParticleBackground = memo(({ options }: ParticleBackgroundProps) => {
-  // Using a simpler implementation with vanilla JS for particles
-  const [particlesInitialized, setParticlesInitialized] = useState(false);
-  const animationFrameId = useRef<number | null>(null);
-  const isFirstRender = useRef(true);
-  const lastFrameTime = useRef(0);
-  const FPS_THROTTLE = 30; // Limit to 30 FPS
-  const frameInterval = 1000 / FPS_THROTTLE;
-
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Get device performance on client-side only
   useEffect(() => {
-    // Only run this effect once
-    if (particlesInitialized || !isFirstRender.current) return;
-    isFirstRender.current = false;
-    
-    // Determine if we're on mobile
-    const isMobile = isMobileDevice();
-    
-    // Reduce particle count and effects for mobile
-    const mobileMultiplier = isMobile ? 0.3 : 1.0;
-    
-    // Create canvas
-    const canvas = document.createElement('canvas');
-    canvas.classList.add('fixed', 'inset-0', '-z-10', 'particles-container');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    document.body.appendChild(canvas);
-    
-    // Configure particles
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    const particles: Array<{
-      x: number;
-      y: number;
-      dirX: number;
-      dirY: number;
-      size: number;
-      color: string;
-      opacity: number;
-    }> = [];
-    
-    // Apply custom options or defaults
-    const baseParticleCount = options?.particles?.number?.value || 50;
-    const particleCount = Math.floor(baseParticleCount * mobileMultiplier);
-    const particleColor = options?.particles?.color?.value || '#ffffff';
-    const particleOpacity = (options?.particles?.opacity?.value || 0.2) * mobileMultiplier;
-    const particleSize = options?.particles?.size?.value || 2;
-    const moveSpeed = (options?.particles?.move?.speed || 0.5) * mobileMultiplier;
-    
-    // Create particles
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        dirX: (Math.random() - 0.5) * moveSpeed,
-        dirY: (Math.random() - 0.5) * moveSpeed,
-        size: Math.random() * particleSize + 1,
-        color: particleColor,
-        opacity: particleOpacity,
-      });
+    setPerformanceTier(getDevicePerformanceTier());
+    setIsMounted(true);
+  }, []);
+  
+  // Determine number of particles based on performance tier and specified density
+  const getOptimalParticleCount = (): number => {
+    // Return 0 if we want to disable on mobile for low-end devices
+    if (disableOnMobile && performanceTier === DevicePerformanceTier.LOW) {
+      return 0;
     }
     
-    // Don't draw connection lines on mobile (significant performance impact)
-    const shouldDrawLines = !isMobile;
+    // Determine base count from the particleDensity prop
+    let baseCount = 0;
+    switch (particleDensity) {
+      case 'none':
+        return 0;
+      case 'low':
+        baseCount = 20;
+        break;
+      case 'medium':
+        baseCount = 50;
+        break;
+      case 'high':
+        baseCount = 100;
+        break;
+    }
     
-    // Animation function with FPS limiting
-    const animate = (timestamp: number) => {
-      // Request next frame first to ensure smooth animation
-      animationFrameId.current = requestAnimationFrame(animate);
-      
-      // Throttle FPS for better performance
-      const elapsed = timestamp - lastFrameTime.current;
-      if (elapsed < frameInterval) return;
-      
-      // Update last frame time, accounting for the extra elapsed time
-      lastFrameTime.current = timestamp - (elapsed % frameInterval);
-      
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      particles.forEach((p) => {
-        // Draw particle
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = p.opacity;
-        ctx.fill();
-        ctx.globalAlpha = 1.0;
-        
-        // Move particle
-        p.x += p.dirX;
-        p.y += p.dirY;
-        
-        // Bounce off edges
-        if (p.x < 0 || p.x > canvas.width) p.dirX *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.dirY *= -1;
-        
-        // Draw lines between close particles - skip on mobile
-        if (shouldDrawLines) {
-          // Only check a subset of particles for connections to improve performance
-          const checkEvery = Math.max(1, Math.floor(particles.length / 20));
-          
-          for (let i = 0; i < particles.length; i += checkEvery) {
-            const p2 = particles[i];
-            if (p === p2) continue;
-            
-            const distance = Math.sqrt(Math.pow(p.x - p2.x, 2) + Math.pow(p.y - p2.y, 2));
-            const maxDistance = isMobile ? 100 : 150;
-            
-            if (distance < maxDistance) {
-              ctx.beginPath();
-              // Extract color values from hex
-              const hex = p.color.replace('#', '');
-              const r = parseInt(hex.substring(0, 2), 16);
-              const g = parseInt(hex.substring(2, 4), 16);
-              const b = parseInt(hex.substring(4, 6), 16);
-              
-              ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${p.opacity * 0.3 * (1 - distance / maxDistance)})`;
-              ctx.lineWidth = 0.5;
-              ctx.moveTo(p.x, p.y);
-              ctx.lineTo(p2.x, p2.y);
-              ctx.stroke();
-            }
-          }
-        }
-      });
-    };
-    
-    // Throttled resize handler
-    let resizeTimeout: number;
-    const handleResize = () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = window.setTimeout(() => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }, 250); // Wait 250ms after resize ends
-    };
-    
-    window.addEventListener('resize', handleResize);
-    animationFrameId.current = requestAnimationFrame(animate);
-    setParticlesInitialized(true);
-    
-    // Cleanup
-    return () => {
-      if (animationFrameId.current) {
-        cancelAnimationFrame(animationFrameId.current);
-      }
-      clearTimeout(resizeTimeout);
-      window.removeEventListener('resize', handleResize);
-      if (document.body.contains(canvas)) {
-        document.body.removeChild(canvas);
-      }
-    };
-  }, [particlesInitialized, options]);
+    // Scale based on performance tier
+    switch (performanceTier) {
+      case DevicePerformanceTier.LOW:
+        return Math.max(5, Math.floor(baseCount * 0.2));
+      case DevicePerformanceTier.MEDIUM:
+        return Math.floor(baseCount * 0.6);
+      case DevicePerformanceTier.HIGH:
+        return baseCount;
+      default:
+        return baseCount;
+    }
+  };
+  
+  // Initialize the tsparticles engine
+  const particlesInit = useCallback(async (engine: Engine) => {
+    await loadSlim(engine);
+  }, []);
+  
+  // Don't render on server-side to avoid hydration mismatches
+  if (!isMounted) {
+    return <div 
+      className={className} 
+      style={{ 
+        ...style,
+        backgroundColor,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: -1
+      }} 
+    />;
+  }
+  
+  // No particles for very low-end devices when disableOnMobile is true
+  const calculatedParticleCount = getOptimalParticleCount();
+  if (calculatedParticleCount === 0) {
+    return <div 
+      className={className} 
+      style={{ 
+        ...style,
+        backgroundColor,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        zIndex: -1
+      }} 
+    />;
+  }
 
-  return null; // Canvas is appended to body directly
-});
-
-ParticleBackground.displayName = 'ParticleBackground';
+  // Optimize configuration based on device performance
+  const useSimpleShape = performanceTier === DevicePerformanceTier.LOW;
+  const disableInteractivity = performanceTier === DevicePerformanceTier.LOW;
+  const reduceAnimationSpeed = performanceTier !== DevicePerformanceTier.HIGH;
+  
+  return (
+    <Particles
+      className={className}
+      init={particlesInit}
+      options={{
+        fullScreen: false,
+        background: {
+          color: { value: backgroundColor },
+        },
+        fpsLimit: performanceTier === DevicePerformanceTier.LOW ? 30 : 60,
+        interactivity: {
+          events: {
+            onClick: {
+              enable: !disableInteractivity,
+              mode: "push",
+            },
+            onHover: {
+              enable: !disableInteractivity,
+              mode: "repulse",
+            },
+            resize: true,
+          },
+          modes: {
+            push: {
+              quantity: performanceTier === DevicePerformanceTier.HIGH ? 4 : 2,
+            },
+            repulse: {
+              distance: performanceTier === DevicePerformanceTier.HIGH ? 100 : 50,
+              duration: 0.4,
+            },
+          },
+        },
+        particles: {
+          color: {
+            value: color,
+          },
+          links: {
+            color: secondaryColor,
+            distance: 150,
+            enable: true,
+            opacity: 0.5,
+            width: 1,
+          },
+          collisions: {
+            enable: performanceTier === DevicePerformanceTier.HIGH,
+          },
+          move: {
+            direction: MoveDirection.NONE,
+            enable: true,
+            outModes: {
+              default: "bounce",
+            },
+            random: false,
+            speed: reduceAnimationSpeed ? 1 : 2,
+            straight: false,
+          },
+          number: {
+            density: {
+              enable: true,
+              area: 800,
+            },
+            value: calculatedParticleCount,
+          },
+          opacity: {
+            value: 0.5,
+          },
+          shape: {
+            type: useSimpleShape ? "circle" : ["circle", "triangle", "square"],
+          },
+          size: {
+            value: { min: 1, max: 5 },
+          },
+        },
+        detectRetina: performanceTier === DevicePerformanceTier.HIGH,
+      }}
+      style={style}
+    />
+  );
+};
 
 export default ParticleBackground;

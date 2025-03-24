@@ -1,151 +1,212 @@
-import { ReactNode, memo, useEffect, useState } from 'react';
-import { useInView } from 'react-intersection-observer';
-import { motion, useReducedMotion } from 'framer-motion';
-import { cn } from '@/lib/utils';
-
-// Detect if we're on a mobile device
-const isMobileDevice = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    typeof navigator !== 'undefined' ? navigator.userAgent : ''
-  );
-};
+import { useEffect, useRef, ReactNode } from 'react';
+import { motion, useInView, useAnimation } from 'framer-motion';
+import { isMobileDevice, shouldReduceAnimations } from '../utils/deviceDetection';
 
 interface ScrollRevealProps {
   children: ReactNode;
   className?: string;
-  threshold?: number;
-  triggerOnce?: boolean;
-  animation?: 'fade' | 'slide-up' | 'slide-down' | 'slide-left' | 'slide-right' | 'zoom' | 'none';
+  variant?: 'fade' | 'slide-up' | 'slide-down' | 'slide-left' | 'slide-right' | 'zoom' | 'none';
   delay?: number;
   duration?: number;
-  rootMargin?: string;
-  // Optional prop to disable animations on mobile
-  disableOnMobile?: boolean;
+  threshold?: number;
+  margin?: string;
+  once?: boolean;
+  disabled?: boolean;
+  skipInMobile?: boolean;
 }
 
-// Simplified variants for mobile
-const mobileAnimationVariants = {
-  'fade': {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-  },
-  'slide-up': {
-    hidden: { opacity: 0, y: 15 }, // Reduced distance
-    visible: { opacity: 1, y: 0 },
-  },
-  'slide-down': {
-    hidden: { opacity: 0, y: -15 }, // Reduced distance
-    visible: { opacity: 1, y: 0 },
-  },
-  'slide-left': {
-    hidden: { opacity: 0, x: 15 }, // Reduced distance
-    visible: { opacity: 1, x: 0 },
-  },
-  'slide-right': {
-    hidden: { opacity: 0, x: -15 }, // Reduced distance
-    visible: { opacity: 1, x: 0 },
-  },
-  'zoom': {
-    hidden: { opacity: 0, scale: 0.95 }, // Less dramatic scale
-    visible: { opacity: 1, scale: 1 },
-  },
-  'none': {
-    hidden: {},
-    visible: {},
-  },
-};
+// Use type assertion for framer-motion
+interface AnimationVariants {
+  hidden: any;
+  visible: any;
+}
 
-// Full animations for desktop
-const desktopAnimationVariants = {
-  'fade': {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-  },
-  'slide-up': {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0 },
-  },
-  'slide-down': {
-    hidden: { opacity: 0, y: -50 },
-    visible: { opacity: 1, y: 0 },
-  },
-  'slide-left': {
-    hidden: { opacity: 0, x: 50 },
-    visible: { opacity: 1, x: 0 },
-  },
-  'slide-right': {
-    hidden: { opacity: 0, x: -50 },
-    visible: { opacity: 1, x: 0 },
-  },
-  'zoom': {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { opacity: 1, scale: 1 },
-  },
-  'none': {
-    hidden: {},
-    visible: {},
-  },
-};
-
-const ScrollReveal = memo(({
+/**
+ * A performance-optimized component that animates its children when they enter the viewport.
+ * Designed to be lightweight on mobile devices and respect user preferences for reduced motion.
+ */
+const ScrollReveal = ({
   children,
-  className,
-  threshold = 0.1,
-  triggerOnce = true,
-  animation = 'fade',
+  className = '',
+  variant = 'fade',
   delay = 0,
   duration = 0.5,
-  rootMargin = '0px',
-  disableOnMobile = false,
+  threshold = 0.2,
+  margin = '0px',
+  once = true,
+  disabled = false,
+  skipInMobile = false
 }: ScrollRevealProps) => {
-  // Check if user prefers reduced motion
-  const prefersReducedMotion = useReducedMotion();
+  const controls = useAnimation();
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, {
+    once, 
+    // Cast to any because framer-motion types are incompatible
+    threshold: threshold as any,
+    margin: margin as any
+  });
   
-  // Check for mobile device
-  const [isMobile, setIsMobile] = useState(false);
+  // Check for reduced motion preference and mobile device
+  const isReducedMotion = useRef(false);
+  const isMobile = useRef(false);
   
+  // Initialize client-side only values
   useEffect(() => {
-    // Set mobile state on client side
-    setIsMobile(isMobileDevice());
+    isReducedMotion.current = shouldReduceAnimations();
+    isMobile.current = isMobileDevice();
   }, []);
   
-  // Use simplified animation variants for mobile
-  const animationVariants = isMobile ? mobileAnimationVariants : desktopAnimationVariants;
-  
-  // Adjust params for mobile
-  const effectiveDuration = isMobile ? Math.min(0.3, duration) : duration;
-  const effectiveDelay = isMobile ? Math.min(0.1, delay) : delay;
-  
-  // Set up intersection observer with appropriate threshold
-  const { ref, inView } = useInView({
-    threshold,
-    triggerOnce,
-    rootMargin,
-  });
+  // Determine if we should skip animations
+  const shouldSkipAnimation = 
+    disabled || 
+    (skipInMobile && isMobile.current) || 
+    isReducedMotion.current;
+    
+  useEffect(() => {
+    // Skip animation if required
+    if (shouldSkipAnimation) {
+      controls.set('visible');
+      return;
+    }
+    
+    // Start animation when in view
+    if (inView) {
+      controls.start('visible');
+    } else if (!once) {
+      controls.start('hidden');
+    }
+  }, [controls, inView, once, shouldSkipAnimation]);
 
-  // Skip animations for users who prefer reduced motion or on mobile if disabled
-  if (prefersReducedMotion || (isMobile && disableOnMobile)) {
-    return <div className={cn(className)}>{children}</div>;
-  }
-
+  // Define animations based on variant
+  const getAnimationVariants = (): AnimationVariants => {
+    // If should skip animation, use minimal variant that just changes opacity slightly
+    if (shouldSkipAnimation) {
+      return {
+        hidden: { opacity: 0.9 },
+        visible: { opacity: 1 }
+      };
+    }
+    
+    // Use simpler animations on mobile for better performance
+    const mobileFriendly = isMobile.current;
+    
+    // Adjust duration for mobile (faster animations)
+    const adjustedDuration = mobileFriendly ? Math.max(0.2, duration * 0.7) : duration;
+    
+    // Default animation (fade)
+    let variants: AnimationVariants = {
+      hidden: { opacity: 0 },
+      visible: { 
+        opacity: 1,
+        transition: {
+          duration: adjustedDuration,
+          delay,
+          ease: 'easeOut'
+        }
+      }
+    };
+    
+    // Adjust animation based on variant
+    switch (variant) {
+      case 'slide-up':
+        variants = {
+          hidden: { opacity: 0, y: mobileFriendly ? 20 : 50 },
+          visible: { 
+            opacity: 1, 
+            y: 0,
+            transition: {
+              duration: adjustedDuration,
+              delay,
+              ease: 'easeOut'
+            }
+          }
+        };
+        break;
+        
+      case 'slide-down':
+        variants = {
+          hidden: { opacity: 0, y: mobileFriendly ? -20 : -50 },
+          visible: { 
+            opacity: 1, 
+            y: 0,
+            transition: {
+              duration: adjustedDuration,
+              delay,
+              ease: 'easeOut'
+            }
+          }
+        };
+        break;
+        
+      case 'slide-left':
+        variants = {
+          hidden: { opacity: 0, x: mobileFriendly ? 20 : 50 },
+          visible: { 
+            opacity: 1, 
+            x: 0,
+            transition: {
+              duration: adjustedDuration,
+              delay,
+              ease: 'easeOut'
+            }
+          }
+        };
+        break;
+        
+      case 'slide-right':
+        variants = {
+          hidden: { opacity: 0, x: mobileFriendly ? -20 : -50 },
+          visible: { 
+            opacity: 1, 
+            x: 0,
+            transition: {
+              duration: adjustedDuration,
+              delay,
+              ease: 'easeOut'
+            }
+          }
+        };
+        break;
+        
+      case 'zoom':
+        variants = {
+          hidden: { opacity: 0, scale: mobileFriendly ? 0.9 : 0.8 },
+          visible: { 
+            opacity: 1, 
+            scale: 1,
+            transition: {
+              duration: adjustedDuration,
+              delay,
+              ease: 'easeOut'
+            }
+          }
+        };
+        break;
+        
+      case 'none':
+        variants = {
+          hidden: { opacity: 1 },
+          visible: { opacity: 1 }
+        };
+        break;
+    }
+    
+    return variants;
+  };
+  
   return (
     <motion.div
       ref={ref}
       initial="hidden"
-      animate={inView ? 'visible' : 'hidden'}
-      variants={animationVariants[animation]}
-      transition={{ 
-        duration: effectiveDuration, 
-        delay: effectiveDelay,
-        ease: 'easeOut',
-      }}
-      className={cn(className, 'will-change-[opacity,transform]')}
+      animate={controls}
+      variants={getAnimationVariants() as any}
+      className={className}
+      // Use hardware acceleration for smoother animations
+      style={{ willChange: 'opacity, transform' }}
     >
       {children}
     </motion.div>
   );
-});
-
-ScrollReveal.displayName = 'ScrollReveal';
+};
 
 export default ScrollReveal;

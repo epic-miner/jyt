@@ -1,188 +1,118 @@
-import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
-import { memo, useMemo, useEffect, useState } from 'react';
-
-// Detect if we're on a mobile device
-const isMobileDevice = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    typeof navigator !== 'undefined' ? navigator.userAgent : ''
-  );
-};
-
-// Further simplified variants for low-end mobile devices
-const mobileLowEndVariants = {
-  initial: {
-    opacity: 0
-  },
-  animate: {
-    opacity: 1
-  },
-  exit: {
-    opacity: 0
-  }
-};
-
-// Simplified variants for mobile
-const mobileVariants = {
-  initial: {
-    opacity: 0,
-    y: 10 // Reduced distance
-  },
-  animate: {
-    opacity: 1,
-    y: 0
-  },
-  exit: {
-    opacity: 0,
-    y: -10 // Reduced distance
-  }
-};
-
-// Define motion variants outside component to prevent recreation on each render
-const desktopVariants = {
-  initial: {
-    opacity: 0,
-    y: 20,
-    scale: 0.98
-  },
-  animate: {
-    opacity: 1,
-    y: 0,
-    scale: 1
-  },
-  exit: {
-    opacity: 0,
-    y: -20,
-    scale: 0.98
-  }
-};
-
-// Simplified variants for reduced motion preference
-const reducedMotionVariants = {
-  initial: {
-    opacity: 0
-  },
-  animate: {
-    opacity: 1
-  },
-  exit: {
-    opacity: 0
-  }
-};
-
-// Transition options optimized for different devices
-const desktopTransition = {
-  type: "tween",
-  ease: "easeInOut",
-  duration: 0.2
-};
-
-// Simpler, faster transition for mobile devices to avoid jank
-const mobileTransition = {
-  type: "tween",
-  ease: "easeInOut",
-  duration: 0.15
-};
-
-// Even faster transition for low-end mobile devices
-const mobileLowEndTransition = {
-  type: "tween",
-  ease: "easeInOut",
-  duration: 0.1
-};
-
-// Detect if device might be low-end based on user agent and memory
-const isLowEndDevice = () => {
-  if (typeof navigator === 'undefined') return false;
-  
-  // Check device memory (Chrome, Opera, Samsung Internet, etc.)
-  // @ts-ignore
-  const deviceMemory = navigator.deviceMemory || 4; // 4GB is default if not supported
-  
-  // Check for low-end devices or devices with limited memory
-  if (deviceMemory < 4) return true;
-  
-  // Check for older mobile devices or slower chipsets
-  const isOlderMobile = /Android [1-7]\./.test(navigator.userAgent);
-  if (isOlderMobile) return true;
-  
-  return false;
-};
+import { useState, useEffect, ReactNode } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { isMobileDevice, DevicePerformanceTier, getDevicePerformanceTier } from '../utils/deviceDetection';
+import { useLocation } from 'wouter';
 
 interface PageTransitionProps {
-  children: React.ReactNode;
-  /**
-   * Optional key to force remounting/animation when it changes
-   * Useful when URL params change but component stays the same
-   */
-  transitionKey?: string | number;
-  /**
-   * Disable transitions completely for low-performance devices
-   */
-  disableOnLowEnd?: boolean;
+  children: ReactNode;
+  location?: string; // Made optional since we can get it from useLocation
+  className?: string;
+  transitionType?: 'fade' | 'slide' | 'zoom' | 'none';
 }
 
-// Memoize the component to prevent unnecessary re-renders
-export const PageTransition = memo(({ 
+/**
+ * A performance-optimized component for smooth page transitions
+ * Renders different animations based on device performance
+ */
+export const PageTransition = ({
   children,
-  transitionKey,
-  disableOnLowEnd = true
+  location: propLocation,
+  className = '',
+  transitionType = 'fade'
 }: PageTransitionProps) => {
-  // Respect user's reduced motion preference for accessibility
-  const prefersReducedMotion = useReducedMotion();
-  const [isMobile, setIsMobile] = useState(false);
-  const [isLowEnd, setIsLowEnd] = useState(false);
+  // Get current location if not provided as prop
+  const [currentLocation] = useLocation();
+  const location = propLocation || currentLocation;
   
+  // Check device capabilities for optimal animation
+  const [performanceTier, setPerformanceTier] = useState<DevicePerformanceTier>(
+    DevicePerformanceTier.MEDIUM
+  );
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Determine if we're on a mobile device
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Initialize performance tier on client side
   useEffect(() => {
-    // Set values on client-side only
+    setPerformanceTier(getDevicePerformanceTier());
     setIsMobile(isMobileDevice());
-    setIsLowEnd(isLowEndDevice());
+    setIsMounted(true);
   }, []);
   
-  // Skip animations completely for very low-end devices
-  const shouldSkipAnimation = disableOnLowEnd && isLowEnd;
+  // Don't animate on low-end devices
+  const shouldSkipAnimation = performanceTier === DevicePerformanceTier.LOW;
   
-  // Conditionally select variants based on device capabilities
-  const variants = useMemo(() => {
-    if (prefersReducedMotion) return reducedMotionVariants;
-    if (isLowEnd) return mobileLowEndVariants;
-    if (isMobile) return mobileVariants;
-    return desktopVariants;
-  }, [prefersReducedMotion, isLowEnd, isMobile]);
-
-  // Select appropriate transition based on device for better performance
-  const transition = useMemo(() => {
-    if (isLowEnd) return mobileLowEndTransition;
-    if (isMobile) return mobileTransition;
-    return desktopTransition;
-  }, [isLowEnd, isMobile]);
-  
-  // For very low-end devices, skip animations entirely
-  if (shouldSkipAnimation) {
-    return <div className="w-full">{children}</div>;
+  if (!isMounted) {
+    // Initial SSR render with no animation
+    return <div className={className}>{children}</div>;
   }
   
+  // Simple animations for mobile
+  const simpleMobileAnimations = isMobile && performanceTier !== DevicePerformanceTier.HIGH;
+  
+  // Determine animation variants based on type and device capabilities
+  let variants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
+  };
+  
+  // Only apply more complex animations if we shouldn't skip them
+  if (!shouldSkipAnimation) {
+    switch (transitionType) {
+      case 'slide':
+        variants = {
+          initial: { opacity: 0, x: simpleMobileAnimations ? 10 : 30 },
+          animate: { opacity: 1, x: 0 },
+          exit: { opacity: 0, x: simpleMobileAnimations ? -10 : -30 },
+        };
+        break;
+      case 'zoom':
+        variants = {
+          initial: { opacity: 0, scale: simpleMobileAnimations ? 0.95 : 0.9 },
+          animate: { opacity: 1, scale: 1 },
+          exit: { opacity: 0, scale: simpleMobileAnimations ? 1.05 : 1.1 },
+        };
+        break;
+      case 'none':
+        variants = {
+          initial: { opacity: 1 },
+          animate: { opacity: 1 },
+          exit: { opacity: 1 },
+        };
+        break;
+    }
+  }
+  
+  // Adjust animation duration based on performance tier
+  const duration = shouldSkipAnimation ? 0.1 : 
+                   performanceTier === DevicePerformanceTier.HIGH ? 0.3 : 0.2;
+  
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={transitionKey}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        variants={variants}
-        transition={transition}
-        className="w-full"
-        style={{
-          // Apply performance optimizations with style to ensure they work
-          willChange: 'opacity, transform',
-          isolation: 'isolate', // Create a new stacking context
-          contain: 'content' // Hint for browser optimization
-        }}
-        data-performance="accelerated"
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <div className={className}>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={location}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          variants={variants as any}
+          transition={{
+            duration,
+            ease: "easeInOut",
+          }}
+          style={{ 
+            width: '100%',
+            height: '100%',
+            willChange: shouldSkipAnimation ? 'auto' : 'opacity, transform' 
+          }}
+        >
+          {children}
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
-});
+};
 
-PageTransition.displayName = 'PageTransition';
+export default PageTransition;

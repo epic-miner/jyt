@@ -1,5 +1,7 @@
 /* Import Enhanced Player Styles - moved to top to fix CSS warning */
 @import url('./styles/enhanced-player.css');
+/* Import Mobile Optimization Styles - addresses performance issues on mobile devices */
+@import url('./styles/mobile-optimizations.css');
 
 /* Theater mode button fix */
 .fluid_video_wrapper .fluid_controls_container .fluid_button.fluid_button_theatre {

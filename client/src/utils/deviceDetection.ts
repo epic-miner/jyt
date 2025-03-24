@@ -1,179 +1,210 @@
 /**
  * Device detection and performance optimization utilities
+ * Used to conditionally render effects and optimizations based on device capabilities
  */
+
+// Performance tiers for different device capabilities
+export enum DevicePerformanceTier {
+  LOW = 'low',     // Low-end devices, minimal animations, maximum optimizations
+  MEDIUM = 'medium', // Mid-range devices, moderate animations, some optimizations
+  HIGH = 'high'    // High-end devices, full animations, minimal optimizations
+}
+
+// Memory thresholds for determining performance tier (in MB)
+const MEMORY_THRESHOLD_LOW = 2048;
+const MEMORY_THRESHOLD_HIGH = 4096;
+
+// Battery thresholds
+const BATTERY_THRESHOLD_LOW = 0.2; // 20%
+const BATTERY_POWER_SAVING_MODE = true;
 
 /**
  * Detects if the current device is a mobile device
+ * @returns boolean indicating if the device is mobile
  */
-export const isMobileDevice = (): boolean => {
-  if (typeof navigator === 'undefined') return false;
+export function isMobileDevice(): boolean {
+  if (typeof window === 'undefined') return false;
   
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
-};
+  const userAgent = navigator.userAgent.toLowerCase();
+  const mobileKeywords = ['android', 'iphone', 'ipad', 'ipod', 'windows phone', 'mobile'];
+  
+  const isMobile = mobileKeywords.some(keyword => userAgent.includes(keyword));
+  
+  // Also check screen size as a fallback
+  const isSmallScreen = window.innerWidth <= 768;
+  
+  return isMobile || isSmallScreen;
+}
 
 /**
- * Detects if the current device might be low-end
+ * Detects if the user has requested reduced motion
+ * @returns boolean indicating if reduced motion is preferred
  */
-export const isLowEndDevice = (): boolean => {
-  if (typeof navigator === 'undefined') return false;
+export function shouldReduceAnimations(): boolean {
+  if (typeof window === 'undefined') return false;
   
-  // Check device memory (Chrome, Opera, Samsung Internet, etc.)
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const deviceMemory = navigator.deviceMemory || 4; // 4GB is default if not supported
+  // Check media query for prefers-reduced-motion
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   
-  // Check for devices with limited memory
-  if (deviceMemory < 4) return true;
-  
-  // Check for older mobile devices or slower chipsets
-  const isOlderMobile = /Android [1-7]\./.test(navigator.userAgent);
-  if (isOlderMobile) return true;
-  
-  return false;
-};
-
-/**
- * Detects if user has enabled data saving mode
- */
-export const isDataSavingEnabled = (): boolean => {
-  if (typeof navigator === 'undefined') return false;
-  
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore - Network Information API
-  return navigator.connection?.saveData === true;
-};
-
-/**
- * Detects if device is on a slow connection
- */
-export const isSlowConnection = (): boolean => {
-  if (typeof navigator === 'undefined') return false;
-  
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore - Network Information API
-  const connection = navigator.connection;
-  
-  if (!connection) return false;
-  
-  // Check if using 2G or if effective type is slow-2g or 2g
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  return connection.type === '2g' || 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    ['slow-2g', '2g'].includes(connection.effectiveType);
-};
-
-/**
- * Get recommended image quality based on device and network
- */
-export const getRecommendedImageQuality = (): number => {
-  if (isDataSavingEnabled()) return 60;
-  if (isSlowConnection()) return 70;
-  if (isLowEndDevice()) return 80;
-  if (isMobileDevice()) return 85;
-  return 90;
-};
-
-/**
- * Get recommended image width based on device and screen
- */
-export const getRecommendedImageWidth = (): number => {
-  if (typeof window === 'undefined') return 800;
-  
-  const screenWidth = window.innerWidth;
-  
-  if (isDataSavingEnabled() || isSlowConnection()) {
-    return Math.min(screenWidth, 400);
+  // Check for low power mode (iOS) or battery saver (Android)
+  // Note: There's no direct API for this, so we approximate with battery API
+  let isLowPowerMode = false;
+  if ('getBattery' in navigator) {
+    const nav = navigator as any;
+    // We can access battery information to make an educated guess
+    nav.getBattery?.().then((battery: any) => {
+      isLowPowerMode = battery.level <= BATTERY_THRESHOLD_LOW || battery.charging === false;
+    }).catch(() => {
+      // Ignore errors with battery API
+    });
   }
   
-  if (isLowEndDevice() || isMobileDevice()) {
-    return Math.min(screenWidth, 600);
-  }
-  
-  return Math.min(screenWidth, 1200);
-};
+  return prefersReducedMotion || isLowPowerMode;
+}
 
 /**
- * Generate optimized image URL with quality and width parameters
+ * Detects device's performance capabilities
+ * @returns DevicePerformanceTier based on device capabilities
  */
-export const getOptimizedImageUrl = (url: string): string => {
-  if (!url) return url;
+export function getDevicePerformanceTier(): DevicePerformanceTier {
+  // Default to medium tier
+  let tier = DevicePerformanceTier.MEDIUM;
   
-  // If already using a compressed format like webp, return as is
-  if (url.includes('.webp')) return url;
+  // Server-side rendering check
+  if (typeof window === 'undefined') return tier;
   
-  // If it's a relative URL without extension, don't modify
-  if (url.startsWith('/') && !url.includes('.')) return url;
+  const userAgent = navigator.userAgent.toLowerCase();
   
-  // If the URL already has a query parameter for quality or size, don't modify
-  if (url.includes('quality=') || url.includes('size=') || 
-      url.includes('w=') || url.includes('width=')) {
-    return url;
+  // Check for obvious low-end device indicators
+  const isLowEndDeviceByUA = 
+    userAgent.includes('android 4') ||
+    userAgent.includes('android 5') ||
+    userAgent.includes('android 6') ||
+    userAgent.includes('msie') ||
+    userAgent.includes('iphone os 9') ||
+    userAgent.includes('iphone os 10');
+  
+  // Check for obvious high-end device indicators
+  const isHighEndDeviceByUA =
+    userAgent.includes('iphone 13') ||
+    userAgent.includes('iphone 14') ||
+    userAgent.includes('iphone 15') ||
+    userAgent.includes('ipad pro') ||
+    userAgent.includes('pixel 6') ||
+    userAgent.includes('pixel 7') ||
+    userAgent.includes('pixel 8') ||
+    userAgent.includes('samsung galaxy s22') ||
+    userAgent.includes('samsung galaxy s23') ||
+    userAgent.includes('samsung galaxy s24');
+  
+  // Check device memory if available
+  let memoryTier = DevicePerformanceTier.MEDIUM;
+  if ('deviceMemory' in navigator) {
+    const memory = (navigator as any).deviceMemory;
+    if (memory <= MEMORY_THRESHOLD_LOW / 1024) {
+      memoryTier = DevicePerformanceTier.LOW;
+    } else if (memory >= MEMORY_THRESHOLD_HIGH / 1024) {
+      memoryTier = DevicePerformanceTier.HIGH;
+    }
   }
   
-  const quality = getRecommendedImageQuality();
-  const width = getRecommendedImageWidth();
+  // Check for reduced motion preference
+  const prefersReducedMotion = shouldReduceAnimations();
   
-  // For URLs with query parameters
-  if (url.includes('?')) {
-    return `${url}&quality=${quality}&w=${width}`;
+  // Check for low battery or power saving mode
+  let isPowerConstrained = false;
+  if ('getBattery' in navigator) {
+    const nav = navigator as any;
+    nav.getBattery?.().then((battery: any) => {
+      isPowerConstrained = battery.level <= BATTERY_THRESHOLD_LOW && !battery.charging;
+    }).catch(() => {
+      // Ignore errors with battery API
+    });
   }
   
-  // For URLs without query parameters
-  return `${url}?quality=${quality}&w=${width}`;
-};
+  // Determine tier based on all factors
+  if (isLowEndDeviceByUA || isPowerConstrained || prefersReducedMotion) {
+    tier = DevicePerformanceTier.LOW;
+  } else if (isHighEndDeviceByUA && memoryTier !== DevicePerformanceTier.LOW) {
+    tier = DevicePerformanceTier.HIGH;
+  } else {
+    tier = memoryTier;
+  }
+  
+  return tier;
+}
 
 /**
- * Check if the browser supports various performance optimizations
+ * Get scroll optimization settings based on device capabilities
+ * @returns Object with scroll optimization settings
  */
-export const getSupportedOptimizations = () => {
-  if (typeof window === 'undefined') {
-    return {
-      webp: false,
-      avif: false,
-      intersectionObserver: false,
-      resizeObserver: false
+export function getScrollOptimizationSettings() {
+  const tier = getDevicePerformanceTier();
+  const isMobile = isMobileDevice();
+  
+  // Default settings for medium tier
+  let settings = {
+    lazyLoadDistance: 300, // Load content 300px before it enters viewport
+    enableAnimations: true, // Enable animations
+    enableParallax: true, // Enable parallax effects
+    enableShadows: true, // Enable complex shadows
+    complexBackgrounds: true, // Enable complex backgrounds
+    imageQuality: 'medium' as 'low' | 'medium' | 'high', // Image quality
+    particleCount: 50, // Number of particles
+    throttleScroll: false, // Throttle scroll events
+    debounceDelay: 100, // Debounce delay in ms
+    useGPU: true, // Use GPU acceleration
+  };
+  
+  // Adjust based on performance tier
+  if (tier === DevicePerformanceTier.LOW) {
+    settings = {
+      ...settings,
+      lazyLoadDistance: isMobile ? 100 : 200, // Load content closer to viewport on mobile
+      enableAnimations: false, // Disable animations
+      enableParallax: false, // Disable parallax
+      enableShadows: false, // Disable complex shadows
+      complexBackgrounds: false, // Disable complex backgrounds
+      imageQuality: 'low', // Lower image quality
+      particleCount: 10, // Fewer particles
+      throttleScroll: true, // Throttle scroll events
+      debounceDelay: 200, // Longer debounce delay
+      useGPU: false, // Don't force GPU acceleration
+    };
+  } else if (tier === DevicePerformanceTier.HIGH) {
+    settings = {
+      ...settings,
+      lazyLoadDistance: 500, // Load content further from viewport
+      enableAnimations: true, // Enable all animations
+      enableParallax: true, // Enable parallax
+      enableShadows: true, // Enable complex shadows
+      complexBackgrounds: true, // Enable complex backgrounds
+      imageQuality: 'high', // Higher image quality
+      particleCount: 100, // More particles
+      throttleScroll: false, // Don't throttle scroll
+      debounceDelay: 50, // Shorter debounce delay
+      useGPU: true, // Use GPU acceleration
     };
   }
   
-  return {
-    webp: Boolean(document.createElement('canvas')
-      .toDataURL('image/webp')
-      .indexOf('data:image/webp') === 0),
-    avif: false, // AVIF detection is complex, defaulting to false
-    intersectionObserver: 'IntersectionObserver' in window,
-    resizeObserver: 'ResizeObserver' in window
-  };
-};
+  return settings;
+}
 
 /**
- * Determine if animations should be reduced/disabled on this device
+ * Get adaptive image quality based on device capabilities
+ * @returns Image quality level for loading optimized images
  */
-export const shouldReduceAnimations = (): boolean => {
-  if (typeof window === 'undefined') return false;
+export function getAdaptiveImageQuality(): 'low' | 'medium' | 'high' {
+  const tier = getDevicePerformanceTier();
   
-  // Check if user has requested reduced motion
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  
-  return (
-    prefersReducedMotion || 
-    isLowEndDevice() || 
-    isDataSavingEnabled() || 
-    isSlowConnection()
-  );
-};
-
-export default {
-  isMobileDevice,
-  isLowEndDevice,
-  isDataSavingEnabled,
-  isSlowConnection,
-  getRecommendedImageQuality,
-  getRecommendedImageWidth,
-  getOptimizedImageUrl,
-  getSupportedOptimizations,
-  shouldReduceAnimations
-};
+  switch (tier) {
+    case DevicePerformanceTier.LOW:
+      return 'low';
+    case DevicePerformanceTier.MEDIUM:
+      return 'medium';
+    case DevicePerformanceTier.HIGH:
+      return 'high';
+    default:
+      return 'medium';
+  }
+}

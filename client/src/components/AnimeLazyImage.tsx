@@ -1,200 +1,193 @@
-import { useState, CSSProperties, useEffect, memo } from 'react';
-import { LazyLoadImage } from 'react-lazy-load-image-component';
-import { cn } from '@/lib/utils';
-
-// Detect if we're on a mobile device
-const isMobileDevice = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    typeof navigator !== 'undefined' ? navigator.userAgent : ''
-  );
-};
-
-// Helper function to generate lower quality image URL for mobile
-const getMobileOptimizedImageUrl = (url: string): string => {
-  if (!url) return url;
-  
-  // If already using a compressed format like webp, return as is
-  if (url.includes('.webp')) return url;
-  
-  // If it's a relative URL without extension, don't modify
-  if (url.startsWith('/') && !url.includes('.')) return url;
-  
-  // If the URL already has a query parameter for quality or size, don't modify
-  if (url.includes('quality=') || url.includes('size=') || 
-      url.includes('w=') || url.includes('width=')) {
-    return url;
-  }
-  
-  // For URLs with query parameters
-  if (url.includes('?')) {
-    return `${url}&quality=70&w=400`;
-  }
-  
-  // For URLs without query parameters
-  return `${url}?quality=70&w=400`;
-};
-
-// Type definitions for the LazyLoadImage props
-interface LazyLoadImageProps {
-  alt?: string;
-  height?: number | string;
-  src: string;
-  width?: number | string;
-  className?: string;
-  placeholderSrc?: string;
-  effect?: 'blur' | 'opacity' | 'black-and-white';
-  afterLoad?: () => void;
-  beforeLoad?: () => void;
-  delayMethod?: 'debounce' | 'throttle';
-  delayTime?: number;
-  placeholder?: React.ReactNode;
-  threshold?: number;
-  useIntersectionObserver?: boolean;
-  visibleByDefault?: boolean;
-  wrapperClassName?: string;
-  wrapperProps?: React.HTMLAttributes<HTMLDivElement>;
-  style?: CSSProperties;
-  onError?: () => void;
-}
+import { useState, useEffect, useRef } from 'react';
+import { getAdaptiveImageQuality } from '../utils/deviceDetection';
 
 interface AnimeLazyImageProps {
   src: string;
   alt: string;
   className?: string;
-  wrapperClassName?: string;
-  width?: number | string;
-  height?: number | string;
-  placeholderColor?: string;
-  effect?: 'blur' | 'opacity' | 'black-and-white';
-  aspectRatio?: string;
-  rounded?: boolean | string;
-  eager?: boolean; // For important above-the-fold images
-  onLoad?: () => void;
-  onError?: () => void;
-  hoverEffect?: 'zoom' | 'brighten' | 'darken' | 'none';
+  width?: number;
+  height?: number;
+  objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
+  blur?: boolean;
   fallbackSrc?: string;
-  disableEffectsOnMobile?: boolean; // New prop to disable effects on mobile
-  optimizeForMobile?: boolean; // New prop to control mobile optimization
+  lazy?: boolean;
+  threshold?: number;
+  loadingIndicator?: boolean;
+  optimizeForMobile?: boolean;
+  priority?: boolean;
+  onLoad?: () => void;
+  onClick?: () => void;
 }
 
-const AnimeLazyImage = memo(({
+/**
+ * An optimized lazy-loading image component for anime thumbnails
+ * Includes smart loading strategies for mobile devices
+ */
+export const AnimeLazyImage = ({
   src,
   alt,
-  className,
-  wrapperClassName,
+  className = '',
   width,
   height,
-  placeholderColor = '#18181b', // Dark default
-  effect = 'blur',
-  aspectRatio = '16/9',
-  rounded = false,
-  eager = false,
+  objectFit = 'cover',
+  blur = true,
+  fallbackSrc = '/images/placeholder.webp',
+  lazy = true,
+  threshold = 0.1,
+  loadingIndicator = true,
+  optimizeForMobile = true,
+  priority = false,
   onLoad,
-  onError,
-  hoverEffect = 'none',
-  fallbackSrc = '/images/placeholder.webp', // Fallback image if src fails
-  disableEffectsOnMobile = true, // Default to disable effects on mobile
-  optimizeForMobile = true, // Default to optimize for mobile
+  onClick
 }: AnimeLazyImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [error, setError] = useState(false);
+  const [imageSrc, setImageSrc] = useState(priority ? src : '');
+  const imageRef = useRef<HTMLImageElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // On mobile devices, optimize image loading if requested
+  const [qualityLevel, setQualityLevel] = useState<'low' | 'medium' | 'high'>('medium');
   
   useEffect(() => {
-    // Set mobile state on client side
-    setIsMobile(isMobileDevice());
-  }, []);
+    // Determine image quality based on device capabilities
+    if (optimizeForMobile) {
+      setQualityLevel(getAdaptiveImageQuality());
+    }
+  }, [optimizeForMobile]);
   
-  // Determine rounded class based on the rounded prop
-  const roundedClass = rounded === true 
-    ? 'rounded-md' 
-    : typeof rounded === 'string' 
-      ? rounded 
-      : '';
+  // Get optimized image URL if needed
+  const getOptimizedImageUrl = (url: string): string => {
+    if (!optimizeForMobile) return url;
+    
+    // If URL already contains optimization params, don't modify
+    if (url.includes('?quality=') || url.includes('&quality=')) {
+      return url;
+    }
+    
+    // For low-end devices, use a lower quality image
+    if (qualityLevel === 'low') {
+      return appendQualityParam(url, 60);
+    } else if (qualityLevel === 'medium') {
+      return appendQualityParam(url, 80);
+    }
+    
+    return url;
+  };
   
-  // Determine hover effect class - disable on mobile if requested
-  const hoverEffectClass = (!isMobile || !disableEffectsOnMobile) ? (
-    hoverEffect === 'zoom' 
-      ? 'transition-transform duration-500 hover:scale-110' 
-      : hoverEffect === 'brighten' 
-        ? 'transition-filter duration-300 hover:brightness-125' 
-        : hoverEffect === 'darken' 
-          ? 'transition-filter duration-300 hover:brightness-75' 
-          : ''
-  ) : '';
+  // Helper to append quality parameter to URL
+  const appendQualityParam = (url: string, quality: number): string => {
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}quality=${quality}`;
+  };
   
+  // Setup intersection observer for lazy loading
+  useEffect(() => {
+    // Skip if image should load immediately or is already loaded
+    if (priority || !lazy || isLoaded) return;
+    
+    // Cleanup existing observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+    
+    if (!imageRef.current) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting) {
+          setImageSrc(getOptimizedImageUrl(src));
+          observer.disconnect();
+          observerRef.current = null;
+        }
+      },
+      {
+        root: null,
+        rootMargin: '200px', // Start loading before visible
+        threshold
+      }
+    );
+    
+    observer.observe(imageRef.current);
+    observerRef.current = observer;
+    
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [src, lazy, priority, threshold, isLoaded, qualityLevel]);
+  
+  // If priority is true, load immediately
+  useEffect(() => {
+    if (priority && src) {
+      setImageSrc(getOptimizedImageUrl(src));
+    }
+  }, [src, priority, qualityLevel]);
+  
+  // Handle image load events
   const handleLoad = () => {
     setIsLoaded(true);
-    onLoad?.();
+    setError(false);
+    if (onLoad) {
+      onLoad();
+    }
   };
   
+  // Handle errors
   const handleError = () => {
-    setIsError(true);
-    onError?.();
+    setError(true);
+    if (fallbackSrc) {
+      setImageSrc(fallbackSrc);
+    }
   };
-  
-  // Create the placeholder component with the specified color
-  const placeholderStyles: CSSProperties = {
-    backgroundColor: placeholderColor,
-    width: '100%',
-    height: '100%',
-  };
-  
-  // If there's an error and fallbackSrc is provided, use the fallback
-  let imageSrc = isError ? fallbackSrc : src;
-  
-  // Use optimized image for mobile if enabled
-  if (isMobile && optimizeForMobile) {
-    imageSrc = getMobileOptimizedImageUrl(imageSrc);
-  }
-  
-  // Simplified effect for mobile
-  const effectiveEffect = isMobile && disableEffectsOnMobile ? 'opacity' : effect;
-  
-  // Optimize loading threshold for mobile (load when closer to viewport)
-  const loadingThreshold = isMobile ? 200 : 100;
   
   return (
-    <div 
-      className={cn(
-        'overflow-hidden', 
-        roundedClass, 
-        wrapperClassName,
-        'will-change-transform' // Improve performance by hinting browser
-      )} 
+    <div
+      className={`relative overflow-hidden ${className}`}
       style={{ 
-        position: 'relative',
-        aspectRatio: aspectRatio,
-        width: width,
-        height: height,
-        contain: 'paint' // Optimize paint containment
+        width: width ? `${width}px` : '100%',
+        height: height ? `${height}px` : '100%' 
       }}
+      onClick={onClick}
     >
-      <LazyLoadImage
-        src={imageSrc}
+      {/* Loading indicator */}
+      {!isLoaded && loadingIndicator && (
+        <div 
+          className="absolute inset-0 bg-gray-800/20 flex items-center justify-center animate-pulse"
+          style={{ zIndex: 1 }}
+        >
+          <div className="w-8 h-8 border-2 border-primary/60 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
+      
+      {/* Blur placeholder effect */}
+      {!isLoaded && blur && (
+        <div 
+          className="absolute inset-0 bg-gray-800/40 backdrop-blur-sm"
+          style={{ zIndex: 0 }}
+        />
+      )}
+      
+      {/* Main image */}
+      <img 
+        ref={imageRef}
+        src={imageSrc} 
         alt={alt}
-        effect={effectiveEffect}
-        className={cn(
-          'object-cover w-full h-full', 
-          hoverEffectClass,
-          className,
-          isLoaded ? 'opacity-100' : 'opacity-0'
-        )}
-        beforeLoad={() => setIsLoaded(false)}
-        afterLoad={handleLoad}
+        loading={lazy && !priority ? "lazy" : undefined}
+        onLoad={handleLoad}
         onError={handleError}
-        threshold={loadingThreshold}
-        visibleByDefault={eager}
-        delayMethod="throttle"
-        delayTime={isMobile ? 300 : 100} // Higher throttle on mobile
-        placeholder={
-          <div style={placeholderStyles} className={roundedClass} />
-        }
+        style={{
+          objectFit,
+          visibility: isLoaded ? 'visible' : 'hidden',
+          width: '100%',
+          height: '100%',
+          transition: 'opacity 0.3s ease-in-out'
+        }}
       />
     </div>
   );
-});
-
-AnimeLazyImage.displayName = 'AnimeLazyImage';
+};
 
 export default AnimeLazyImage;

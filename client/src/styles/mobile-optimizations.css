@@ -1,162 +1,310 @@
 /**
- * Mobile Optimizations
+ * MOBILE OPTIMIZATIONS CSS
  * 
- * This file contains CSS optimizations specifically for mobile devices
- * to improve scrolling performance and reduce UI jank.
+ * This file contains CSS optimizations for mobile devices.
+ * These optimizations aim to improve performance by:
+ * 1. Reducing animation complexity
+ * 2. Minimizing repaints during scrolling
+ * 3. Using mobile-friendly styles for touch interfaces
+ * 4. Progressively enhancing features based on device capability
  */
 
+/* 
+ * ===============================
+ * PERFORMANCE OPTIMIZATION RULES
+ * ===============================
+ */
+
+/* Optimize rendering on mobile devices */
 @media (max-width: 768px) {
-  /* Apply passive touch handling to all scrollable elements */
-  .scrollable,
-  div,
-  main,
-  section,
-  article,
-  aside,
-  nav,
-  footer,
-  header,
-  ul,
-  ol {
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: auto; /* Disable smooth scrolling on mobile for better performance */
-  }
-
-  /* Prevent repaints during scrolling */
-  body * {
-    /* Prevent hover effects from causing repaints during scrolling */
-    will-change: auto; /* Reset any will-change to automatic optimization */
-    transform: translateZ(0); /* Promote to a layer only when needed */
-    backface-visibility: hidden; /* Reduces paints for elements that move */
-  }
-
-  /* Optimize transitions and animations */
-  *, *::before, *::after {
-    transition-duration: 0.15s !important; /* Shorter transitions on mobile */
-    animation-duration: 0.5s !important; /* Shorter animations on mobile */
-  }
-
-  /* Optimize fixed/sticky elements that might cause paint issues */
-  .fixed, 
-  .sticky, 
-  [style*="position: fixed"], 
-  [style*="position: sticky"] {
-    transform: translateZ(0); /* Force GPU acceleration */
-    contain: layout; /* Layout containment for better paint performance */
-  }
-
-  /* Optimize scrollable containers */
-  .scrollable-container,
-  [style*="overflow: auto"],
-  [style*="overflow: scroll"],
-  [style*="overflow-y: auto"],
-  [style*="overflow-y: scroll"] {
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    overscroll-behavior: contain; /* Prevent scroll chaining */
-    scroll-padding: 10px; /* Better touch scrolling */
-    scrollbar-width: thin; /* Thinner scrollbars on Firefox */
-  }
-
-  /* Reduce motion for users who prefer it */
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.001s !important; /* Essentially disable animations */
-      transition-duration: 0.001s !important; /* Essentially disable transitions */
-      scroll-behavior: auto !important; /* Disable smooth scrolling */
-    }
-  }
-
-  /* Better touch targets for mobile */
-  button,
-  a,
-  input,
-  select,
-  [role="button"],
-  [tabindex]:not([tabindex="-1"]) {
-    min-height: 40px; /* Minimum touch target height */
-    min-width: 40px; /* Minimum touch target width */
-  }
-
-  /* Optimize images and media */
-  img, 
-  video, 
-  canvas, 
-  picture, 
-  svg {
-    content-visibility: auto; /* Automatic content visibility optimization */
-    contain: content; /* Content containment for better paint performance */
-  }
-
-  /* Optimize layout transitions on mobile */
-  .layout-transition,
-  [data-animation],
-  [class*="motion-"],
-  [class*="animate-"],
-  [class*="transition-"] {
-    transform: translateZ(0); /* Force GPU acceleration */
-    will-change: transform, opacity; /* Optimize for common animations */
-    transition-property: transform, opacity; /* Limit transition to these properties */
-  }
-
-  /* Optimize hardware acceleration selectively */
-  .hardware-accelerated,
-  .gpu-accelerated,
-  [style*="transform"],
-  [style*="opacity"],
-  [style*="filter"] {
-    transform: translateZ(0); /* Force GPU acceleration */
-    backface-visibility: hidden; /* Reduces paints for elements that move */
-    perspective: 1000; /* Helps with 3D transforms */
-  }
-
-  /* Prevent browser address bar appearance/disappearance causing layout shifts */
-  html, 
+  /* Force hardware acceleration for smoother scrolling */
   body {
-    height: 100%; /* Use full height */
-    overflow-x: hidden; /* Prevent horizontal overflow */
-    overscroll-behavior-y: none; /* Prevent pull-to-refresh */
-    position: fixed; /* Fix the viewport */
-    width: 100%; /* Use full width */
-    overflow-y: auto; /* Allow vertical scrolling */
-  }
-
-  /* Prevent 300ms tap delay on touch devices */
-  a, button, [role="button"] {
-    touch-action: manipulation;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
   }
   
-  /* Disable hover effects on mobile */
-  [class*="hover:"] {
+  /* Reduce paint operations by preventing hover effects */
+  .mobile-no-hover {
+    transform: none !important;
     transition: none !important;
   }
   
-  /* Optimize list rendering */
-  ul, ol, dl {
-    content-visibility: auto;
-    contain-intrinsic-size: 0 500px; /* Provide size hint for hidden content */
+  /* Minimize layering and complexity for background effects */
+  .mobile-simplified-bg {
+    background-image: none !important;
+    background-attachment: initial !important;
+    background-size: cover !important;
   }
   
-  /* Optimize grid and flex layouts */
-  .grid, .flex, [class*="grid-"], [class*="flex-"] {
-    contain: layout style;
+  /* Set will-change property for elements that will animate */
+  .mobile-optimize-animation {
+    will-change: transform, opacity;
+  }
+  
+  /* Disable expensive text-shadows on mobile */
+  .mobile-no-text-shadow {
+    text-shadow: none !important;
+  }
+  
+  /* Simplified box shadows for better performance */
+  .mobile-simplified-shadow {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  /* Reduce filter complexity */
+  .mobile-no-filter {
+    filter: none !important;
+    -webkit-filter: none !important;
+  }
+  
+  /* GPU acceleration for critical animations */
+  .mobile-gpu {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  
+  /* Reduce repaints during scrolling */
+  .scroll-optimize {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    contain: content;
+  }
+  
+  /* Progressive enhancement - simpler gradients */
+  .mobile-simple-gradient {
+    background: linear-gradient(to bottom, var(--primary-color), #000) !important;
+  }
+  
+  /* Disable parallax effects */
+  .parallax-bg {
+    background-attachment: scroll !important;
+    background-position: center center !important;
+  }
+  
+  /* Disable blur effects */
+  .mobile-no-blur {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  /* Replace expensive backdrop-blur with simple opacity */
+  .mobile-blur-alternative {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+    backdrop-filter: none !important;
   }
 }
 
-/* Optimization specifically for low-end devices */
-@media (max-width: 768px) and (prefers-reduced-motion) {
-  /* Disable all animations completely */
-  *, *::before, *::after {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
+/* 
+ * ===============================
+ * TOUCH-FIRST INTERACTION STYLES
+ * ===============================
+ */
+
+@media (max-width: 768px) {
+  /* Increase touch targets for better mobile usability */
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
   }
   
-  /* Simplify all effects */
-  [class*="shadow-"],
-  [class*="blur-"],
-  [filter],
-  [style*="filter"] {
-    filter: none !important;
-    box-shadow: none !important;
+  /* Add active state for touch feedback instead of hover */
+  .mobile-touch-feedback:active {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+  
+  /* Optimize buttons for touch */
+  button, 
+  .button, 
+  [role="button"],
+  a.button,
+  input[type="button"],
+  input[type="submit"] {
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  
+  /* Prevent selection on interactive elements */
+  .prevent-select {
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+  
+  /* Optimize scrolling containers */
+  .scroll-container {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    overscroll-behavior: contain;
+  }
+  
+  /* Add momentum scrolling to carousels/sliders */
+  .carousel-container {
+    scroll-snap-type: x mandatory;
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .carousel-item {
+    scroll-snap-align: start;
+  }
+}
+
+/* 
+ * ===============================
+ * ADAPTIVE LOADING STRATEGIES
+ * ===============================
+ */
+
+/* Low-end device optimizations */
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+  /* Disable all animations */
+  *, *::before, *::after {
+    animation-duration: 0.001s !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+    transition-delay: 0s !important;
+  }
+  
+  /* Disable background video */
+  video.bg-video {
+    display: none !important;
+  }
+  
+  /* Replace with static image */
+  .video-fallback {
+    display: block !important;
+  }
+  
+  /* Use simplified loading indicators */
+  .loading-spinner {
+    animation: none !important;
+    opacity: 0.5 !important;
+  }
+}
+
+/* 
+ * ===============================
+ * TYPOGRAPHY OPTIMIZATIONS
+ * ===============================
+ */
+
+@media (max-width: 768px) {
+  /* Optimize font rendering */
+  body {
+    text-rendering: optimizeSpeed;
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  /* Scale down large headings */
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  /* Optimize line length for readability */
+  p, li {
+    max-width: 65ch;
+  }
+}
+
+/* 
+ * ===============================
+ * LAYOUT OPTIMIZATIONS
+ * ===============================
+ */
+
+@media (max-width: 768px) {
+  /* Prevent horizontal scroll */
+  .container-fluid,
+  .container {
+    padding-left: env(safe-area-inset-left, 15px);
+    padding-right: env(safe-area-inset-right, 15px);
+    overflow-x: hidden;
+  }
+  
+  /* Bottom padding for iOS safe area */
+  .has-safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 15px);
+  }
+  
+  /* Top padding for iOS safe area */
+  .has-safe-area-top {
+    padding-top: env(safe-area-inset-top, 15px);
+  }
+}
+
+/* 
+ * ===============================
+ * IMAGE OPTIMIZATIONS
+ * ===============================
+ */
+
+@media (max-width: 768px) {
+  /* Use smaller images on mobile */
+  .responsive-image {
+    content-visibility: auto;
+  }
+  
+  /* Apply blur-up loading for larger images */
+  .blur-up {
+    filter: blur(5px);
+    transition: filter 400ms;
+  }
+  
+  .blur-up.lazyloaded {
+    filter: blur(0);
+  }
+  
+  /* Prevent layout shifts during image loading */
+  .image-container {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Maintain aspect ratio to prevent layout shifts */
+  .aspect-preserve::before {
+    content: "";
+    display: block;
+    padding-top: var(--aspect-ratio, 56.25%); /* Default to 16:9 */
+  }
+}
+
+/* 
+ * ===============================
+ * SERVICE WORKER OFFLINE STYLES
+ * ===============================
+ */
+
+/* Indicate offline state */
+.offline-indicator {
+  display: none;
+}
+
+/* Only show when app is offline */
+.offline .offline-indicator {
+  display: block;
+}
+
+/* Style content differently when offline */
+.offline .online-only {
+  opacity: 0.5;
+}
+
+/* Additional helper classes for device capability detection */
+.touch-only {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .touch-only {
+    display: block;
+  }
+  
+  .pointer-only {
+    display: none;
   }
 }

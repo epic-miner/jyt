@@ -1,110 +1,182 @@
-import { ReactNode, useState, useEffect, useRef, memo } from 'react';
-import { cn } from '@/lib/utils';
-
-// Detect if we're on a mobile device
-const isMobileDevice = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    typeof navigator !== 'undefined' ? navigator.userAgent : ''
-  );
-};
+import { useEffect, useRef, useState, ReactNode } from 'react';
+import { isMobileDevice, getScrollOptimizationSettings } from '../utils/deviceDetection';
 
 interface ScrollLazyLoaderProps {
   children: ReactNode;
+  loadMore: () => void;
+  hasMore: boolean;
+  loading: boolean;
+  threshold?: number;
   className?: string;
-  placeholderClassName?: string;
-  height?: number | string;
-  placeholder?: ReactNode;
-  rootMargin?: string; // IntersectionObserver rootMargin
-  threshold?: number; // IntersectionObserver threshold
-  enabled?: boolean; // Allow disabling
-  fallbackHeight?: number | string; // Height to use if children are not visible
+  loadingIndicator?: ReactNode;
+  endMessage?: ReactNode;
+  scrollThrottleMs?: number;
+  useSmartLoading?: boolean;
 }
 
 /**
- * ScrollLazyLoader - Defers rendering of children until they're near the viewport
- * Helps improve scrolling performance by rendering only what's needed
+ * A performance-optimized infinite scroll component
+ * Detects device capabilities and adjusts loading behavior accordingly
  */
-const ScrollLazyLoader = memo(({
+export const ScrollLazyLoader = ({
   children,
-  className,
-  placeholderClassName,
-  height,
-  placeholder,
-  rootMargin = '200px 0px',
-  threshold = 0.1,
-  enabled = true,
-  fallbackHeight = 'auto'
+  loadMore,
+  hasMore,
+  loading,
+  threshold = 200,
+  className = '',
+  loadingIndicator,
+  endMessage,
+  scrollThrottleMs,
+  useSmartLoading = true
 }: ScrollLazyLoaderProps) => {
-  const [isVisible, setIsVisible] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastScrollTop = useRef(0);
   const [isMobile, setIsMobile] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
+  
+  // Get scroll optimization settings for the device
+  const [scrollSettings, setScrollSettings] = useState({
+    throttleScroll: false,
+    debounceDelay: 100,
+    lazyLoadDistance: 300
+  });
+  
+  // Initialize device-specific settings
   useEffect(() => {
     setIsMobile(isMobileDevice());
-  }, []);
-
+    
+    if (useSmartLoading) {
+      const settings = getScrollOptimizationSettings();
+      setScrollSettings({
+        throttleScroll: settings.throttleScroll,
+        debounceDelay: settings.debounceDelay,
+        lazyLoadDistance: settings.lazyLoadDistance
+      });
+    }
+  }, [useSmartLoading]);
+  
+  // Throttle function for scroll events
+  const throttle = (callback: Function, delay: number) => {
+    let lastCall = 0;
+    return function() {
+      const now = new Date().getTime();
+      if (now - lastCall < delay) {
+        return;
+      }
+      lastCall = now;
+      callback();
+    };
+  };
+  
+  // Check if we need to load more content
+  const checkLoadMore = () => {
+    if (!containerRef.current || loading || !hasMore) return;
+    
+    // Get scroll position and element height
+    const { scrollTop, clientHeight, scrollHeight } = 
+      containerRef.current === document.documentElement ? 
+      document.documentElement : 
+      containerRef.current;
+    
+    // For mobile devices, only load more when scrolling down
+    // This improves performance by avoiding unnecessary loads
+    if (isMobile) {
+      const scrollDown = scrollTop > lastScrollTop.current;
+      lastScrollTop.current = scrollTop;
+      
+      if (!scrollDown) return;
+    }
+    
+    // Adjust threshold based on device capabilities
+    const adaptiveThreshold = isMobile ? 
+      threshold * 0.7 : // Smaller threshold for mobile to start loading earlier
+      threshold;
+      
+    // Check if we're close to the bottom
+    if (scrollHeight - scrollTop - clientHeight <= adaptiveThreshold) {
+      loadMore();
+    }
+  };
+  
+  // Setup intersection observer as an alternative to scroll events
+  // This is more performant, especially on mobile
   useEffect(() => {
-    // If disabled or already visible, no need to observe
-    if (!enabled || isVisible) return;
-
-    const currentRef = ref.current;
-    if (!currentRef) return;
-
-    // Configure observer with more aggressive loading on desktop
-    // and more conservative loading on mobile
-    const observerOptions = {
-      rootMargin: isMobile ? '100px 0px' : rootMargin,
-      threshold: isMobile ? Math.min(0.05, threshold) : threshold
+    if (!hasMore || loading) return;
+    
+    // Cleanup existing observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+    
+    const options = {
+      root: null,
+      rootMargin: `0px 0px ${scrollSettings.lazyLoadDistance}px 0px`,
+      threshold: 0.1
     };
-
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setIsVisible(true);
-        // Stop observing once visible
-        observer.disconnect();
+    
+    const observer = new IntersectionObserver((entries) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && hasMore && !loading) {
+        loadMore();
       }
-    }, observerOptions);
-
-    observer.observe(currentRef);
-
+    }, options);
+    
+    // Find the sentinel element (last child of the container)
+    if (containerRef.current) {
+      const children = containerRef.current.children;
+      if (children.length > 0) {
+        const sentinel = children[children.length - 1];
+        observer.observe(sentinel);
+      }
+    }
+    
+    observerRef.current = observer;
+    
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
       }
     };
-  }, [enabled, isVisible, rootMargin, threshold, isMobile]);
-
-  // If component is disabled, render children immediately
-  if (!enabled) {
-    return <div className={className}>{children}</div>;
-  }
-
+  }, [hasMore, loading, children, scrollSettings.lazyLoadDistance]);
+  
+  // Setup scroll event listener as a fallback
+  useEffect(() => {
+    // We use window scroll for document scrolling
+    const scrollContainer = containerRef.current === document.documentElement ? 
+      window : containerRef.current;
+    
+    if (!scrollContainer) return;
+      
+    // Apply throttling based on device capabilities
+    const handleScroll = scrollSettings.throttleScroll ? 
+      throttle(checkLoadMore, scrollThrottleMs || scrollSettings.debounceDelay) : 
+      checkLoadMore;
+    
+    scrollContainer.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScroll);
+    };
+  }, [loading, hasMore, threshold, scrollSettings, scrollThrottleMs]);
+  
   return (
-    <div
-      ref={ref}
-      className={cn(className)}
-      style={{
-        height: isVisible ? height : fallbackHeight,
-        minHeight: isVisible ? undefined : fallbackHeight
-      }}
-    >
-      {isVisible ? (
-        children
-      ) : (
-        placeholder || (
-          <div 
-            className={cn(
-              "w-full h-full bg-dark-800/60 animate-pulse rounded-md",
-              placeholderClassName
-            )}
-            style={{ height: fallbackHeight }}
-          />
-        )
+    <div ref={containerRef} className={className}>
+      {children}
+      
+      {loading && (loadingIndicator || (
+        <div className="flex justify-center items-center py-4">
+          <div className="w-8 h-8 border-4 border-primary/60 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      ))}
+      
+      {!hasMore && endMessage && (
+        <div className="py-4">
+          {endMessage}
+        </div>
       )}
     </div>
   );
-});
-
-ScrollLazyLoader.displayName = 'ScrollLazyLoader';
+};
 
 export default ScrollLazyLoader;
