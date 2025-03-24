@@ -14,6 +14,7 @@ import ScrollReveal from '../components/ScrollReveal';
 import TiltCard from '../components/TiltCard';
 import ConfettiEffect from '../components/ConfettiEffect';
 import LottieLoader from '../components/LottieLoader';
+import BackToTop from '../components/BackToTop';
 import { cleanAnimeTitle } from '../utils/titleFormatter';
 
 // Animation variants for sections
@@ -218,7 +219,7 @@ const Home = () => {
     <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-800 pb-24 md:pb-8">
       {/* Replaced particles with a simpler gradient background for better performance */}
       <div className="gradient-animated absolute inset-0 z-[-1]" style={{ opacity: 0.7 }} />
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="container mx-auto px-4 py-6 max-w-7xl optimize-scroll">
         {/* Welcome Banner with AnimatedTitle */}
         <ScrollReveal>
           <div className="mb-8 text-center">
@@ -286,10 +287,11 @@ const Home = () => {
 
         {/* Trending Section */}
         <motion.section 
+          id="trending"
           initial="hidden"
           animate="visible"
           variants={sectionVariants}
-          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5"
+          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5 scroll-mt-16"
         >
           <SectionTitle 
             icon="chart-line" 
@@ -334,10 +336,11 @@ const Home = () => {
         
         {/* Latest Released Section */}
         <motion.section 
+          id="latest"
           initial="hidden"
           animate="visible"
           variants={sectionVariants}
-          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5"
+          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5 scroll-mt-16"
         >
           <SectionTitle 
             icon="clock" 
@@ -382,10 +385,11 @@ const Home = () => {
         
         {/* Popular Section */}
         <motion.section 
+          id="popular"
           initial="hidden"
           animate="visible"
           variants={sectionVariants}
-          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5"
+          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5 scroll-mt-16"
         >
           <SectionTitle 
             icon="fire" 
@@ -430,10 +434,11 @@ const Home = () => {
 
         {/* All Anime Section */}
         <motion.section 
+          id="all"
           initial="hidden"
           animate="visible"
           variants={sectionVariants}
-          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5"
+          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5 scroll-mt-16"
         >
           <SectionTitle 
             icon="film" 
@@ -478,10 +483,11 @@ const Home = () => {
 
         {/* Browse by Genre Section */}
         <motion.section 
+          id="genres"
           initial="hidden"
           animate="visible"
           variants={sectionVariants}
-          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5"
+          className="mb-12 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5 scroll-mt-16"
         >
           <SectionTitle 
             icon="tags" 

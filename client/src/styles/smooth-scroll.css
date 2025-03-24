@@ -1,0 +1,43 @@
+/* Smooth scrolling for the whole page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* For Safari and older browsers that don't support scroll-behavior */
+@supports not (scroll-behavior: smooth) {
+  html, body {
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-snap-type: y proximity;
+  }
+  
+  section {
+    scroll-snap-align: start;
+  }
+}
+
+/* Mobile specific scroll behavior tweaks */
+@media (max-width: 768px) {
+  html {
+    scroll-padding-top: 70px; /* Adjust based on your header height */
+  }
+  
+  /* Smoother scrolling for touch devices */
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Optimize performance during scrolling to prevent janky scrolling */
+  .optimize-scroll {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+
+/* Disable smooth scrolling for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

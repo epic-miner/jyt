@@ -4,6 +4,8 @@
 @import url('./styles/mobile-optimizations.css');
 /* Import Gradient Background Styles - fallback for low-power devices */
 @import url('./styles/gradient-background.css');
+/* Import Smooth Scrolling Styles - improves navigation experience */
+@import url('./styles/smooth-scroll.css');
 
 /* Theater mode button fix */
 .fluid_video_wrapper .fluid_controls_container .fluid_button.fluid_button_theatre {
