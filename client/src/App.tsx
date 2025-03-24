@@ -1,7 +1,8 @@
-import { Route, Switch, Link, Navigate } from "wouter";
+import { Route, Switch, Link, Redirect } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import NavBar from "./components/NavBar";
 import { MobileNavBar } from "./components/MobileNavBar";
+import TestPlayerPage from "./pages/TestPlayerPage";
 import ScrollToTop from "./components/ScrollToTop";
 import { PageTransition } from "./components/PageTransition";
 import { lazy, Suspense, useEffect } from "react";
@@ -87,7 +88,10 @@ function App() {
             }>
               <PageTransition>
                 <Switch>
-                  <Route path="/" element={<Navigate to="/test-player" />} />
+                  <Route path="/">
+                    {() => <Redirect to="/test-player" />}
+                  </Route>
+                  <Route path="/test-player" component={TestPlayerPage} />
                   <Route path="/anime/:id" component={AnimeDetails} />
                   <Route path="/watch/:animeId/:episodeId" component={VideoPlayerPage} />
                   <Route path="/search" component={SearchResults} />

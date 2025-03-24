@@ -1,9 +1,25 @@
 import { useEffect, useRef } from 'react';
-import { FluidPlayerOptions, FluidPlayerInstance } from '../types/fluid-player';
 import '../styles/play-button-fix.css';
-//import { createDefaultAdConfiguration } from '../lib/adConfig'; // Removed import as adConfig is no longer needed
 
-// Simple test page to verify Fluid Player is loading correctly
+// Define types for Fluid Player
+interface FluidPlayerInstance {
+  on: (event: string, callback: () => void) => void;
+  destroy: () => void;
+}
+
+interface FluidPlayerOptions {
+  layoutControls?: {
+    primaryColor?: string;
+    fillToContainer?: boolean;
+  };
+}
+
+declare global {
+  interface Window {
+    fluidPlayer: (id: string, options?: FluidPlayerOptions) => FluidPlayerInstance;
+  }
+}
+
 const TestPlayerPage = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerInstanceRef = useRef<FluidPlayerInstance | null>(null);
@@ -28,77 +44,26 @@ const TestPlayerPage = () => {
         .fluid_video_wrapper .fluid_initial_play_button {
           border-color: transparent transparent transparent hsl(266, 100%, 64%) !important;
         }
-
-        /* Target dynamically added pseudo-elements */
-        #test-video-player + .fluid_video_wrapper .fluid_initial_play_button:before,
-        #test-video-player + .fluid_video_wrapper .fluid_initial_play_button:after,
-        #fluid_video_wrapper_test-video-player .fluid_initial_play_button:before,
-        #fluid_video_wrapper_test-video-player .fluid_initial_play_button:after,
-        .fluid_video_wrapper .fluid_initial_play_button:before,
-        .fluid_video_wrapper .fluid_initial_play_button:after {
-          border-color: transparent transparent transparent hsl(266, 100%, 64%) !important;
-        }
-
-        /* For SVG triangles or other icons */
-        .fluid_initial_play_button svg,
-        .fluid_initial_play_button i {
-          color: hsl(266, 100%, 64%) !important;
-          fill: hsl(266, 100%, 64%) !important;
-        }
       `;
 
-      // Directly target play button elements and modify inline styles
-      const fixPlayButtonStyles = () => {
-        const playButtons = document.querySelectorAll('.fluid_initial_play_button');
-        playButtons.forEach(button => {
-          if (button instanceof HTMLElement) {
-            // Override any inline styles
-            button.style.setProperty('border-color', 'transparent transparent transparent hsl(266, 100%, 64%)', 'important');
-
-            // Also look for any SVG or icon children
-            const svgElements = button.querySelectorAll('svg, i');
-            svgElements.forEach(svg => {
-              if (svg instanceof HTMLElement) {
-                svg.style.setProperty('color', 'hsl(266, 100%, 64%)', 'important');
-                svg.style.setProperty('fill', 'hsl(266, 100%, 64%)', 'important');
-              }
-            });
-          }
-        });
-      };
-
-      // Run the style fix
-      fixPlayButtonStyles();
-
-      // Set up a MutationObserver to watch for dynamically added play buttons
+      // Create MutationObserver to monitor for any dynamic changes
       const observer = new MutationObserver((mutations) => {
-        let needsFix = false;
-
-        mutations.forEach(mutation => {
+        mutations.forEach((mutation) => {
           if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-            mutation.addedNodes.forEach(node => {
-              if (node instanceof HTMLElement) {
-                if (node.classList.contains('fluid_initial_play_button') || 
-                    node.querySelector('.fluid_initial_play_button')) {
-                  needsFix = true;
-                }
+            // Re-apply our styles when new nodes are added
+            const playButtons = document.querySelectorAll('.fluid_initial_play_button');
+            playButtons.forEach(button => {
+              if (button instanceof HTMLElement) {
+                button.style.setProperty('border-color', 'transparent transparent transparent hsl(266, 100%, 64%)', 'important');
               }
             });
           }
         });
-
-        if (needsFix) {
-          fixPlayButtonStyles();
-        }
       });
 
       // Start observing the document with the configured parameters
-      observer.observe(document.body, { 
-        childList: true, 
-        subtree: true
-      });
+      observer.observe(document.body, { childList: true, subtree: true });
 
-      // Store the observer for cleanup
       return observer;
     };
 
@@ -138,10 +103,10 @@ const TestPlayerPage = () => {
     // Wait for window.fluidPlayer to be available
     const checkForFluidPlayer = () => {
       console.log('Checking for window.fluidPlayer availability');
-      console.log('window.fluidPlayer exists:', typeof (window as any).fluidPlayer !== 'undefined' ? 'YES' : 'NO');
-      console.log('window.fluidPlayer type:', typeof (window as any).fluidPlayer);
+      console.log('window.fluidPlayer exists:', typeof window.fluidPlayer !== 'undefined' ? 'YES' : 'NO');
+      console.log('window.fluidPlayer type:', typeof window.fluidPlayer);
 
-      if (typeof (window as any).fluidPlayer === 'function') {
+      if (typeof window.fluidPlayer === 'function') {
         console.log('Fluid Player is available, initializing test player...');
         initFluidPlayer();
       } else {
@@ -158,49 +123,19 @@ const TestPlayerPage = () => {
       }
 
       try {
-        // Enhanced configuration with streaming support and ad optimization
-        const playerInstance = (window as any).fluidPlayer('test-video-player', {
+        // Configure player options
+        const playerOptions: FluidPlayerOptions = {
           layoutControls: {
-            primaryColor: "hsl(266, 100%, 64%)",
-            fillToContainer: true,
-            autoPlay: false,
-            playbackRateEnabled: true, // Enable playback speed control
-            allowTheatre: true, // Enable theater mode
-            miniPlayer: {
-              enabled: true,
-              width: 400,
-              widthMobile: 280,
-              placeholderText: "Playing in Mini Player",
-              position: "bottom right"
-            },
-            controlBar: {
-              autoHide: true,
-              autoHideTimeout: 3,
-              animated: true
-            },
-            logo: {
-              imageUrl: null,
-              position: "top left",
-              clickUrl: null,
-              opacity: 1,
-              showOverAds: false, // Hide logo during ad playback for better ad visibility
-            },
-            contextMenu: {
-              controls: true
-            }
-          },
-          // Ad configuration removed
-          //vastOptions: createDefaultAdConfiguration(),
-          // Modules configuration to properly handle streaming/quality options
-          modules: {
-            configureDash: (options: any) => {
-              return options;
-            },
-            configureHls: (options: any) => {
-              return options;
-            }
+            primaryColor: "#7c3aed", // Purple color
+            fillToContainer: true
           }
-        });
+        };
+
+        // Initialize FluidPlayer
+        const playerInstance = window.fluidPlayer(
+          'test-video-player',
+          playerOptions
+        );
 
         console.log('Fluid Player instance created successfully:', playerInstance);
         playerInstanceRef.current = playerInstance;
@@ -237,8 +172,7 @@ const TestPlayerPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-black p-4">
-      <h1 className="text-2xl font-bold mb-6">Fluid Player Test Page</h1>
-
+      <h1 className="text-2xl font-bold mb-6 text-white">Fluid Player Test Page</h1>
       <div className="w-full max-w-4xl mx-auto bg-gray-900 rounded-lg overflow-hidden">
         <video 
           ref={videoRef}

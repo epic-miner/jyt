@@ -95,3 +95,24 @@
 .fluid_initial_play_button:after {
   border-color: transparent transparent transparent hsl(266, 100%, 64%) !important;
 }
+/* Force override for play button triangle */
+.fluid_initial_play_button {
+  border-color: transparent transparent transparent hsl(266, 100%, 64%) !important;
+}
+
+/* Ensure fluid player container is responsive */
+.fluid_video_wrapper {
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+}
+
+/* Fix play button styling */
+.fluid_initial_play {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Make sure video takes up full container */
+#fluid_video_wrapper_test-video-player {
+  width: 100% !important;
+}
