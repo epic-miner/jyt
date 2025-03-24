@@ -34,23 +34,23 @@ const Footer: React.FC = () => {
             <h3 className="text-lg font-semibold mb-4 text-primary">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/">
-                  <a className="text-muted-foreground hover:text-primary transition-colors">Home</a>
+                <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
+                  Home
                 </Link>
               </li>
               <li>
-                <Link href="/recently-watched">
-                  <a className="text-muted-foreground hover:text-primary transition-colors">Recently Watched</a>
+                <Link href="/recently-watched" className="text-muted-foreground hover:text-primary transition-colors">
+                  Recently Watched
                 </Link>
               </li>
               <li>
-                <Link href="/category/action">
-                  <a className="text-muted-foreground hover:text-primary transition-colors">Action Anime</a>
+                <Link href="/category/action" className="text-muted-foreground hover:text-primary transition-colors">
+                  Action Anime
                 </Link>
               </li>
               <li>
-                <Link href="/category/popular">
-                  <a className="text-muted-foreground hover:text-primary transition-colors">Popular Anime</a>
+                <Link href="/category/popular" className="text-muted-foreground hover:text-primary transition-colors">
+                  Popular Anime
                 </Link>
               </li>
             </ul>
