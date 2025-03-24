@@ -1,9 +1,83 @@
 /**
  * Advanced DevTools detection utility
  * Combines multiple detection techniques to identify if developer tools are open
+ * with special handling for Brave and other Chromium-based browsers
  */
 
-// Firebug and Chrome/Firefox dev tools detection
+// Check if browser is Brave
+const isBraveBrowser = (): boolean => {
+  try {
+    // @ts-ignore - Brave-specific property
+    return navigator.brave?.isBrave || false;
+  } catch (_) {
+    return false;
+  }
+};
+
+// Specialized detection approach for Brave browser
+const braveDetection = (): boolean => {
+  try {
+    // Test 1: Regex-based detection of debugger 
+    const regexMatch = /Chrome\/devtools/i.test(navigator.userAgent);
+    if (regexMatch) return true;
+    
+    // Test 2: Brave-specific console timing test (adjusted threshold)
+    const startTime = performance.now();
+    console.log('');
+    console.clear();
+    const endTime = performance.now();
+    // Brave requires a higher threshold
+    return (endTime - startTime) > 30;
+  } catch (_) {
+    return false;
+  }
+};
+
+// Elements test (works in most browsers including Brave)
+const elementsTest = (): boolean => {
+  try {
+    const div = document.createElement('div');
+    
+    // This is a more reliable test for Brave
+    let measureDevTools = false;
+    Object.defineProperty(div, 'id', {
+      get() {
+        measureDevTools = true;
+        return undefined;
+      },
+    });
+    
+    console.log(div);
+    console.clear();
+    
+    return measureDevTools;
+  } catch (_) {
+    return false;
+  }
+};
+
+// Chromium-based devtools detection (Chrome, Edge, Brave, etc.)
+const chromiumDetection = (): boolean => {
+  // Detects the __REACT_DEVTOOLS_GLOBAL_HOOK__ which is present in dev tools
+  // @ts-ignore
+  if (window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+    return true;
+  }
+  
+  // Detects Chrome DevTools protocol
+  try {
+    if (/Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)) {
+      return (window as any).chrome && 
+             (window as any).chrome.devtools !== undefined;
+    }
+  } catch (_) {
+    // Ignore errors
+  }
+  
+  return false;
+};
+
+// Main DevTools detection function - combines multiple methods
 export const isDevToolsOpen = (): boolean => {
   try {
     // Method 1: Window size comparison
@@ -53,14 +127,19 @@ export const isDevToolsOpen = (): boolean => {
     setTimeout(() => {
       // @ts-ignore
       window.Date = oldDate;
-    }, 500);
+    }, 100);
 
     // Method 5: Test Firebug
     if (window.console && (window.console as any).firebug) {
       return true;
     }
-
-    return consoleDetection() || dbgDetected;
+    
+    // Method 6: Browser-specific detection
+    if (isBraveBrowser()) {
+      return braveDetection() || elementsTest();
+    }
+    
+    return consoleDetection() || dbgDetected || chromiumDetection() || elementsTest();
   } catch (e) {
     // If there's an error in our detection code, play it safe and return false
     return false;
