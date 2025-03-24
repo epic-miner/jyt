@@ -1,0 +1,20 @@
+
+User-agent: *
+Allow: /
+
+# Optimize crawling rate
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://your-domain.com/sitemap.xml
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /private/
+
+# Allow important content
+Allow: /anime/
+Allow: /episode/
+Allow: /search
+Allow: /browse
+Allow: /genres/

@@ -11,7 +11,7 @@
   }
 }
 
-/* For devices that prefer reduced motion */
+/* For devices that prefer reduced motion - improves Core Web Vitals */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto !important;
@@ -24,32 +24,34 @@
   }
 }
 
-/* YouTube-like scrolling performance optimizations */
+/* Performance optimizations - helps with Largest Contentful Paint (LCP) */
 .optimize-scroll {
   -webkit-overflow-scrolling: touch; /* For older iOS */
   overscroll-behavior: contain;  /* Prevent scroll chaining */
   scroll-snap-type: y proximity; /* Subtle scroll snapping for sections */
   
-  /* YouTube-like scroll optimizations */
-  will-change: transform; /* GPU acceleration hint */
-  perspective: 1000px; /* Create a stacking context for better compositing */
-  transform-style: preserve-3d; /* Help with layer compositing */
-  backface-visibility: hidden; /* Reduce paints */
+  /* Performance optimizations for better Core Web Vitals */
+  contain: content; /* Containment for better performance */
+  content-visibility: auto; /* Prioritize visible content rendering - SEO boost */
+  contain-intrinsic-size: 1px 5000px; /* Estimated size hint */
 }
 
-/* Optimize scrolling of nested containers */
+/* Optimize scrolling of nested containers - helps with First Input Delay (FID) */
 .optimize-scroll > section {
   scroll-snap-align: start;
-  /* Consider content for its own layer to improve scroll performance */
-  will-change: opacity, transform;
-  transform: translateZ(0);
+  contain: layout paint; /* Containment for performance */
 }
 
-/* YouTube-like scroll reveal animations */
-.scroll-reveal {
+/* Improved lazy load styles - better Cumulative Layout Shift (CLS) scores */
+.lazy-image {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition: opacity 0.3s ease-in;
+  min-height: 1px;
+  aspect-ratio: 16/9; /* Prevent layout shifts */
+}
+
+.lazy-image.loaded {
+  opacity: 1;
 }
 
 .scroll-reveal.visible {

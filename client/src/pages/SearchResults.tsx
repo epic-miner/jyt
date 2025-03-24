@@ -16,6 +16,21 @@ const SearchResults = () => {
     const query = searchParams.get('q');
     if (query) {
       setSearchQuery(query);
+      
+      // Update page title and meta description for SEO
+      document.title = `Search Results for "${query}" | 9Anime - Watch Anime Online`;
+      
+      // Update meta description
+      const metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription) {
+        metaDescription.setAttribute('content', `Search results for "${query}" - Find and watch your favorite anime online for free with English subtitles`);
+      }
+      
+      // Update canonical URL to avoid duplicate content issues
+      let canonicalLink = document.querySelector('link[rel="canonical"]');
+      if (canonicalLink) {
+        canonicalLink.setAttribute('href', `https://your-domain.com/search?q=${encodeURIComponent(query)}`);
+      }
     }
   }, [location]);
 
@@ -28,10 +43,10 @@ const SearchResults = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <h2 className="text-xl font-bold mb-4 flex items-center">
+      <h1 className="text-xl font-bold mb-4 flex items-center">
         <i className="fas fa-search mr-2 text-primary"></i> Search Results
         {searchQuery && <span className="ml-2 text-sm font-normal text-slate-400">for "{searchQuery}"</span>}
-      </h2>
+      </h1>
 
       {isLoading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
