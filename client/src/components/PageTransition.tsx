@@ -1,8 +1,44 @@
 import { motion, useReducedMotion, AnimatePresence } from 'framer-motion';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useEffect, useState } from 'react';
+
+// Detect if we're on a mobile device
+const isMobileDevice = () => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    typeof navigator !== 'undefined' ? navigator.userAgent : ''
+  );
+};
+
+// Further simplified variants for low-end mobile devices
+const mobileLowEndVariants = {
+  initial: {
+    opacity: 0
+  },
+  animate: {
+    opacity: 1
+  },
+  exit: {
+    opacity: 0
+  }
+};
+
+// Simplified variants for mobile
+const mobileVariants = {
+  initial: {
+    opacity: 0,
+    y: 10 // Reduced distance
+  },
+  animate: {
+    opacity: 1,
+    y: 0
+  },
+  exit: {
+    opacity: 0,
+    y: -10 // Reduced distance
+  }
+};
 
 // Define motion variants outside component to prevent recreation on each render
-const pageVariants = {
+const desktopVariants = {
   initial: {
     opacity: 0,
     y: 20,
@@ -47,11 +83,29 @@ const mobileTransition = {
   duration: 0.15
 };
 
-// Detect if we're on a mobile device
-const isMobileDevice = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    typeof navigator !== 'undefined' ? navigator.userAgent : ''
-  );
+// Even faster transition for low-end mobile devices
+const mobileLowEndTransition = {
+  type: "tween",
+  ease: "easeInOut",
+  duration: 0.1
+};
+
+// Detect if device might be low-end based on user agent and memory
+const isLowEndDevice = () => {
+  if (typeof navigator === 'undefined') return false;
+  
+  // Check device memory (Chrome, Opera, Samsung Internet, etc.)
+  // @ts-ignore
+  const deviceMemory = navigator.deviceMemory || 4; // 4GB is default if not supported
+  
+  // Check for low-end devices or devices with limited memory
+  if (deviceMemory < 4) return true;
+  
+  // Check for older mobile devices or slower chipsets
+  const isOlderMobile = /Android [1-7]\./.test(navigator.userAgent);
+  if (isOlderMobile) return true;
+  
+  return false;
 };
 
 interface PageTransitionProps {
@@ -61,27 +115,51 @@ interface PageTransitionProps {
    * Useful when URL params change but component stays the same
    */
   transitionKey?: string | number;
+  /**
+   * Disable transitions completely for low-performance devices
+   */
+  disableOnLowEnd?: boolean;
 }
 
 // Memoize the component to prevent unnecessary re-renders
 export const PageTransition = memo(({ 
   children,
-  transitionKey
+  transitionKey,
+  disableOnLowEnd = true
 }: PageTransitionProps) => {
   // Respect user's reduced motion preference for accessibility
   const prefersReducedMotion = useReducedMotion();
+  const [isMobile, setIsMobile] = useState(false);
+  const [isLowEnd, setIsLowEnd] = useState(false);
   
-  // Conditionally select variants based on user preference
-  const variants = useMemo(() => 
-    prefersReducedMotion ? reducedMotionVariants : pageVariants, 
-    [prefersReducedMotion]
-  );
+  useEffect(() => {
+    // Set values on client-side only
+    setIsMobile(isMobileDevice());
+    setIsLowEnd(isLowEndDevice());
+  }, []);
+  
+  // Skip animations completely for very low-end devices
+  const shouldSkipAnimation = disableOnLowEnd && isLowEnd;
+  
+  // Conditionally select variants based on device capabilities
+  const variants = useMemo(() => {
+    if (prefersReducedMotion) return reducedMotionVariants;
+    if (isLowEnd) return mobileLowEndVariants;
+    if (isMobile) return mobileVariants;
+    return desktopVariants;
+  }, [prefersReducedMotion, isLowEnd, isMobile]);
 
   // Select appropriate transition based on device for better performance
-  const transition = useMemo(() => 
-    isMobileDevice() ? mobileTransition : desktopTransition, 
-    []
-  );
+  const transition = useMemo(() => {
+    if (isLowEnd) return mobileLowEndTransition;
+    if (isMobile) return mobileTransition;
+    return desktopTransition;
+  }, [isLowEnd, isMobile]);
+  
+  // For very low-end devices, skip animations entirely
+  if (shouldSkipAnimation) {
+    return <div className="w-full">{children}</div>;
+  }
   
   return (
     <AnimatePresence mode="wait">
@@ -92,10 +170,13 @@ export const PageTransition = memo(({
         exit="exit"
         variants={variants}
         transition={transition}
-        className="w-full will-change-[transform,opacity]"
-        // Improve performance by letting the browser know this element will animate
-        layoutId={transitionKey?.toString()}
-        // Improve browser paint performance  
+        className="w-full"
+        style={{
+          // Apply performance optimizations with style to ensure they work
+          willChange: 'opacity, transform',
+          isolation: 'isolate', // Create a new stacking context
+          contain: 'content' // Hint for browser optimization
+        }}
         data-performance="accelerated"
       >
         {children}
