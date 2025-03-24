@@ -3,10 +3,11 @@ import { useEffect } from 'react';
 import { isDevToolsOpen, monitorDevTools } from '../lib/devToolsDetection';
 import { 
   isBraveBrowser, 
-  detectBraveDevTools, 
+  detectBraveDevTools,
   installBraveKeyboardProtection,
   createBraveBlocker
 } from '../lib/braveProtection';
+import { installDebuggerProtection, checkForDebuggerEvasion } from '../lib/debuggerProtection';
 
 export const useConsoleProtection = () => {
   useEffect(() => {
@@ -163,12 +164,34 @@ export const useConsoleProtection = () => {
         handleDevToolsDetected();
       }
       
-      // Setup Brave-specific checks
+      // Setup Brave-specific checks with progressive intervals
+      let checkCount = 0;
+      const maxChecks = 100; // Limit the number of aggressive checks
+      
+      // Start with frequent checks, then reduce frequency
       const braveInterval = setInterval(() => {
         if (detectBraveDevTools()) {
           handleDevToolsDetected();
+          return;
         }
-      }, 1000);
+        
+        // After a certain number of checks, reduce the frequency
+        checkCount++;
+        if (checkCount >= maxChecks) {
+          clearInterval(braveInterval);
+          
+          // Switch to a less frequent interval for ongoing monitoring
+          const longTermInterval = setInterval(() => {
+            if (detectBraveDevTools()) {
+              handleDevToolsDetected();
+            }
+          }, 2000);
+          
+          cleanupFunctions.push(() => {
+            clearInterval(longTermInterval);
+          });
+        }
+      }, 500); // Start with more frequent checks
       
       cleanupFunctions.push(() => {
         clearInterval(braveInterval);
@@ -177,6 +200,25 @@ export const useConsoleProtection = () => {
     
     // Setup special detection techniques
     setupIframeDetector();
+    
+    // Install anti-debugger dodging protection
+    const debuggerProtectionCleanup = installDebuggerProtection();
+    cleanupFunctions.push(debuggerProtectionCleanup);
+    
+    // Check for debugger evasion techniques
+    if (checkForDebuggerEvasion()) {
+      console.log("Debugger evasion detected!");
+      handleDevToolsDetected();
+    }
+    
+    // Periodically check for debugger evasion
+    const evasionCheckInterval = setInterval(() => {
+      if (checkForDebuggerEvasion()) {
+        handleDevToolsDetected();
+        clearInterval(evasionCheckInterval);
+      }
+    }, 3000);
+    cleanupFunctions.push(() => clearInterval(evasionCheckInterval));
     
     // Check immediately when page loads with standard method
     if (isDevToolsOpen()) {

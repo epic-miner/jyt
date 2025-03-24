@@ -72,6 +72,26 @@ export const detectBraveDevTools = (): boolean => {
     const endTime = performance.now();
     const timeDiff = endTime - startTime;
     
+    // Method 3: Check for dev tools window by comparing iframe dimensions
+    try {
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+      
+      // In Brave with DevTools open, there can be discrepancies
+      const iframeWinHeight = iframe.contentWindow?.innerHeight || 0;
+      const iframeDocHeight = iframe.contentDocument?.documentElement.clientHeight || 0;
+      
+      document.body.removeChild(iframe);
+      
+      // If the heights don't match when they should, DevTools might be open
+      if (Math.abs(iframeWinHeight - iframeDocHeight) > 50) {
+        return true;
+      }
+    } catch (e) {
+      // Ignore errors
+    }
+    
     // Brave has different performance characteristics
     // Console operations are significantly slower with DevTools open
     return timeDiff > 50; 
@@ -111,6 +131,43 @@ export const installBraveKeyboardProtection = (): (() => void) => {
   return () => {
     window.removeEventListener('keydown', handleKeyDown, true);
   };
+};
+
+// Special function to detect DevTools on initial page load for Brave
+export const detectBraveDevToolsOnLoad = (callback: () => void): void => {
+  // First check - immediate check
+  if (detectBraveDevTools()) {
+    callback();
+    return;
+  }
+  
+  // Second check after a slight delay (helps catch slow-loading dev tools)
+  setTimeout(() => {
+    if (detectBraveDevTools()) {
+      callback();
+      return;
+    }
+    
+    // Third check using MutationObserver to detect DOM changes typical of DevTools
+    const observer = new MutationObserver(() => {
+      if (detectBraveDevTools()) {
+        observer.disconnect();
+        callback();
+      }
+    });
+    
+    // Start observing the document for any changes
+    observer.observe(document.documentElement, {
+      attributes: true,
+      childList: true,
+      subtree: true
+    });
+    
+    // Clean up after a few seconds if nothing detected
+    setTimeout(() => {
+      observer.disconnect();
+    }, 5000);
+  }, 500);
 };
 
 // Create a blocking overlay with Brave-specific message
