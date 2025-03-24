@@ -254,66 +254,10 @@ export const preventTextSelection = (element: HTMLElement) => {
   });
 };
 
-// Iframe protection - enhanced with more aggressive prevention
+// Iframe protection
 export const preventIframeEmbedding = () => {
-  try {
-    // Method 1: Standard frame busting
-    if (window.self !== window.top) {
-      window.top!.location.href = window.self.location.href;
-    }
-    
-    // Method 2: Use X-Frame-Options header (this is set server-side, but we can check)
-    if (window.self !== window.top) {
-      // If we're in a frame, create a blocker
-      const frameBlocker = document.createElement('div');
-      frameBlocker.style.position = 'fixed';
-      frameBlocker.style.top = '0';
-      frameBlocker.style.left = '0';
-      frameBlocker.style.width = '100%';
-      frameBlocker.style.height = '100%';
-      frameBlocker.style.backgroundColor = 'black';
-      frameBlocker.style.zIndex = '999999';
-      frameBlocker.style.display = 'flex';
-      frameBlocker.style.alignItems = 'center';
-      frameBlocker.style.justifyContent = 'center';
-      frameBlocker.style.color = 'white';
-      frameBlocker.style.fontSize = '20px';
-      frameBlocker.textContent = 'This website cannot be displayed in frames';
-      document.body.appendChild(frameBlocker);
-      
-      // Try to break out of the frame
-      window.self.location = window.top!.location;
-    }
-    
-    // Method 3: Continuous monitoring
-    setInterval(() => {
-      if (window.self !== window.top) {
-        window.top!.location.href = window.self.location.href;
-      }
-    }, 1000);
-  } catch (e) {
-    // If we get a security error, it means we're in a cross-origin frame
-    // In this case, we can't access the parent, but we can still show a block screen
-    try {
-      const frameBlocker = document.createElement('div');
-      frameBlocker.style.position = 'fixed';
-      frameBlocker.style.top = '0';
-      frameBlocker.style.left = '0';
-      frameBlocker.style.width = '100%';
-      frameBlocker.style.height = '100%';
-      frameBlocker.style.backgroundColor = 'black';
-      frameBlocker.style.zIndex = '999999';
-      frameBlocker.style.display = 'flex';
-      frameBlocker.style.alignItems = 'center';
-      frameBlocker.style.justifyContent = 'center';
-      frameBlocker.style.color = 'white';
-      frameBlocker.style.fontSize = '20px';
-      frameBlocker.textContent = 'This website cannot be displayed in frames';
-      document.body.appendChild(frameBlocker);
-    } catch (innerError) {
-      // Last resort, if we can't even add an element
-      document.body.innerHTML = 'This website cannot be displayed in frames';
-    }
+  if (window.self !== window.top) {
+    window.top!.location.href = window.self.location.href;
   }
 };
 
