@@ -1,4 +1,5 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
+import { cn } from '../utils/cn';
 
 interface SmoothScrollProps {
   to: string; // ID of the element to scroll to
@@ -19,88 +20,64 @@ const SmoothScroll: React.FC<SmoothScrollProps> = ({
 }) => {
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detect if we're on a mobile device
   useEffect(() => {
+    // Check if the device is mobile
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      setIsMobile(window.innerWidth < 768);
     };
-    
-    // Check on mount
+
+    // Initial check
     checkMobile();
-    
-    // Check on resize
+
+    // Add resize listener
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
   }, []);
-  
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     e.preventDefault();
-    
-    const targetElement = document.getElementById(to);
-    
-    if (!targetElement) {
-      console.warn(`Element with id "${to}" not found`);
-      return;
-    }
-    
-    // Calculate appropriate offset based on device
-    const totalOffset = isMobile ? offset + mobileOffset : offset;
-    
-    // Use native smooth scrolling on modern mobile browsers that support it well
-    if (isMobile && 'scrollBehavior' in document.documentElement.style) {
-      const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - totalOffset;
-      window.scrollTo({
-        top: targetPosition,
-        behavior: 'smooth'
-      });
-      return;
-    }
-    
-    // For older browsers or desktop, use our custom animation
-    const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - totalOffset;
-    const startPosition = window.pageYOffset;
-    const distance = targetPosition - startPosition;
+
+    const targetElement = document.getElementById(to.replace('#', ''));
+
+    if (!targetElement) return;
+
+    const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY;
+    const startPosition = window.scrollY;
+    const finalOffset = isMobile ? offset + mobileOffset : offset;
+    const distance = targetPosition - startPosition - finalOffset;
+
     let startTime: number | null = null;
-    
-    // Adjust duration for mobile devices for a faster feel
-    const adjustedDuration = isMobile ? duration * 0.8 : duration;
-    
+
+    // Cubic easing function for a YouTube-like feel
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
     const animation = (currentTime: number) => {
       if (startTime === null) startTime = currentTime;
       const timeElapsed = currentTime - startTime;
-      const progress = Math.min(timeElapsed / adjustedDuration, 1);
-      
-      // Different easing for mobile vs desktop for better feel
-      const ease = isMobile ? easeOutQuint(progress) : easeInOutCubic(progress);
-      
-      window.scrollTo(0, startPosition + distance * ease);
-      
-      if (timeElapsed < adjustedDuration) {
+      const progress = Math.min(timeElapsed / duration, 1);
+      const easeProgress = easeOutCubic(progress);
+
+      window.scrollTo(0, startPosition + distance * easeProgress);
+
+      if (timeElapsed < duration) {
         requestAnimationFrame(animation);
+      } else {
+        // Update URL hash after scrolling (optional)
+        window.history.pushState(null, '', `#${to.replace('#', '')}`);
       }
     };
-    
-    // Easing function for smooth acceleration and deceleration
-    const easeInOutCubic = (t: number) => {
-      return t < 0.5 
-        ? 4 * t * t * t 
-        : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    };
-    
-    // Quicker easing for mobile - feels more responsive
-    const easeOutQuint = (t: number) => {
-      return 1 - Math.pow(1 - t, 5);
-    };
-    
+
     requestAnimationFrame(animation);
   };
-  
+
   return (
     <a 
-      href={`#${to}`} 
-      onClick={handleClick} 
-      className={className}
-      aria-label={`Scroll to ${to} section`}
+      href={`#${to.replace('#', '')}`} 
+      onClick={handleClick}
+      className={cn('cursor-pointer transition-colors duration-200', className)}
     >
       {children}
     </a>

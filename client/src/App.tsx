@@ -13,6 +13,8 @@ import { ColorSchemeProvider } from './contexts/ColorSchemeContext';
 import Footer from './components/Footer';
 import { initScrollDetection } from './utils/scrollDetection';
 import { initSmoothScrollLinks } from './utils/smoothScrollLinks';
+import { setupScrollBehaviors } from './utils/scrollManager'; // Added import
+import BackToTop from './components/BackToTop'; // Added import
 
 // Lazy load page components for better performance and code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -34,6 +36,15 @@ function App() {
   // Initialize global security measures
   useEffect(() => {
     initializeGlobalSecurity();
+  }, []);
+
+  useEffect(() => {
+    // Initialize scroll behaviors with YouTube-like smooth scrolling
+    const cleanup = setupScrollBehaviors();
+
+    return () => {
+      cleanup();
+    };
   }, []);
 
   return (
@@ -67,6 +78,7 @@ function App() {
                 </Switch>
               </PageTransition>
             </Suspense>
+            <BackToTop showAtHeight={400} /> {/* Added BackToTop component */}
           </main>
           <MobileNavBar />
           <ScrollToTop />

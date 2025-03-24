@@ -1,30 +1,67 @@
-/* Smooth scrolling styles */
-html {
-  scroll-behavior: smooth;
-}
+/* Optimized scroll experience styles */
 
 /* Add extra padding/margin to section targets for better positioning */
 .scroll-mt-16 {
   scroll-margin-top: 4rem;
 }
 
-/* For devices that prefer reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+@media (max-width: 768px) {
+  .scroll-mt-16 {
+    scroll-margin-top: 5rem; /* More offset on mobile */
   }
 }
 
-/* Optimize scrolling performance on mobile devices */
+/* For devices that prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-on-scroll {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* YouTube-like scrolling performance optimizations */
 .optimize-scroll {
   -webkit-overflow-scrolling: touch; /* For older iOS */
   overscroll-behavior: contain;  /* Prevent scroll chaining */
   scroll-snap-type: y proximity; /* Subtle scroll snapping for sections */
+  
+  /* YouTube-like scroll optimizations */
+  will-change: transform; /* GPU acceleration hint */
+  perspective: 1000px; /* Create a stacking context for better compositing */
+  transform-style: preserve-3d; /* Help with layer compositing */
+  backface-visibility: hidden; /* Reduce paints */
 }
 
 /* Optimize scrolling of nested containers */
 .optimize-scroll > section {
   scroll-snap-align: start;
+  /* Consider content for its own layer to improve scroll performance */
+  will-change: opacity, transform;
+  transform: translateZ(0);
+}
+
+/* YouTube-like scroll reveal animations */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* For smoother scrolling on iOS */
+@supports (-webkit-touch-callout: none) {
+  .optimize-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 /* Improved touch handling for mobile scrolling */
