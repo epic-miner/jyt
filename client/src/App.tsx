@@ -13,11 +13,8 @@ import { ColorSchemeProvider } from './contexts/ColorSchemeContext';
 import Footer from './components/Footer';
 import { initScrollDetection } from './utils/scrollDetection';
 import { initSmoothScrollLinks } from './utils/smoothScrollLinks';
-import { setupScrollBehaviors } from './utils/scrollManager'; 
-import BackToTop from './components/BackToTop';
-import { isBraveBrowser, detectBraveDevTools, installBraveKeyboardProtection, createBraveBlocker } from './lib/braveProtection';
-// Import initial protection that runs before React mounts
-import './lib/initialProtection';
+import { setupScrollBehaviors } from './utils/scrollManager'; // Added import
+import BackToTop from './components/BackToTop'; // Added import
 
 // Lazy load page components for better performance and code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -28,7 +25,7 @@ const RecentlyWatched = lazy(() => import("./pages/RecentlyWatched"));
 const GenrePage = lazy(() => import("./pages/GenrePage"));
 const CategoryPage = lazy(() => import("./pages/CategoryPage"));
 const TestPlayerPage = lazy(() => import("./pages/TestPlayerPage"));
-// const AdOptimizationTestPage = lazy(() => import("./pages/AdOptimizationTestPage"));
+const AdOptimizationTestPage = lazy(() => import("./pages/AdOptimizationTestPage"));
 
 const NotFound = lazy(() => import("./pages/not-found"));
 
@@ -36,47 +33,9 @@ const queryClient = new QueryClient();
 
 function App() {
   useConsoleProtection();
-  
   // Initialize global security measures
   useEffect(() => {
     initializeGlobalSecurity();
-  }, []);
-
-  // Handle Brave browser specific protections
-  useEffect(() => {
-    if (isBraveBrowser()) {
-      console.log("Brave browser detected, applying specialized protection...");
-      
-      // Install Brave-specific keyboard protection
-      const keyboardCleanup = installBraveKeyboardProtection();
-      
-      // Set up Brave-specific dev tools detection
-      const redirectToYouTube = () => {
-        // Create blocker overlay
-        createBraveBlocker(() => {
-          // Redirect to YouTube after warning
-          window.location.href = 'https://www.youtube.com';
-        });
-      };
-      
-      // Check immediately if dev tools are already open
-      if (detectBraveDevTools()) {
-        redirectToYouTube();
-      }
-      
-      // Set up continuous monitoring for Brave
-      const intervalId = setInterval(() => {
-        if (detectBraveDevTools()) {
-          redirectToYouTube();
-          clearInterval(intervalId);
-        }
-      }, 1000);
-      
-      return () => {
-        keyboardCleanup();
-        clearInterval(intervalId);
-      };
-    }
   }, []);
 
   useEffect(() => {
@@ -119,7 +78,7 @@ function App() {
                 </Switch>
               </PageTransition>
             </Suspense>
-            <BackToTop showAfterScrollY={400} /> {/* Added BackToTop component */}
+            <BackToTop showAtHeight={400} /> {/* Added BackToTop component */}
           </main>
           <MobileNavBar />
           <ScrollToTop />
