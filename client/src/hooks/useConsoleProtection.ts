@@ -1,11 +1,19 @@
 
 import { useEffect } from 'react';
+import { isDevToolsOpen, monitorDevTools } from '../lib/devToolsDetection';
 
 export const useConsoleProtection = () => {
   useEffect(() => {
-    const threshold = 160;
-    let isDevToolsOpen = false;
+    let hasRedirected = false;
     let blockerDiv: HTMLDivElement | null = null;
+
+    // Redirect to YouTube
+    const redirectToYoutube = () => {
+      if (!hasRedirected) {
+        hasRedirected = true;
+        window.location.href = 'https://www.youtube.com';
+      }
+    };
 
     const createBlocker = () => {
       if (!blockerDiv) {
@@ -18,42 +26,61 @@ export const useConsoleProtection = () => {
         blockerDiv.style.backgroundColor = 'black';
         blockerDiv.style.zIndex = '999999';
         blockerDiv.style.display = 'flex';
+        blockerDiv.style.flexDirection = 'column';
         blockerDiv.style.alignItems = 'center';
         blockerDiv.style.justifyContent = 'center';
         blockerDiv.style.color = 'white';
         blockerDiv.style.fontSize = '20px';
-        blockerDiv.textContent = 'Website access restricted - Developer tools detected';
+        blockerDiv.style.textAlign = 'center';
+        blockerDiv.style.padding = '20px';
+        
+        const message = document.createElement('div');
+        message.textContent = 'Website access restricted - Developer tools detected';
+        blockerDiv.appendChild(message);
+        
+        const subMessage = document.createElement('div');
+        subMessage.textContent = 'For security reasons, this site cannot be accessed with developer tools open';
+        subMessage.style.fontSize = '16px';
+        subMessage.style.marginTop = '10px';
+        subMessage.style.color = '#999';
+        blockerDiv.appendChild(subMessage);
+        
+        const redirectMessage = document.createElement('div');
+        redirectMessage.textContent = 'Redirecting...';
+        redirectMessage.style.fontSize = '14px';
+        redirectMessage.style.marginTop = '20px';
+        redirectMessage.style.color = '#666';
+        blockerDiv.appendChild(redirectMessage);
+        
         document.body.appendChild(blockerDiv);
+        
+        // Redirect after showing message
+        setTimeout(redirectToYoutube, 2500);
       }
     };
 
     const removeBlocker = () => {
-      if (blockerDiv) {
+      if (blockerDiv && document.body.contains(blockerDiv)) {
         document.body.removeChild(blockerDiv);
         blockerDiv = null;
       }
     };
 
-    const checkDevTools = () => {
-      const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-      const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-
-      if (widthThreshold || heightThreshold) {
-        if (!isDevToolsOpen) {
-          isDevToolsOpen = true;
-          createBlocker();
-        }
-      } else {
-        isDevToolsOpen = false;
-        removeBlocker();
-      }
+    const handleDevToolsDetected = () => {
+      createBlocker();
     };
 
-    window.addEventListener('resize', checkDevTools);
-    setInterval(checkDevTools, 1000);
+    // Check immediately when page loads
+    if (isDevToolsOpen()) {
+      handleDevToolsDetected();
+    }
+    
+    // Add the continuous monitoring
+    const cleanupMonitoring = monitorDevTools(handleDevToolsDetected);
 
+    // Ensure we clean up properly
     return () => {
-      window.removeEventListener('resize', checkDevTools);
+      cleanupMonitoring();
       removeBlocker();
     };
   }, []);
