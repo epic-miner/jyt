@@ -52,9 +52,13 @@ export const isTabletDevice = (): boolean => {
 /**
  * Detects if the device has low power (e.g., budget phone)
  * This uses various signals to estimate device capabilities
+ * Using a more aggressive approach to detect low-power devices for better mobile performance
  */
 export const isLowPowerDevice = (): boolean => {
   if (typeof window === 'undefined') return false;
+  
+  // For mobile devices, be more aggressive with classification as low-power
+  const isMobile = isMobileDevice();
   
   // Check available CPU cores - fewer cores often indicates a budget device
   const cpuCores = navigator.hardwareConcurrency || 0;
@@ -74,11 +78,51 @@ export const isLowPowerDevice = (): boolean => {
   const slowConnection = connection ? 
     (connection.effectiveType === 'slow-2g' || 
      connection.effectiveType === '2g' || 
+     connection.effectiveType === '3g' || 
      connection.saveData === true) : false;
+     
+  // Detect animation performance by measuring frame rate
+  let hasLowFrameRate = false;
   
-  // Combine signals to determine if it's likely a lower-power device
-  return (cpuCores <= 4 || lowMemory || slowConnection || 
-         (hasReducedMotion && isMobileDevice()));
+  // Simple frame rate check - will capture on next render cycle
+  if (typeof window.requestAnimationFrame === 'function') {
+    if (!(window as any).__checkedFrameRate) {
+      (window as any).__checkedFrameRate = true;
+      let frameCount = 0;
+      let lastFrameTime = performance.now();
+      
+      const checkFrameRate = () => {
+        frameCount++;
+        const now = performance.now();
+        const elapsedTime = now - lastFrameTime;
+        
+        // After 500ms, calculate frame rate and store
+        if (elapsedTime > 500) {
+          const fps = (frameCount / elapsedTime) * 1000;
+          (window as any).__estimatedFps = fps;
+          (window as any).__lowPerformanceDevice = fps < 40;
+        } else {
+          requestAnimationFrame(checkFrameRate);
+        }
+      };
+      
+      requestAnimationFrame(checkFrameRate);
+    }
+  }
+  
+  // Use stored frame rate value if available
+  hasLowFrameRate = (window as any).__lowPerformanceDevice === true;
+
+  // For mobile, be more aggressive
+  if (isMobile) {
+    // For mobile, treat as low power if ANY of these conditions are met
+    return cpuCores <= 6 || lowMemory || slowConnection || hasReducedMotion || hasLowFrameRate;
+  }
+  
+  // For desktop, require more signals to classify as low power
+  return (cpuCores <= 2 || 
+         (lowMemory && slowConnection) || 
+         (hasReducedMotion && hasLowFrameRate));
 };
 
 /**
@@ -261,12 +305,25 @@ export const hasWebGLSupport = (): boolean => {
  */
 export const getOptimalParticleCount = (): number => {
   const tier = getDevicePerformanceTier();
+  const isMobile = isMobileDevice();
   
+  // Ultra-aggressive mobile optimization
+  if (isMobile) {
+    if (tier === DevicePerformanceTier.LOW) {
+      return 8; // Absolute minimal particles for low-end mobile
+    } else if (tier === DevicePerformanceTier.MEDIUM) {
+      return 15; // Very few particles for medium mobile
+    } else {
+      return 25; // Still limited for high-end mobile
+    }
+  }
+  
+  // Desktop can handle more particles
   if (tier === DevicePerformanceTier.LOW) {
-    return 20; // Minimal particles for low-end devices
+    return 15; // Minimal particles for low-end desktops
   } else if (tier === DevicePerformanceTier.MEDIUM) {
-    return 50; // Medium amount for mid-range devices
+    return 40; // Medium amount for mid-range desktops
   } else {
-    return 100; // Full effect for high-end devices
+    return 80; // Full effect for high-end desktops
   }
 };

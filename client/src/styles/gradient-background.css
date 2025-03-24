@@ -1,0 +1,41 @@
+/* Gradient background fallback for ultra-low-power devices */
+.gradient-fallback {
+  background: linear-gradient(135deg, rgba(30, 27, 38, 0.95) 0%, rgba(33, 33, 75, 0.8) 50%, rgba(60, 19, 80, 0.7) 100%);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Animated gradient for medium-power devices */
+.gradient-animated {
+  background: linear-gradient(135deg, 
+    rgba(30, 27, 38, 0.95) 0%, 
+    rgba(33, 33, 75, 0.8) 50%, 
+    rgba(60, 19, 80, 0.7) 100%);
+  background-size: 400% 400%;
+  animation: gradientAnimation 15s ease infinite;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Only apply animations if no reduced motion is requested */
+@media (prefers-reduced-motion: reduce) {
+  .gradient-animated {
+    animation: none;
+  }
+}

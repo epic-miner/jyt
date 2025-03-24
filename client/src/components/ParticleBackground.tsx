@@ -1,8 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import Particles from 'react-particles';
 import { loadSlim } from 'tsparticles-slim'; // Using slim package for better performance
 import type { Engine, ISourceOptions } from 'tsparticles-engine';
-import { getDevicePerformanceTier, DevicePerformanceTier, isMobileDevice, getOptimalParticleCount } from '../utils/deviceDetection';
+import { 
+  getDevicePerformanceTier, 
+  DevicePerformanceTier, 
+  isMobileDevice, 
+  getOptimalParticleCount,
+  isLowPowerDevice
+} from '../utils/deviceDetection';
 
 interface ParticleBackgroundProps {
   className?: string;
@@ -52,12 +58,46 @@ const ParticleBackground = ({
   const [isInitialized, setIsInitialized] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [performanceTier, setPerformanceTier] = useState<DevicePerformanceTier>(DevicePerformanceTier.MEDIUM);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const scrollTimeoutRef = useRef<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   // Initialize device detection
   useEffect(() => {
     setIsMobile(isMobileDevice());
     setPerformanceTier(getDevicePerformanceTier());
     setIsInitialized(true);
+    
+    // Check if reduced motion is preferred
+    setReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    
+    // Add scroll listener to reduce particle animation during scrolling
+    const handleScroll = () => {
+      if (!isLowPowerDevice()) return; // Only apply to low-power devices
+      
+      setIsScrolling(true);
+      
+      // Clear previous timeout
+      if (scrollTimeoutRef.current !== null) {
+        window.clearTimeout(scrollTimeoutRef.current);
+      }
+      
+      // Set a timeout to stop "isScrolling" state 100ms after scrolling stops
+      scrollTimeoutRef.current = window.setTimeout(() => {
+        setIsScrolling(false);
+        scrollTimeoutRef.current = null;
+      }, 100);
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current !== null) {
+        window.clearTimeout(scrollTimeoutRef.current);
+      }
+    };
   }, []);
   
   // Skip rendering if this should be disabled on mobile
@@ -242,18 +282,50 @@ const ParticleBackground = ({
     };
   };
   
-  // Optimize options based on device detection
-  const optimizedOptions: ISourceOptions = isMobile 
+  // Get base options based on device detection
+  let baseOptions: ISourceOptions = isMobile 
     ? getMobileOptimizedOptions() as ISourceOptions
     : getStandardOptions() as ISourceOptions;
+  
+  // Apply further optimizations if scrolling or reduced motion is preferred
+  if (isScrolling || reducedMotion) {
+    // Create a nearly frozen state during scroll on mobile
+    const frozenOptions: ISourceOptions = {
+      ...baseOptions,
+      particles: {
+        ...baseOptions.particles,
+        number: {
+          ...(baseOptions.particles?.number || {}),
+          value: Math.floor((baseOptions.particles?.number?.value || actualParticleCount) * (isMobile ? 0.3 : 0.7)), // Reduce particles drastically during scroll
+        },
+        move: {
+          ...(baseOptions.particles?.move || {}),
+          enable: !isMobile, // Completely stop movement on mobile during scroll
+          speed: ((baseOptions.particles?.move?.speed || moveSpeed) * 0.2), // Much slower movement during scroll
+        },
+        opacity: {
+          ...(baseOptions.particles?.opacity || {}),
+          value: ((baseOptions.particles?.opacity?.value || particleOpacity) * 0.5), // Fade particles during scroll
+          anim: {
+            enable: false // Disable opacity animation during scroll
+          }
+        }
+      }
+    };
+    
+    // Use frozen state during scrolling
+    baseOptions = frozenOptions;
+  }
     
   return (
-    <Particles
-      id="tsparticles"
-      className={`absolute inset-0 ${className}`}
-      options={optimizedOptions as any}
-      init={particlesInit}
-    />
+    <div ref={containerRef} className={`absolute inset-0 ${className}`} style={{ pointerEvents: 'none', zIndex: -1 }}>
+      <Particles
+        id="tsparticles"
+        className="absolute inset-0"
+        options={baseOptions as any}
+        init={particlesInit}
+      />
+    </div>
   );
 };
 
