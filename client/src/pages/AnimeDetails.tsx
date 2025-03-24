@@ -40,7 +40,7 @@ const AnimeDetails = () => {
     if (anime) {
       updateRecentlyWatchedAnime({
         id: anime.id.toString(),
-        title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, ''), // Remove tags from title
+        title: cleanAnimeTitle(anime.title), // Remove tags from title using shared utility
         thumbnail_url: anime.thumbnail_url,
         genre: anime.genre,
         timestamp: new Date().getTime()
@@ -143,7 +143,7 @@ const AnimeDetails = () => {
           {/* Anime details */}
           <div className="flex-1 backdrop-blur-sm bg-dark-900/30 p-6 rounded-2xl border border-white/5">
             <AnimatedTitle
-              text={anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')}
+              text={cleanAnimeTitle(anime.title)}
               className="text-2xl md:text-4xl font-bold mb-2 hover:scale-[1.01] transition-transform duration-300"
               gradient="from-primary via-white to-primary"
               delay={0.1}
