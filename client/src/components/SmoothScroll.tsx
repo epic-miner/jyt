@@ -1,5 +1,5 @@
 import React, { useState, useEffect, ReactNode } from 'react';
-import { cn } from '../utils/cn';
+import { cn } from '@/lib/utils';
 
 interface SmoothScrollProps {
   to: string; // ID of the element to scroll to
