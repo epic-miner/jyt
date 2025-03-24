@@ -22,6 +22,7 @@ interface ParticleBackgroundProps {
   hoverEffect?: boolean;
   clickEffect?: boolean;
   disableForLowPerformance?: boolean;
+  particleCount?: number;
 }
 
 /**
@@ -45,7 +46,8 @@ const ParticleBackground = ({
   moveSpeed = 3,
   hoverEffect = true,
   clickEffect = true,
-  disableForLowPerformance = true
+  disableForLowPerformance = true,
+  particleCount
 }: ParticleBackgroundProps) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -65,8 +67,8 @@ const ParticleBackground = ({
   const isLowPerformance = performanceTier === DevicePerformanceTier.LOW;
   const disableForPerformance = disableForLowPerformance && isLowPerformance;
   
-  // Calculate optimal particle count based on device performance
-  const particleCount = getOptimalParticleCount();
+  // Calculate optimal particle count or use provided value
+  const actualParticleCount = particleCount || getOptimalParticleCount();
   
   // Initialize particles with performance optimizations
   const particlesInit = useCallback(async (engine: Engine) => {
@@ -98,7 +100,7 @@ const ParticleBackground = ({
     return {
       particles: {
         number: {
-          value: Math.floor(particleCount * 0.5), // Use 50% fewer particles on mobile
+          value: Math.floor(actualParticleCount * 0.5), // Use 50% fewer particles on mobile
           density: {
             enable: true,
             value_area: densityArea * 1.5 // Spread them out more
@@ -137,7 +139,7 @@ const ParticleBackground = ({
     return {
       particles: {
         number: {
-          value: particleCount,
+          value: actualParticleCount,
           density: {
             enable: true,
             value_area: densityArea

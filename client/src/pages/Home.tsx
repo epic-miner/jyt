@@ -218,15 +218,16 @@ const Home = () => {
     <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-800 pb-24 md:pb-8">
       {/* Enhanced particle background */}
       <ParticleBackground 
-        options={{
-          particles: {
-            number: { value: 40 },
-            color: { value: "#8257e6" },
-            opacity: { value: 0.3 },
-            size: { value: 3 },
-            move: { speed: 0.5 }
-          }
-        }}
+        particleColor="#8257e6"
+        particleOpacity={0.3}
+        particleSize={3}
+        moveSpeed={0.5}
+        enableOnMobile={true}
+        particleCount={40}
+        linkColor="#8257e6"
+        linkOpacity={0.2}
+        backgroundColor="transparent"
+        disableForLowPerformance={false}
       />
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Welcome Banner with AnimatedTitle */}
