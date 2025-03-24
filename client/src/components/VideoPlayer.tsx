@@ -17,6 +17,28 @@ import {
 } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 import VideoPlayerDesktopMenu from './VideoPlayerDesktopMenu';
+
+// Add event listener to prevent keyboard shortcuts in the video player
+useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    // Prevent Ctrl+Shift+I (Developer tools)
+    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+      e.preventDefault();
+      return false;
+    }
+    // Prevent F12 (Developer tools)
+    if (e.key === 'F12') {
+      e.preventDefault();
+      return false;
+    }
+  };
+
+  window.addEventListener('keydown', handleKeyDown, true);
+  return () => {
+    window.removeEventListener('keydown', handleKeyDown, true);
+  };
+}, []);
+
 import VideoPlayerMobileMenu from './VideoPlayerMobileMenu';
 import { initializeSecurity } from '../lib/security';
 import { cleanAnimeTitle } from '../utils/titleFormatter';
