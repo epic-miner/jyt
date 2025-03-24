@@ -1,3 +1,48 @@
+
+// Add this at the beginning of your file
+import { useEffect } from 'react';
+
+// Add this detection hook inside your component before the return statement
+const useDevToolsDetection = () => {
+  useEffect(() => {
+    // Detect using resize method
+    const detectDevTools = () => {
+      const threshold = 160;
+      const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+      const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+      
+      if (widthThreshold || heightThreshold) {
+        document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:black;color:white;text-align:center;padding-top:20%;z-index:10000;font-size:24px;">Developer Tools detected. Please close to continue.</div>';
+      }
+    };
+
+    window.addEventListener('resize', detectDevTools);
+    setInterval(detectDevTools, 1000);
+
+    // Disable right-click
+    document.addEventListener('contextmenu', e => e.preventDefault());
+
+    // Create an image element for another detection technique
+    const element = new Image();
+    Object.defineProperty(element, 'id', {
+      get: function() {
+        document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:black;color:white;text-align:center;padding-top:20%;z-index:10000;font-size:24px;">Developer Tools detected. Please close to continue.</div>';
+        return '';
+      }
+    });
+
+    // Regular console log to trigger detection
+    setInterval(() => {
+      console.clear();
+      console.log(element);
+    }, 1000);
+
+    return () => {
+      window.removeEventListener('resize', detectDevTools);
+    };
+  }, []);
+};
+
 import { useState, useEffect, useRef, memo, useCallback } from 'react';
 import { Episode, Anime } from '@shared/types';
 import { updateWatchHistory } from '../lib/cookies';
