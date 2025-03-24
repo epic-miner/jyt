@@ -1,8 +1,69 @@
 
-/* Mobile optimizations for MP4 video playback */
+/* Mobile optimizations for MP4 video playback and UI performance */
+
+/* Global optimizations for all devices */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Better scrolling performance on all devices */
+.scrollable-content {
+  /* Promote to GPU layer */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform;
+}
+
+/* Apply hardware acceleration to images */
+img {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
 
 /* Better touch targets for mobile */
 @media (max-width: 768px) {
+  /* Disable hover effects that cause jank on mobile */
+  .hover\:scale-105, .hover\:scale-\[1\.05\], .hover\:scale-\[1\.02\], .group-hover\:scale-105 {
+    transition: none !important;
+    transform: none !important;
+  }
+  
+  /* Optimize animations for mobile */
+  .motion-safe\:animate-fade-in, .motion-safe\:animate-slide-in, 
+  .animate-pulse, .motion-safe\:animate-bounce {
+    animation-duration: 0.3s !important;
+    animation-iteration-count: 1 !important;
+  }
+  
+  /* Reduce transition durations */
+  .transition-all, .transition-transform, .transition-opacity {
+    transition-duration: 0.2s !important;
+  }
+  
+  /* Optimize grid layouts */
+  .grid {
+    contain: layout style paint;
+  }
+  
+  /* Simplify animations for mobile */
+  .motion-safe\:animate-glow, 
+  .motion-safe\:animate-pulse, 
+  .motion-safe\:animate-float {
+    animation: none !important;
+  }
+  
+  /* Reduce particles count on mobile */
+  .particles-container {
+    opacity: 0.3 !important;
+  }
+  
+  /* Optimize scrolling */
+  html, body {
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
+  }
+  
   /* Larger control buttons for easier tapping */
   #fluid_video_wrapper.fluid_player_layout_default .fluid_controls_container .fluid_button {
     width: 40px !important;
