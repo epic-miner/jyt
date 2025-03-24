@@ -1,5 +1,6 @@
 import Cookies from 'js-cookie';
 import { WatchHistoryItem, RecentlyWatchedAnime } from '@shared/types';
+import { cleanAnimeTitle } from '../utils/titleFormatter';
 
 const WATCH_HISTORY_COOKIE = 'animeflix_watch_history';
 const RECENTLY_WATCHED_COOKIE = 'animeflix_recently_watched';
@@ -28,8 +29,8 @@ export const updateWatchHistory = (item: WatchHistoryItem): void => {
     // Clean the title before saving
     const cleanedItem = {
       ...item,
-      title: item.title.replace(/\(T\)|\(LR\)|\(P\)/g, ''),
-      animeTitle: item.animeTitle.replace(/\(T\)|\(LR\)|\(P\)/g, '')
+      title: cleanAnimeTitle(item.title),
+      animeTitle: cleanAnimeTitle(item.animeTitle)
     };
     
     // Add new entry at the beginning
@@ -75,7 +76,7 @@ export const updateRecentlyWatchedAnime = (anime: RecentlyWatchedAnime): void =>
     // Clean the title before saving
     const cleanedAnime = {
       ...anime,
-      title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '')
+      title: cleanAnimeTitle(anime.title)
     };
     
     // Add new entry at the beginning

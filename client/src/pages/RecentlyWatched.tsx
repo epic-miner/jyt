@@ -69,7 +69,7 @@ const RecentlyWatched = () => {
                     </div>
                   </div>
                   <div className="p-2">
-                    <h3 className="font-medium text-sm">{item.animeTitle.replace(/\(T\)|\(LR\)|\(P\)/g, '')}</h3>
+                    <h3 className="font-medium text-sm">{cleanAnimeTitle(item.animeTitle)}</h3>
                     <p className="text-xs text-slate-400">Episode {item.episodeNumber}</p>
                   </div>
                 </div>
@@ -91,7 +91,7 @@ const RecentlyWatched = () => {
                 key={anime.id} 
                 anime={{
                   id: parseInt(anime.id),
-                  title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, ''),
+                  title: cleanAnimeTitle(anime.title),
                   thumbnail_url: anime.thumbnail_url,
                   genre: anime.genre,
                   description: ''
