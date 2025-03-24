@@ -6,10 +6,15 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Security headers
+// Enhanced security headers
 app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('Content-Security-Policy', "frame-ancestors 'none';");
+  res.setHeader('Content-Security-Policy', "frame-ancestors 'none'; script-src 'self' 'unsafe-inline';");
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Permissions-Policy', 'interest-cohort=()');
+  // Add custom header to trigger client-side protection
+  res.setHeader('X-DevTools-Protection', 'enabled');
   next();
 });
 

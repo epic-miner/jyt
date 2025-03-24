@@ -1,3 +1,11 @@
+
+import { initializeGlobalSecurity } from './lib/global-security';
+
+// Initialize global security as early as possible
+if (typeof window !== 'undefined') {
+  initializeGlobalSecurity();
+}
+
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
