@@ -6,10 +6,27 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Security headers
+// Security headers for enhanced protection
 app.use((req, res, next) => {
+  // Prevent iframe embedding
   res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('Content-Security-Policy', "frame-ancestors 'none';");
+  res.setHeader('Content-Security-Policy', "frame-ancestors 'none'; script-src 'self' 'unsafe-inline'; object-src 'none';");
+  
+  // Prevent dev tools usage and browser features that could expose vulnerabilities
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('X-Download-Options', 'noopen');
+  res.setHeader('X-DNS-Prefetch-Control', 'off');
+  
+  // Prevent content from being loaded over HTTP when site is accessed over HTTPS
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  
+  // Disable browser features for security
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  
+  // Only allow referrers from the same origin
+  res.setHeader('Referrer-Policy', 'same-origin');
+  
   next();
 });
 
