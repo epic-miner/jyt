@@ -216,19 +216,8 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-dark-800 pb-24 md:pb-8">
-      {/* Enhanced particle background */}
-      <ParticleBackground 
-        particleColor="#8257e6"
-        particleOpacity={0.3}
-        particleSize={3}
-        moveSpeed={0.5}
-        enableOnMobile={true}
-        particleCount={40}
-        linkColor="#8257e6"
-        linkOpacity={0.2}
-        backgroundColor="transparent"
-        disableForLowPerformance={false}
-      />
+      {/* Replaced particles with a simpler gradient background for better performance */}
+      <div className="gradient-animated absolute inset-0 z-[-1]" style={{ opacity: 0.7 }} />
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Welcome Banner with AnimatedTitle */}
         <ScrollReveal>
