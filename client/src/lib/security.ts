@@ -127,6 +127,12 @@ export const preventKeyboardShortcuts = () => {
       return false;
     }
 
+    // Prevent Ctrl+Shift+I (Developer tools)
+    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+      e.preventDefault();
+      return false;
+    }
+
     // Prevent Ctrl+S (Save page)
     if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
       e.preventDefault();
