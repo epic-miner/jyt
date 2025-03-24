@@ -16,6 +16,8 @@ import { initSmoothScrollLinks } from './utils/smoothScrollLinks';
 import { setupScrollBehaviors } from './utils/scrollManager'; 
 import BackToTop from './components/BackToTop';
 import { isBraveBrowser, detectBraveDevTools, installBraveKeyboardProtection, createBraveBlocker } from './lib/braveProtection';
+// Import initial protection that runs before React mounts
+import './lib/initialProtection';
 
 // Lazy load page components for better performance and code splitting
 const Home = lazy(() => import("./pages/Home"));

@@ -8,6 +8,7 @@ import {
   createBraveBlocker
 } from '../lib/braveProtection';
 import { installDebuggerProtection, checkForDebuggerEvasion } from '../lib/debuggerProtection';
+import { preventContextMenu, preventTextSelection, addDevToolsTraps } from '../lib/contextMenuProtection';
 
 export const useConsoleProtection = () => {
   useEffect(() => {
@@ -224,6 +225,30 @@ export const useConsoleProtection = () => {
     if (isDevToolsOpen()) {
       handleDevToolsDetected();
     }
+    
+    // Add context menu and right-click protection
+    const contextMenuCleanup = preventContextMenu();
+    cleanupFunctions.push(contextMenuCleanup);
+    
+    // Add text selection prevention to protect against inspecting content
+    const textSelectionCleanup = preventTextSelection();
+    cleanupFunctions.push(textSelectionCleanup);
+    
+    // Add hidden dev tools traps
+    const trapsCleanup = addDevToolsTraps();
+    cleanupFunctions.push(trapsCleanup);
+    
+    // Listen for trap events
+    const trapHandler = (e: Event) => {
+      if (e instanceof CustomEvent && e.detail?.method) {
+        console.log('Trap triggered:', e.detail.method);
+        handleDevToolsDetected();
+      }
+    };
+    document.addEventListener('devtools-detected', trapHandler);
+    cleanupFunctions.push(() => {
+      document.removeEventListener('devtools-detected', trapHandler);
+    });
     
     // Add the continuous monitoring for all browsers
     const cleanupStandardMonitoring = monitorDevTools(handleDevToolsDetected);
