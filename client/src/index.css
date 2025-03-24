@@ -1,3 +1,43 @@
+
+/* Add smooth scrolling to the entire page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* For browsers that support it, add more precise scroll physics like YouTube */
+@supports (scroll-behavior: smooth) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* For improved scrolling physics on supported browsers */
+body {
+  overscroll-behavior-y: contain; /* Prevents bouncing on some browsers */
+}
+
+/* Make scrolling more responsive on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  :root {
+    --thumb-color: rgba(128, 128, 128, 0.5);
+  }
+  
+  /* Custom scrollbar for touch devices */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--thumb-color);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}
+
 /* Import Enhanced Player Styles - moved to top to fix CSS warning */
 @import url('./styles/enhanced-player.css');
 /* Import Mobile Optimization Styles - addresses performance issues on mobile devices */
