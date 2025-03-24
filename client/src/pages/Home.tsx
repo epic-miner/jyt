@@ -15,6 +15,12 @@ import TiltCard from '../components/TiltCard';
 import ConfettiEffect from '../components/ConfettiEffect';
 import LottieLoader from '../components/LottieLoader';
 
+// Helper function to clean anime titles by removing category and ranking tags
+const cleanAnimeTitle = (title: string): string => {
+  // Remove all category tags like (T), (P), (LR) with optional ranking like (T)-(1)
+  return title.replace(/\(T\)(?:-\(\d+\))?|\(LR\)(?:-\(\d+\))?|\(P\)(?:-\(\d+\))?/g, '').trim();
+};
+
 // Animation variants for sections
 const sectionVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -328,7 +334,7 @@ const Home = () => {
                   <AnimeCard 
                     anime={{
                       ...anime,
-                      title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '') // Remove tags for display
+                      title: cleanAnimeTitle(anime.title)
                     }}
                     rating={4.8} 
                     episodeCount={episodeCounts?.[anime.id] || undefined}
@@ -376,7 +382,7 @@ const Home = () => {
                   <AnimeCard 
                     anime={{
                       ...anime,
-                      title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '') // Remove tags for display
+                      title: cleanAnimeTitle(anime.title)
                     }}
                     rating={4.6} 
                     episodeCount={episodeCounts?.[anime.id] || undefined}
@@ -424,7 +430,7 @@ const Home = () => {
                   <AnimeCard 
                     anime={{
                       ...anime,
-                      title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '') // Remove tags for display
+                      title: cleanAnimeTitle(anime.title)
                     }}
                     rating={4.5} 
                     episodeCount={episodeCounts?.[anime.id] || undefined}
@@ -472,7 +478,7 @@ const Home = () => {
                   <AnimeCard 
                     anime={{
                       ...anime,
-                      title: anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, '') // Remove tags for display
+                      title: cleanAnimeTitle(anime.title)
                     }}
                     rating={4.2} 
                     episodeCount={episodeCounts?.[anime.id] || undefined}
