@@ -33,32 +33,9 @@ const queryClient = new QueryClient();
 
 function App() {
   useConsoleProtection();
-  
   // Initialize global security measures
   useEffect(() => {
     initializeGlobalSecurity();
-    
-    // Detect page visibility changes to prevent inspection in hidden tabs
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') {
-        // Set a flag to check if dev tools might have been opened
-        const beforeHideTime = Date.now();
-        
-        // When the page becomes visible again, check time difference
-        const visibilityListener = () => {
-          const timeDiff = Date.now() - beforeHideTime;
-          
-          // If the page was hidden for too long, it might indicate dev tools usage
-          if (timeDiff > 3000) {
-            alert('Warning: Page was inactive. Security measures have been enhanced.');
-          }
-          
-          document.removeEventListener('visibilitychange', visibilityListener);
-        };
-        
-        document.addEventListener('visibilitychange', visibilityListener);
-      }
-    });
   }, []);
 
   useEffect(() => {

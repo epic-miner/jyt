@@ -6,34 +6,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Enhanced security headers
+// Security headers
 app.use((req, res, next) => {
-  // Prevent iframe embedding
   res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('Content-Security-Policy', "frame-ancestors 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; object-src 'none';");
-  
-  // Prevent MIME type sniffing
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  
-  // Enable XSS protection
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  
-  // Prevent browser caching of sensitive data
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  res.setHeader('Pragma', 'no-cache');
-  
-  // Restrict referrer information
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  
-  // Protection against clickjacking
-  res.setHeader('X-Frame-Options', 'DENY');
-  
-  // HTTP Strict Transport Security
-  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  
-  // Feature Policy restrictions
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
-  
+  res.setHeader('Content-Security-Policy', "frame-ancestors 'none';");
   next();
 });
 
