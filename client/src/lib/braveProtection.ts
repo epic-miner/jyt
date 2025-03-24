@@ -7,8 +7,8 @@
 export const isBraveBrowser = (): boolean => {
   try {
     // Method 1: Check for brave property in navigator (newer versions)
-    // @ts-ignore - Proprietary property
-    if (navigator.brave && navigator.brave.isBrave) {
+    // @ts-ignore - Brave-specific property not in standard types
+    if (navigator.brave?.isBrave) {
       return true;
     }
     
@@ -21,13 +21,17 @@ export const isBraveBrowser = (): boolean => {
       return true;
     }
     
-    // Method 3: Check for Brave Shield feature
-    // @ts-ignore - Proprietary Chrome API
-    return typeof window.chrome !== 'undefined' && 
-           // @ts-ignore
-           typeof window.chrome.runtime !== 'undefined' && 
-           // @ts-ignore
-           typeof window.chrome.braveShields !== 'undefined';
+    // Method 3: Alternative check for Brave
+    try {
+      // @ts-ignore - This is a test for Brave's implementation
+      if (navigator.brave) {
+        return true;
+      }
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    return false;
   } catch (e) {
     return false;
   }
@@ -36,51 +40,41 @@ export const isBraveBrowser = (): boolean => {
 // Special brave devtools detection
 export const detectBraveDevTools = (): boolean => {
   try {
-    // Method 1: Function.toString behavior in Brave's DevTools
-    const originalFunc = Function.prototype.toString;
-    let devToolsOpen = false;
+    // Method 1: Size comparison for Brave
+    const widthThreshold = window.outerWidth - window.innerWidth > 200;
+    const heightThreshold = window.outerHeight - window.innerHeight > 200;
     
-    // Temporarily override toString method
-    Object.defineProperty(Function.prototype, 'toString', {
-      value: function() {
-        devToolsOpen = true;
-        return originalFunc.apply(this, arguments);
-      },
-      configurable: true
-    });
-    
-    // Call console methods that trigger toString inspection in DevTools
-    console.profile();
-    console.profileEnd();
-    
-    // Restore original toString
-    Object.defineProperty(Function.prototype, 'toString', {
-      value: originalFunc,
-      configurable: true
-    });
-    
-    if (devToolsOpen) {
+    if (widthThreshold || heightThreshold) {
       return true;
     }
     
-    // Method 2: Advanced timing detection for Brave
+    // Method 2: DOM manipulation performance test - way slower with DevTools open
     const startTime = performance.now();
     
+    // Create a custom element to test performance
     const div = document.createElement('div');
+    let counter = 0;
+    
+    // Define a getter that we can track
     Object.defineProperty(div, 'id', {
       get() {
-        return div;
+        counter++;
+        return 'test-' + counter;
       }
     });
     
-    // Calling these in sequence takes longer with DevTools open
-    console.log(div);
+    // These operations are much slower with DevTools open
+    for (let i = 0; i < 5; i++) {
+      console.log(div.id);
+    }
     console.clear();
     
     const endTime = performance.now();
     const timeDiff = endTime - startTime;
     
-    return timeDiff > 50; // Higher threshold for Brave
+    // Brave has different performance characteristics
+    // Console operations are significantly slower with DevTools open
+    return timeDiff > 50; 
   } catch (e) {
     return false;
   }
