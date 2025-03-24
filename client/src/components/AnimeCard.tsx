@@ -3,6 +3,7 @@ import { Anime } from '@shared/types';
 import { PlayCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { memo, useMemo } from 'react';
+import { cleanAnimeTitle } from '../utils/titleFormatter';
 
 interface AnimeCardProps {
   anime: Anime;
@@ -29,7 +30,7 @@ const AnimeCard = memo(({
     className?.includes('continue-watching-card'), [className]);
   
   const sanitizedTitle = useMemo(() => 
-    anime.title.replace(/\(T\)|\(LR\)|\(P\)/g, ''), [anime.title]);
+    cleanAnimeTitle(anime.title), [anime.title]);
     
   const primaryGenre = useMemo(() => 
     anime.genre.split(',')[0], [anime.genre]);

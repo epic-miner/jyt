@@ -14,12 +14,7 @@ import ScrollReveal from '../components/ScrollReveal';
 import TiltCard from '../components/TiltCard';
 import ConfettiEffect from '../components/ConfettiEffect';
 import LottieLoader from '../components/LottieLoader';
-
-// Helper function to clean anime titles by removing category and ranking tags
-const cleanAnimeTitle = (title: string): string => {
-  // Remove all category tags like (T), (P), (LR) with optional ranking like (T)-(1)
-  return title.replace(/\(T\)(?:-\(\d+\))?|\(LR\)(?:-\(\d+\))?|\(P\)(?:-\(\d+\))?/g, '').trim();
-};
+import { cleanAnimeTitle } from '../utils/titleFormatter';
 
 // Animation variants for sections
 const sectionVariants = {

@@ -7,12 +7,7 @@ import { fetchAllAnime } from '../lib/api';
 import { Anime } from '@shared/types';
 import { motion } from 'framer-motion';
 import { SEO } from '../components/SEO';
-
-// Helper function to clean anime titles by removing category and ranking tags
-const cleanAnimeTitle = (title: string): string => {
-  // Remove all category tags like (T), (P), (LR) with optional ranking like (T)-(1)
-  return title.replace(/\(T\)(?:-\(\d+\))?|\(LR\)(?:-\(\d+\))?|\(P\)(?:-\(\d+\))?/g, '').trim();
-};
+import { cleanAnimeTitle } from '../utils/titleFormatter';
 
 const CategoryPage = () => {
   const [, params] = useRoute('/category/:type');
