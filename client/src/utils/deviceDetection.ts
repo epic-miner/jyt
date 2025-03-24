@@ -1,210 +1,272 @@
 /**
- * Device detection and performance optimization utilities
- * Used to conditionally render effects and optimizations based on device capabilities
+ * Device Detection Utility
+ * 
+ * Provides functions for:
+ * - Detecting device type (mobile, tablet, desktop)
+ * - Determining device performance capabilities
+ * - Optimizing rendering based on device performance
+ * - Adapting image quality based on device
+ * - Detecting reduced motion preferences
  */
 
-// Performance tiers for different device capabilities
+// Performance tiers for different devices
 export enum DevicePerformanceTier {
-  LOW = 'low',     // Low-end devices, minimal animations, maximum optimizations
-  MEDIUM = 'medium', // Mid-range devices, moderate animations, some optimizations
-  HIGH = 'high'    // High-end devices, full animations, minimal optimizations
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high'
 }
-
-// Memory thresholds for determining performance tier (in MB)
-const MEMORY_THRESHOLD_LOW = 2048;
-const MEMORY_THRESHOLD_HIGH = 4096;
-
-// Battery thresholds
-const BATTERY_THRESHOLD_LOW = 0.2; // 20%
-const BATTERY_POWER_SAVING_MODE = true;
 
 /**
  * Detects if the current device is a mobile device
- * @returns boolean indicating if the device is mobile
+ * This function uses a combination of user agent detection and screen size checks
  */
-export function isMobileDevice(): boolean {
+export const isMobileDevice = (): boolean => {
   if (typeof window === 'undefined') return false;
   
-  const userAgent = navigator.userAgent.toLowerCase();
-  const mobileKeywords = ['android', 'iphone', 'ipad', 'ipod', 'windows phone', 'mobile'];
+  // User agent detection
+  const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera || '';
+  const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
   
-  const isMobile = mobileKeywords.some(keyword => userAgent.includes(keyword));
+  // Screen size detection (typical mobile devices)
+  const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
   
-  // Also check screen size as a fallback
-  const isSmallScreen = window.innerWidth <= 768;
-  
-  return isMobile || isSmallScreen;
-}
+  return mobileRegex.test(userAgent) || screenWidth <= 768;
+};
 
 /**
- * Detects if the user has requested reduced motion
- * @returns boolean indicating if reduced motion is preferred
+ * Detects if the current device is a tablet
  */
-export function shouldReduceAnimations(): boolean {
+export const isTabletDevice = (): boolean => {
   if (typeof window === 'undefined') return false;
   
-  // Check media query for prefers-reduced-motion
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const userAgent = navigator.userAgent || '';
+  const tabletRegex = /(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i;
   
-  // Check for low power mode (iOS) or battery saver (Android)
-  // Note: There's no direct API for this, so we approximate with battery API
-  let isLowPowerMode = false;
-  if ('getBattery' in navigator) {
-    const nav = navigator as any;
-    // We can access battery information to make an educated guess
-    nav.getBattery?.().then((battery: any) => {
-      isLowPowerMode = battery.level <= BATTERY_THRESHOLD_LOW || battery.charging === false;
-    }).catch(() => {
-      // Ignore errors with battery API
-    });
-  }
+  // Screen size typical for tablets (between mobile and desktop)
+  const screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
   
-  return prefersReducedMotion || isLowPowerMode;
-}
+  return tabletRegex.test(userAgent.toLowerCase()) || 
+         (screenWidth > 768 && screenWidth <= 1024 && 'ontouchstart' in window);
+};
 
 /**
- * Detects device's performance capabilities
- * @returns DevicePerformanceTier based on device capabilities
+ * Detects if the device has low power (e.g., budget phone)
+ * This uses various signals to estimate device capabilities
  */
-export function getDevicePerformanceTier(): DevicePerformanceTier {
-  // Default to medium tier
-  let tier = DevicePerformanceTier.MEDIUM;
+export const isLowPowerDevice = (): boolean => {
+  if (typeof window === 'undefined') return false;
   
-  // Server-side rendering check
-  if (typeof window === 'undefined') return tier;
+  // Check available CPU cores - fewer cores often indicates a budget device
+  const cpuCores = navigator.hardwareConcurrency || 0;
   
-  const userAgent = navigator.userAgent.toLowerCase();
+  // Check if device memory API is available (Chrome)
+  const lowMemory = (navigator as any).deviceMemory !== undefined ? 
+    (navigator as any).deviceMemory < 4 : false;
+    
+  // Check if the device might be older based on GPU blacklisting or other signals
+  const hasReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   
-  // Check for obvious low-end device indicators
-  const isLowEndDeviceByUA = 
-    userAgent.includes('android 4') ||
-    userAgent.includes('android 5') ||
-    userAgent.includes('android 6') ||
-    userAgent.includes('msie') ||
-    userAgent.includes('iphone os 9') ||
-    userAgent.includes('iphone os 10');
+  // Check for connection speed as a proxy for device quality
+  const connection = (navigator as any).connection || 
+                     (navigator as any).mozConnection || 
+                     (navigator as any).webkitConnection;
   
-  // Check for obvious high-end device indicators
-  const isHighEndDeviceByUA =
-    userAgent.includes('iphone 13') ||
-    userAgent.includes('iphone 14') ||
-    userAgent.includes('iphone 15') ||
-    userAgent.includes('ipad pro') ||
-    userAgent.includes('pixel 6') ||
-    userAgent.includes('pixel 7') ||
-    userAgent.includes('pixel 8') ||
-    userAgent.includes('samsung galaxy s22') ||
-    userAgent.includes('samsung galaxy s23') ||
-    userAgent.includes('samsung galaxy s24');
+  const slowConnection = connection ? 
+    (connection.effectiveType === 'slow-2g' || 
+     connection.effectiveType === '2g' || 
+     connection.saveData === true) : false;
   
-  // Check device memory if available
-  let memoryTier = DevicePerformanceTier.MEDIUM;
-  if ('deviceMemory' in navigator) {
-    const memory = (navigator as any).deviceMemory;
-    if (memory <= MEMORY_THRESHOLD_LOW / 1024) {
-      memoryTier = DevicePerformanceTier.LOW;
-    } else if (memory >= MEMORY_THRESHOLD_HIGH / 1024) {
-      memoryTier = DevicePerformanceTier.HIGH;
-    }
-  }
-  
-  // Check for reduced motion preference
-  const prefersReducedMotion = shouldReduceAnimations();
-  
-  // Check for low battery or power saving mode
-  let isPowerConstrained = false;
-  if ('getBattery' in navigator) {
-    const nav = navigator as any;
-    nav.getBattery?.().then((battery: any) => {
-      isPowerConstrained = battery.level <= BATTERY_THRESHOLD_LOW && !battery.charging;
-    }).catch(() => {
-      // Ignore errors with battery API
-    });
-  }
-  
-  // Determine tier based on all factors
-  if (isLowEndDeviceByUA || isPowerConstrained || prefersReducedMotion) {
-    tier = DevicePerformanceTier.LOW;
-  } else if (isHighEndDeviceByUA && memoryTier !== DevicePerformanceTier.LOW) {
-    tier = DevicePerformanceTier.HIGH;
-  } else {
-    tier = memoryTier;
-  }
-  
-  return tier;
-}
+  // Combine signals to determine if it's likely a lower-power device
+  return (cpuCores <= 4 || lowMemory || slowConnection || 
+         (hasReducedMotion && isMobileDevice()));
+};
 
 /**
- * Get scroll optimization settings based on device capabilities
- * @returns Object with scroll optimization settings
+ * Returns the estimated performance tier for the current device
  */
-export function getScrollOptimizationSettings() {
+export const getDevicePerformanceTier = (): DevicePerformanceTier => {
+  // On server-side, assume medium tier
+  if (typeof window === 'undefined') return DevicePerformanceTier.MEDIUM;
+  
+  // Cache this value to avoid recalculating
+  if (isLowPowerDevice()) {
+    return DevicePerformanceTier.LOW;
+  }
+  
+  // Gaming PCs, high-end mobile devices, etc.
+  if (isHighPerformanceDevice()) {
+    return DevicePerformanceTier.HIGH;
+  }
+  
+  // Mid-range devices (most common)
+  return DevicePerformanceTier.MEDIUM;
+};
+
+/**
+ * Returns recommended scroll optimization settings based on device capability
+ */
+export const getScrollOptimizationSettings = () => {
   const tier = getDevicePerformanceTier();
   const isMobile = isMobileDevice();
   
-  // Default settings for medium tier
-  let settings = {
-    lazyLoadDistance: 300, // Load content 300px before it enters viewport
-    enableAnimations: true, // Enable animations
-    enableParallax: true, // Enable parallax effects
-    enableShadows: true, // Enable complex shadows
-    complexBackgrounds: true, // Enable complex backgrounds
-    imageQuality: 'medium' as 'low' | 'medium' | 'high', // Image quality
-    particleCount: 50, // Number of particles
-    throttleScroll: false, // Throttle scroll events
-    debounceDelay: 100, // Debounce delay in ms
-    useGPU: true, // Use GPU acceleration
+  // Default settings (medium tier)
+  const settings = {
+    throttleScroll: isMobile,
+    debounceDelay: 100,
+    lazyLoadDistance: 300
   };
   
   // Adjust based on performance tier
   if (tier === DevicePerformanceTier.LOW) {
-    settings = {
-      ...settings,
-      lazyLoadDistance: isMobile ? 100 : 200, // Load content closer to viewport on mobile
-      enableAnimations: false, // Disable animations
-      enableParallax: false, // Disable parallax
-      enableShadows: false, // Disable complex shadows
-      complexBackgrounds: false, // Disable complex backgrounds
-      imageQuality: 'low', // Lower image quality
-      particleCount: 10, // Fewer particles
-      throttleScroll: true, // Throttle scroll events
-      debounceDelay: 200, // Longer debounce delay
-      useGPU: false, // Don't force GPU acceleration
+    return {
+      throttleScroll: true,
+      debounceDelay: 200, // Longer delay to reduce CPU usage
+      lazyLoadDistance: 200 // Shorter distance to reduce elements in DOM
     };
   } else if (tier === DevicePerformanceTier.HIGH) {
-    settings = {
-      ...settings,
-      lazyLoadDistance: 500, // Load content further from viewport
-      enableAnimations: true, // Enable all animations
-      enableParallax: true, // Enable parallax
-      enableShadows: true, // Enable complex shadows
-      complexBackgrounds: true, // Enable complex backgrounds
-      imageQuality: 'high', // Higher image quality
-      particleCount: 100, // More particles
-      throttleScroll: false, // Don't throttle scroll
-      debounceDelay: 50, // Shorter debounce delay
-      useGPU: true, // Use GPU acceleration
+    return {
+      throttleScroll: isMobile, // Only throttle on mobile even for high-end
+      debounceDelay: 50, // Faster response on high-end devices
+      lazyLoadDistance: 600 // Pre-load more content on high-end devices
     };
   }
   
   return settings;
-}
+};
 
 /**
- * Get adaptive image quality based on device capabilities
- * @returns Image quality level for loading optimized images
+ * Returns appropriate image quality settings based on device
  */
-export function getAdaptiveImageQuality(): 'low' | 'medium' | 'high' {
+export const getAdaptiveImageQuality = (): 'low' | 'medium' | 'high' => {
   const tier = getDevicePerformanceTier();
   
-  switch (tier) {
-    case DevicePerformanceTier.LOW:
-      return 'low';
-    case DevicePerformanceTier.MEDIUM:
-      return 'medium';
-    case DevicePerformanceTier.HIGH:
-      return 'high';
-    default:
-      return 'medium';
+  if (tier === DevicePerformanceTier.LOW) {
+    return 'low';
+  } else if (tier === DevicePerformanceTier.HIGH && !isMobileDevice()) {
+    return 'high';
   }
-}
+  
+  return 'medium';
+};
+
+/**
+ * Checks if the user has requested reduced motion
+ */
+export const shouldReduceAnimations = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  // Check OS-level reduced motion setting
+  const hasReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
+  // Also reduce animations on low-power devices
+  const isLowPower = isLowPowerDevice();
+  
+  return hasReducedMotion || isLowPower;
+};
+
+/**
+ * Detects if the device is likely a high-performance device
+ */
+const isHighPerformanceDevice = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  // High core count typically indicates a more powerful device
+  const highCpuCores = navigator.hardwareConcurrency >= 8;
+  
+  // Check for higher device memory (if available)
+  const highMemory = (navigator as any).deviceMemory !== undefined ? 
+    (navigator as any).deviceMemory >= 8 : false;
+  
+  // Check for high-resolution display (typically on premium devices)
+  const highDpi = window.devicePixelRatio >= 2.5;
+  
+  // Detect desktop with good specifications
+  const isDesktop = !isMobileDevice() && !isTabletDevice();
+  
+  return (highCpuCores && (highMemory || isDesktop)) || 
+         (highDpi && highCpuCores && !isLowPowerDevice());
+};
+
+/**
+ * Returns the battery level of the device if available
+ * This can be used to further optimize for low-battery situations
+ */
+export const getBatteryLevel = async (): Promise<number | null> => {
+  if (typeof window === 'undefined' || !('getBattery' in navigator)) return null;
+  
+  try {
+    const battery = await (navigator as any).getBattery();
+    return battery.level;
+  } catch (e) {
+    return null;
+  }
+};
+
+/**
+ * Returns whether the device is in battery saving mode
+ * This can be used to further optimize for power saving
+ */
+export const isInBatterySaveMode = async (): Promise<boolean | null> => {
+  if (typeof window === 'undefined' || 
+      !('getBattery' in navigator)) return null;
+  
+  try {
+    const battery = await (navigator as any).getBattery();
+    
+    // Check for very low battery with power saving likely enabled
+    const lowBattery = battery.level <= 0.2 && !battery.charging;
+    
+    return lowBattery;
+  } catch (e) {
+    return null;
+  }
+};
+
+/**
+ * Returns optimal animation FPS based on device capability
+ * This helps balance smoothness vs battery life
+ */
+export const getOptimalAnimationFps = (): number => {
+  const tier = getDevicePerformanceTier();
+  
+  if (tier === DevicePerformanceTier.LOW) {
+    return 30; // 30fps for low-end devices
+  } else if (tier === DevicePerformanceTier.MEDIUM) {
+    return 45; // 45fps for mid-range
+  } else {
+    return 60; // 60fps for high-end
+  }
+};
+
+/**
+ * Checks if device supports WebGL for advanced effects
+ */
+export const hasWebGLSupport = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
+    );
+  } catch (e) {
+    return false;
+  }
+};
+
+/**
+ * Determines the optimal particle count for background effects
+ * based on device capabilities
+ */
+export const getOptimalParticleCount = (): number => {
+  const tier = getDevicePerformanceTier();
+  
+  if (tier === DevicePerformanceTier.LOW) {
+    return 20; // Minimal particles for low-end devices
+  } else if (tier === DevicePerformanceTier.MEDIUM) {
+    return 50; // Medium amount for mid-range devices
+  } else {
+    return 100; // Full effect for high-end devices
+  }
+};

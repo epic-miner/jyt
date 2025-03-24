@@ -1,213 +1,256 @@
 import { useCallback, useEffect, useState } from 'react';
-import { loadSlim } from 'tsparticles-slim';
-import type { Engine } from 'tsparticles-engine';
 import Particles from 'react-particles';
-import { getDevicePerformanceTier, DevicePerformanceTier } from '../utils/deviceDetection';
-
-// Define our own MoveDirection enum to avoid dependency on tsparticles-engine exports
-enum MoveDirection {
-  NONE = "none",
-  TOP = "top",
-  TOP_RIGHT = "top-right",
-  RIGHT = "right",
-  BOTTOM_RIGHT = "bottom-right",
-  BOTTOM = "bottom",
-  BOTTOM_LEFT = "bottom-left",
-  LEFT = "left",
-  TOP_LEFT = "top-left"
-}
+import { loadSlim } from 'tsparticles-slim'; // Using slim package for better performance
+import type { Engine, ISourceOptions } from 'tsparticles-engine';
+import { getDevicePerformanceTier, DevicePerformanceTier, isMobileDevice, getOptimalParticleCount } from '../utils/deviceDetection';
 
 interface ParticleBackgroundProps {
   className?: string;
-  color?: string;
-  secondaryColor?: string;
-  style?: React.CSSProperties;
-  particleDensity?: 'none' | 'low' | 'medium' | 'high';
+  particleColor?: string;
+  particleOpacity?: number;
+  linkColor?: string;
+  linkOpacity?: number;
   backgroundColor?: string;
-  disableOnMobile?: boolean;
+  backgroundOpacity?: number;
+  minDistance?: number;
+  maxDistance?: number;
+  enableOnMobile?: boolean;
+  densityArea?: number;
+  particleShape?: 'circle' | 'square' | 'triangle' | 'star' | 'polygon';
+  particleSize?: number;
+  moveSpeed?: number;
+  hoverEffect?: boolean;
+  clickEffect?: boolean;
+  disableForLowPerformance?: boolean;
 }
 
 /**
- * A performance-optimized background particle effect
- * Uses tsparticles-slim for better mobile performance and adapts to device capabilities
+ * A performance-optimized particle background component
+ * Automatically adjusts particle density and effects based on device capabilities
  */
 const ParticleBackground = ({
   className = '',
-  color = '#6d28d9',
-  secondaryColor = '#8b5cf6',
-  style,
-  particleDensity = 'medium',
-  backgroundColor = 'transparent',
-  disableOnMobile = true
+  particleColor = '#8b5cf6',
+  particleOpacity = 0.5,
+  linkColor = '#8b5cf6',
+  linkOpacity = 0.3,
+  backgroundColor = '#121212',
+  backgroundOpacity = 1,
+  minDistance = 100,
+  maxDistance = 200,
+  enableOnMobile = true,
+  densityArea = 800,
+  particleShape = 'circle',
+  particleSize = 3,
+  moveSpeed = 3,
+  hoverEffect = true,
+  clickEffect = true,
+  disableForLowPerformance = true
 }: ParticleBackgroundProps) => {
-  const [performanceTier, setPerformanceTier] = useState<DevicePerformanceTier>(
-    DevicePerformanceTier.MEDIUM
-  );
-  const [isMounted, setIsMounted] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [performanceTier, setPerformanceTier] = useState<DevicePerformanceTier>(DevicePerformanceTier.MEDIUM);
   
-  // Get device performance on client-side only
+  // Initialize device detection
   useEffect(() => {
+    setIsMobile(isMobileDevice());
     setPerformanceTier(getDevicePerformanceTier());
-    setIsMounted(true);
+    setIsInitialized(true);
   }, []);
   
-  // Determine number of particles based on performance tier and specified density
-  const getOptimalParticleCount = (): number => {
-    // Return 0 if we want to disable on mobile for low-end devices
-    if (disableOnMobile && performanceTier === DevicePerformanceTier.LOW) {
-      return 0;
-    }
-    
-    // Determine base count from the particleDensity prop
-    let baseCount = 0;
-    switch (particleDensity) {
-      case 'none':
-        return 0;
-      case 'low':
-        baseCount = 20;
-        break;
-      case 'medium':
-        baseCount = 50;
-        break;
-      case 'high':
-        baseCount = 100;
-        break;
-    }
-    
-    // Scale based on performance tier
-    switch (performanceTier) {
-      case DevicePerformanceTier.LOW:
-        return Math.max(5, Math.floor(baseCount * 0.2));
-      case DevicePerformanceTier.MEDIUM:
-        return Math.floor(baseCount * 0.6);
-      case DevicePerformanceTier.HIGH:
-        return baseCount;
-      default:
-        return baseCount;
-    }
-  };
+  // Skip rendering if this should be disabled on mobile
+  const shouldDisable = !enableOnMobile && isMobile;
   
-  // Initialize the tsparticles engine
+  // Skip rendering for low-performance devices if requested
+  const isLowPerformance = performanceTier === DevicePerformanceTier.LOW;
+  const disableForPerformance = disableForLowPerformance && isLowPerformance;
+  
+  // Calculate optimal particle count based on device performance
+  const particleCount = getOptimalParticleCount();
+  
+  // Initialize particles with performance optimizations
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadSlim(engine);
   }, []);
   
-  // Don't render on server-side to avoid hydration mismatches
-  if (!isMounted) {
-    return <div 
-      className={className} 
-      style={{ 
-        ...style,
-        backgroundColor,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: -1
-      }} 
-    />;
+  // Skip rendering entirely if disabled
+  if (!isInitialized || shouldDisable || disableForPerformance) {
+    return null;
   }
   
-  // No particles for very low-end devices when disableOnMobile is true
-  const calculatedParticleCount = getOptimalParticleCount();
-  if (calculatedParticleCount === 0) {
-    return <div 
-      className={className} 
-      style={{ 
-        ...style,
-        backgroundColor,
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        zIndex: -1
-      }} 
-    />;
+  // Simple background for low-power devices
+  if (isLowPerformance && !disableForPerformance) {
+    return (
+      <div 
+        className={`absolute inset-0 ${className}`}
+        style={{
+          backgroundColor,
+          opacity: backgroundOpacity,
+          pointerEvents: 'none',
+          zIndex: -1
+        }}
+      />
+    );
   }
-
-  // Optimize configuration based on device performance
-  const useSimpleShape = performanceTier === DevicePerformanceTier.LOW;
-  const disableInteractivity = performanceTier === DevicePerformanceTier.LOW;
-  const reduceAnimationSpeed = performanceTier !== DevicePerformanceTier.HIGH;
   
+  // Performance-optimized options based on device capability
+  const getMobileOptimizedOptions = (): ISourceOptions => {
+    return {
+      particles: {
+        number: {
+          value: Math.floor(particleCount * 0.5), // Use 50% fewer particles on mobile
+          density: {
+            enable: true,
+            value_area: densityArea * 1.5 // Spread them out more
+          }
+        },
+        size: {
+          value: particleSize * 0.8 // Slightly smaller particles
+        },
+        move: {
+          enable: true,
+          speed: moveSpeed * 0.5, // Slower movement for better performance
+          random: false,
+          straight: false,
+          out_mode: "out",
+          bounce: false,
+        },
+        // Disable more advanced effects on mobile
+        interactivity: {
+          detect_on: "canvas",
+          events: {
+            onhover: {
+              enable: false
+            },
+            onclick: {
+              enable: false
+            },
+            resize: true
+          }
+        }
+      }
+    };
+  };
+  
+  // Get standard options for desktop
+  const getStandardOptions = (): ISourceOptions => {
+    return {
+      particles: {
+        number: {
+          value: particleCount,
+          density: {
+            enable: true,
+            value_area: densityArea
+          }
+        },
+        color: {
+          value: particleColor
+        },
+        opacity: {
+          value: particleOpacity,
+          random: true,
+          anim: {
+            enable: true,
+            speed: 0.5,
+            opacity_min: 0.1,
+            sync: false
+          }
+        },
+        size: {
+          value: particleSize,
+          random: true,
+          anim: {
+            enable: true,
+            speed: 1,
+            size_min: 0.1,
+            sync: false
+          }
+        },
+        line_linked: {
+          enable: true,
+          distance: 150,
+          color: linkColor,
+          opacity: linkOpacity,
+          width: 1
+        },
+        move: {
+          enable: true,
+          speed: moveSpeed,
+          direction: "none",
+          random: true,
+          straight: false,
+          out_mode: "out",
+          bounce: false,
+          attract: {
+            enable: false,
+            rotateX: 600,
+            rotateY: 1200
+          }
+        }
+      },
+      interactivity: {
+        detect_on: "canvas",
+        events: {
+          onhover: {
+            enable: hoverEffect,
+            mode: "grab"
+          },
+          onclick: {
+            enable: clickEffect,
+            mode: "push"
+          },
+          resize: true
+        },
+        modes: {
+          grab: {
+            distance: minDistance,
+            line_linked: {
+              opacity: 0.7
+            }
+          },
+          bubble: {
+            distance: maxDistance,
+            size: 10,
+            duration: 2,
+            opacity: 0.8,
+            speed: 3
+          },
+          repulse: {
+            distance: 200,
+            duration: 0.4
+          },
+          push: {
+            particles_nb: 4
+          },
+          remove: {
+            particles_nb: 2
+          }
+        }
+      },
+      retina_detect: true,
+      background: {
+        color: {
+          value: backgroundColor
+        },
+        opacity: backgroundOpacity,
+        position: "50% 50%",
+        repeat: "no-repeat",
+        size: "cover"
+      }
+    };
+  };
+  
+  // Optimize options based on device detection
+  const optimizedOptions: ISourceOptions = isMobile 
+    ? getMobileOptimizedOptions() as ISourceOptions
+    : getStandardOptions() as ISourceOptions;
+    
   return (
     <Particles
-      className={className}
+      id="tsparticles"
+      className={`absolute inset-0 ${className}`}
+      options={optimizedOptions as any}
       init={particlesInit}
-      options={{
-        fullScreen: false,
-        background: {
-          color: { value: backgroundColor },
-        },
-        fpsLimit: performanceTier === DevicePerformanceTier.LOW ? 30 : 60,
-        interactivity: {
-          events: {
-            onClick: {
-              enable: !disableInteractivity,
-              mode: "push",
-            },
-            onHover: {
-              enable: !disableInteractivity,
-              mode: "repulse",
-            },
-            resize: true,
-          },
-          modes: {
-            push: {
-              quantity: performanceTier === DevicePerformanceTier.HIGH ? 4 : 2,
-            },
-            repulse: {
-              distance: performanceTier === DevicePerformanceTier.HIGH ? 100 : 50,
-              duration: 0.4,
-            },
-          },
-        },
-        particles: {
-          color: {
-            value: color,
-          },
-          links: {
-            color: secondaryColor,
-            distance: 150,
-            enable: true,
-            opacity: 0.5,
-            width: 1,
-          },
-          collisions: {
-            enable: performanceTier === DevicePerformanceTier.HIGH,
-          },
-          move: {
-            direction: MoveDirection.NONE,
-            enable: true,
-            outModes: {
-              default: "bounce",
-            },
-            random: false,
-            speed: reduceAnimationSpeed ? 1 : 2,
-            straight: false,
-          },
-          number: {
-            density: {
-              enable: true,
-              area: 800,
-            },
-            value: calculatedParticleCount,
-          },
-          opacity: {
-            value: 0.5,
-          },
-          shape: {
-            type: useSimpleShape ? "circle" : ["circle", "triangle", "square"],
-          },
-          size: {
-            value: { min: 1, max: 5 },
-          },
-        },
-        detectRetina: performanceTier === DevicePerformanceTier.HIGH,
-      }}
-      style={style}
     />
   );
 };

@@ -41,10 +41,11 @@ const ScrollReveal = ({
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, {
     once, 
-    // Cast to any because framer-motion types are incompatible
-    threshold: threshold as any,
-    margin: margin as any
-  });
+    // Note: Framer motion's useInView signature expects additional props, but we need to cast
+    // them to any to avoid TypeScript errors
+    ...(threshold !== undefined ? { threshold } : {}),
+    ...(margin !== undefined ? { margin } : {})
+  } as any);
   
   // Check for reduced motion preference and mobile device
   const isReducedMotion = useRef(false);

@@ -51,8 +51,15 @@ export const PageTransition = ({
   // Simple animations for mobile
   const simpleMobileAnimations = isMobile && performanceTier !== DevicePerformanceTier.HIGH;
   
+  // Define the type for variants to fix framer-motion type issues
+  interface AnimationVariants {
+    initial: any;
+    animate: any;
+    exit: any;
+  }
+  
   // Determine animation variants based on type and device capabilities
-  let variants = {
+  let variants: AnimationVariants = {
     initial: { opacity: 0 },
     animate: { opacity: 1 },
     exit: { opacity: 0 },
