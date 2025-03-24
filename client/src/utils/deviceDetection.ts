@@ -327,3 +327,52 @@ export const getOptimalParticleCount = (): number => {
     return 80; // Full effect for high-end desktops
   }
 };
+
+/**
+ * Detects extremely low performance devices that need ultra-optimized experience
+ * Use for absolute fallback scenarios where even minimal particles are too much
+ */
+export const isExtremelyLowPerformance = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  // Check specific hardware limitations
+  const cpuCores = navigator.hardwareConcurrency || 0;
+  const isMobile = isMobileDevice();
+  
+  // Check if device memory API is available (Chrome)
+  const veryLowMemory = (navigator as any).deviceMemory !== undefined ? 
+    (navigator as any).deviceMemory < 2 : false;
+    
+  // Check for extremely slow connection
+  const connection = (navigator as any).connection || 
+                    (navigator as any).mozConnection || 
+                    (navigator as any).webkitConnection;
+  
+  const extremelySlowConnection = connection ? 
+    (connection.effectiveType === 'slow-2g' || connection.saveData === true) : false;
+  
+  // Check for extremely low frame rate
+  const hasVeryLowFrameRate = (window as any).__estimatedFps !== undefined ? 
+    (window as any).__estimatedFps < 20 : false;
+  
+  // Check reduced motion preference
+  const hasReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  
+  // Combined checks for extreme low performance
+  if (isMobile) {
+    // More aggressive classification for mobile devices
+    return (
+      (cpuCores <= 2) || 
+      (veryLowMemory) || 
+      (extremelySlowConnection && hasReducedMotion) || 
+      hasVeryLowFrameRate
+    );
+  }
+  
+  // Desktop requires more signals to classify as extremely low performance
+  return (
+    (cpuCores <= 1 && veryLowMemory) || 
+    (extremelySlowConnection && hasVeryLowFrameRate) || 
+    (hasVeryLowFrameRate && hasReducedMotion && veryLowMemory)
+  );
+};

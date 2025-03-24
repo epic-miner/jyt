@@ -7,7 +7,8 @@ import {
   DevicePerformanceTier, 
   isMobileDevice, 
   getOptimalParticleCount,
-  isLowPowerDevice
+  isLowPowerDevice,
+  isExtremelyLowPerformance
 } from '../utils/deviceDetection';
 
 interface ParticleBackgroundProps {
@@ -120,16 +121,25 @@ const ParticleBackground = ({
     return null;
   }
   
-  // Simple background for low-power devices
+  // Gradient background fallback for low-power devices
   if (isLowPerformance && !disableForPerformance) {
     return (
       <div 
-        className={`absolute inset-0 ${className}`}
+        className={`gradient-fallback ${className}`}
         style={{
-          backgroundColor,
           opacity: backgroundOpacity,
-          pointerEvents: 'none',
-          zIndex: -1
+        }}
+      />
+    );
+  }
+  
+  // Animated gradient for extremely low performance (ultra-low-power) devices
+  if (isExtremelyLowPerformance()) {
+    return (
+      <div 
+        className={`gradient-animated ${className}`}
+        style={{
+          opacity: backgroundOpacity,
         }}
       />
     );
@@ -301,11 +311,11 @@ const ParticleBackground = ({
         move: {
           ...(baseOptions.particles?.move || {}),
           enable: !isMobile, // Completely stop movement on mobile during scroll
-          speed: ((baseOptions.particles?.move?.speed || moveSpeed) * 0.2), // Much slower movement during scroll
+          speed: moveSpeed * 0.2, // Much slower movement during scroll
         },
         opacity: {
           ...(baseOptions.particles?.opacity || {}),
-          value: ((baseOptions.particles?.opacity?.value || particleOpacity) * 0.5), // Fade particles during scroll
+          value: particleOpacity * 0.5, // Fade particles during scroll
           anim: {
             enable: false // Disable opacity animation during scroll
           }
