@@ -115,20 +115,83 @@ const Home = () => {
 
   const genres = extractGenres();
   
-  // Filter anime based on tags in titles
+  // Filter anime based on tags in titles and sort by rank if available
   const trendingAnime = useMemo(() => {
     if (!animeList) return [];
-    return animeList.filter(anime => anime.title.includes('(T)'));
+    
+    // Find anime with trending tag (T)
+    const trending = animeList.filter(anime => anime.title.includes('(T)'));
+    
+    // Sort by rank if possible
+    return trending.sort((a, b) => {
+      // Try to extract ranking numbers from titles
+      const aMatch = a.title.match(/\(T\)-\((\d+)\)/);
+      const bMatch = b.title.match(/\(T\)-\((\d+)\)/);
+      
+      // If both have ranking numbers, sort by them
+      if (aMatch && bMatch) {
+        return parseInt(aMatch[1]) - parseInt(bMatch[1]);
+      }
+      
+      // If only one has a ranking number, prioritize the one with ranking
+      if (aMatch) return -1;
+      if (bMatch) return 1;
+      
+      // Otherwise keep original order
+      return 0;
+    });
   }, [animeList]);
   
   const latestReleasedAnime = useMemo(() => {
     if (!animeList) return [];
-    return animeList.filter(anime => anime.title.includes('(LR)'));
+    
+    // Find anime with latest released tag (LR)
+    const latest = animeList.filter(anime => anime.title.includes('(LR)'));
+    
+    // Sort by rank if possible
+    return latest.sort((a, b) => {
+      // Try to extract ranking numbers from titles
+      const aMatch = a.title.match(/\(LR\)-\((\d+)\)/);
+      const bMatch = b.title.match(/\(LR\)-\((\d+)\)/);
+      
+      // If both have ranking numbers, sort by them
+      if (aMatch && bMatch) {
+        return parseInt(aMatch[1]) - parseInt(bMatch[1]);
+      }
+      
+      // If only one has a ranking number, prioritize the one with ranking
+      if (aMatch) return -1;
+      if (bMatch) return 1;
+      
+      // Otherwise keep original order
+      return 0;
+    });
   }, [animeList]);
   
   const popularAnime = useMemo(() => {
     if (!animeList) return [];
-    return animeList.filter(anime => anime.title.includes('(P)'));
+    
+    // Find anime with popular tag (P)
+    const popular = animeList.filter(anime => anime.title.includes('(P)'));
+    
+    // Sort by rank if possible
+    return popular.sort((a, b) => {
+      // Try to extract ranking numbers from titles
+      const aMatch = a.title.match(/\(P\)-\((\d+)\)/);
+      const bMatch = b.title.match(/\(P\)-\((\d+)\)/);
+      
+      // If both have ranking numbers, sort by them
+      if (aMatch && bMatch) {
+        return parseInt(aMatch[1]) - parseInt(bMatch[1]);
+      }
+      
+      // If only one has a ranking number, prioritize the one with ranking
+      if (aMatch) return -1;
+      if (bMatch) return 1;
+      
+      // Otherwise keep original order
+      return 0;
+    });
   }, [animeList]);
   
   // All Anime section should contain all anime
